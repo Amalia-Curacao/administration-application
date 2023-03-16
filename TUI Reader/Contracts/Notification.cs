@@ -1,6 +1,6 @@
 ﻿namespace TUI_Reader.Contracts;
 
-public class Message
+public class Notification
 {
     public string Reference { get; init; } = null!;
     public DateTime ReceivedAt { get; init; }

@@ -1,10 +1,12 @@
-﻿using System.Text.Json;
-using TUI_Reader.Properties;
+﻿using TUI_Reader;
 
 Console.WriteLine("-----Start TUI Reader Console-----");
 
-
-var appSettings = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(@"./Properties/appsettings.json"));
+var notifications = new Reader().Run();
+foreach (var notification in notifications)
+{
+    Console.WriteLine(notification.ToString());
+}
 
 
 Console.WriteLine("-----End TUI Reader Console-----");
