@@ -1,90 +1,114 @@
-﻿using OpenQA.Selenium;
+﻿using System.Text.Json;
+using OpenQA.Selenium;
+using TUI_Reader.Drivers;
 using TUI_Reader.Extensions;
+using TUI_Reader.Properties;
+using DriverOptions = TUI_Reader.Contracts.DriverOptions;
 
 namespace TUI_Reader.Actions;
 
-internal sealed class Login
+internal static class Login
 {
-    private readonly string     _email;
-    private readonly string     _password;
-    private readonly IWebDriver _driver;
-    public Login(string email, string password, IWebDriver driver)
+    /// <summary>
+    /// Will attempt to login to the jil website.
+    /// </summary>
+    /// <remarks>
+    /// To use different credentials than the appsettings.json credentials use <see cref="Run(TUI_Reader.Drivers.Driver,int)"/> instead.
+    /// </remarks>
+    /// <exception cref="Exception">Failed login attempt.</exception>
+    public static void Run(Driver driver, int maxLoginAttempt = int.MaxValue)
     {
-        _email = email;
-        _password = password;
-        _driver = driver;
+        var appSettings = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(@"./Properties/appsettings.json"))!;
+        Login.Run(driver, appSettings.Email, appSettings.Password, maxLoginAttempt);
     }
     /// <summary>
     /// Will attempt to login to the jil website.
     /// </summary>
-    /// <param name="maxLoginAttempt">The maximum amount of login attempts.</param>
+    /// <remarks>
+    /// To use the credentials in the appsettings.json use <see cref="Run(TUI_Reader.Drivers.Driver,int)"/> instead.
+    /// </remarks>
     /// <exception cref="Exception">Failed login attempt.</exception>
-    public void Run(int maxLoginAttempt = 1)
+    public static void Run(Driver driver, string email, string password, int maxLoginAttempt = int.MaxValue)
     {
-        Console.WriteLine("Login: start");
+        Console.WriteLine($"{driver.Id}: login start");
         
-        var successfulLogin = AttemptLogin(maxLoginAttempt);
+        var successfulLogin = driver.AttemptLogin(email, password, maxLoginAttempt);
         
         if (!successfulLogin) 
-            throw new Exception("Login: failed");
+            throw new Exception($"{driver.Id}: login failed");
         else
-            Console.WriteLine("Login: successful");
+            Console.WriteLine($"{driver.Id}: login successful");
     }
     /// <summary>
     /// Gets the email input field on the login page.
     /// </summary>
     /// <returns>Email input field.</returns>
     /// <exception cref="Exception">Email input field could not be found.</exception>
-    private IWebElement GetEmailInputField()
-    => _driver.FindElement(By.ClassName(@"jilcode")) ?? throw new Exception("Email input field could not be found.");
+    private static IWebElement GetEmailInputField(this IWebDriver driver)
+    => driver.FindElement(By.ClassName(@"jilcode")) ?? throw new Exception("Email input field could not be found.");
     /// <summary>
     /// Gets the password input field on the login page.
     /// </summary>
     /// <returns>Password input field.</returns>
     /// <exception cref="Exception">Password input field could not be found.</exception>
-    private IWebElement GetPasswordInputField()
-    => _driver.FindElement(By.ClassName(@"password")) ?? throw new Exception("Password input field could not be found.");
+    private static IWebElement GetPasswordInputField(this IWebDriver driver)
+    => driver.FindElement(By.ClassName(@"password")) ?? throw new Exception("Password input field could not be found.");
     
     /// <summary>
     /// Gets the login button 
     /// </summary>
-    /// <returns></returns>
+    /// <returns>Login button.</returns>
     /// <exception cref="Exception"></exception>
-    private IWebElement GetLoginButton()
-    => _driver.FindElement(By.Id(@"loginButton")) ?? throw new Exception("Login button could not be found.");
+    private static IWebElement GetLoginButton(this IWebDriver driver)
+    => driver.FindElement(By.Id(@"loginButton")) ?? throw new Exception("Login button could not be found.");
 
     /// <summary>
     /// Tries to login.
     /// </summary>
-    /// <param name="maxLoginAttempts">The amount of times it will attempt to login.</param>
     /// <returns>One login attempt was successfully.</returns>
-    private bool AttemptLogin(int maxLoginAttempts)
+    private static bool AttemptLogin(this Driver driver, string email, string password, int maxLoginAttempts)
     {
-        _driver.GoToLoginPage();
+        var webDriver = driver.WebDriver;
+        webDriver.GoToLoginPage();
         for (var i = 0; i < maxLoginAttempts; i++)
         {
-            ClearCredentials();
-            FillCredentials();
-            GetLoginButton().Click();
-            if(_driver.Wait().Until(driver => driver.IsOnHomePage())) return true;
+            webDriver.ClearCredentials();
+            webDriver.FillCredentials(email, password);
+            webDriver.GetLoginButton().Click();
+            try
+            {
+                return driver.Wait().Until(wd => wd.IsOnHomePage());
+            }
+            catch (Exception) { /*ignored*/ }
         }
         return false;
     }
     /// <summary>
+    /// Checks if the driver is currently at the home page.
+    /// </summary>
+    private static bool IsOnHomePage(this IWebDriver webDriver) 
+        => webDriver.Title.Equals(@"JIL Hotel Partner Platform");
+    
+    /// <summary>
+    /// Goes to JIL's login page.
+    /// </summary>
+    private static void GoToLoginPage(this IWebDriver webDriver) 
+        => webDriver.Navigate().GoToUrl(@"https://www.jil.travel/");
+    /// <summary>
     /// Fills the email and password input fields.
     /// </summary>
-    private void FillCredentials()
+    private static void FillCredentials(this IWebDriver webDriver, string email, string password)
     {
-        GetEmailInputField().SendKeys(_email);
-        GetPasswordInputField().SendKeys(_password);
+        webDriver.GetEmailInputField().SendKeys(email);
+        webDriver.GetPasswordInputField().SendKeys(password);
     }
     /// <summary>
     /// Clears the email and password input field.
     /// </summary>
-    private void ClearCredentials()
+    private static void ClearCredentials(this IWebDriver webDriver)
     {
-        GetEmailInputField().Clear();
-        GetPasswordInputField().Clear();
+        webDriver.GetEmailInputField().Clear();
+        webDriver.GetPasswordInputField().Clear();
     }
 
 }

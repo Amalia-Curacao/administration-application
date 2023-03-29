@@ -1,25 +1,23 @@
 ﻿using System.Text.RegularExpressions;
 using OpenQA.Selenium;
 using TUI_Reader.Contracts;
+using TUI_Reader.Drivers;
 using TUI_Reader.Extensions;
+using DriverOptions = TUI_Reader.Contracts.DriverOptions;
 
 namespace TUI_Reader.Actions;
 
-internal sealed class ReadOpenedNotifications
+internal static class ReadOpenedNotifications
 {
-    private readonly IWebDriver _driver;
-    public ReadOpenedNotifications(IWebDriver driver)
-    {
-        _driver = driver;
-    }
     /// <summary>
     /// Gets all the opened notifications from JIL.
     /// </summary>
     /// <returns>Opened notifications.</returns>
-    public IEnumerable<Notification> Run()
+    public static IEnumerable<Notification> Run(ReaderOptions readerOptions)
     {
         Console.WriteLine("Read opened notifications: start");
-        var openedNotifications = GetOpenedNotifications();
+        // The to list forces the c# to irritate through the notifications.
+        var openedNotifications = GetOpenedNotifications(readerOptions).ToList();
         Console.WriteLine("Read opened notifications: successful");
         return openedNotifications;
     }
@@ -27,40 +25,52 @@ internal sealed class ReadOpenedNotifications
     /// Gets all the opened notifications.
     /// </summary>
     /// <returns>Opened notifications.</returns>
-    private IEnumerable<Notification> GetOpenedNotifications()
+    private static IEnumerable<Notification> GetOpenedNotifications(ReaderOptions readerOptions)
     {
-        _driver.GoToOpenedNotificationPage();
-        foreach (var openedNotificationLink in GetOpenedNotificationLinks())
-        {
-            _driver.SwitchTo().NewWindow(WindowType.Tab);
-            yield return GetNotification(openedNotificationLink);
-            _driver.Close();
-            _driver.SwitchTo().Window(_driver.WindowHandles.First());
-        }
+        // The to list forces the c# to irritate through the notification links.
+        var openNotificationLinks = GetOpenedNotificationLinks(readerOptions.DriverOptions).ToList();
+        var openedNotifications = new List<Notification>();
+        var i = 0;
+        Parallel.ForEach(
+            openNotificationLinks,
+            new ParallelOptions
+            {
+                MaxDegreeOfParallelism = readerOptions.MaximumParallelOperations
+            },
+            openedNotificationLink =>
+            {
+                i++;
+                Console.WriteLine($"Notification: {i}");
+                openedNotifications.Add(GetNotification(readerOptions.DriverOptions, openedNotificationLink));
+            });
+        return openedNotifications;
     }
     /// <summary>
     /// Gets the opened notification.
     /// </summary>
-    /// <param name="notificationLink">Opened notification link.</param>
     /// <returns>Opened notification.</returns>
-    private Notification GetNotification(string notificationLink)
+    private static Notification GetNotification(DriverOptions driverOptions, string notificationLink)
     {
-        _driver.Navigate().GoToUrl(notificationLink);
-        var rows = GetTrElements().ToArray();
-        return new Notification
+        var driver = Driver.Chrome(driverOptions);
+        Login.Run(driver);
+        driver.WebDriver.Navigate().GoToUrl(notificationLink);
+        var rows = driver.WebDriver.GetTrElements().ToArray();
+        var notification = new Notification
         {
-            Content = GetContent(),
-            ReceivedAt = ParseToDateTime(GetValue(rows,"Date")),
+            Content = driver.WebDriver.GetContent(),
+            ReceivedAt = ParseToDateTime(GetValue(rows, "Date")),
             Hotel = GetValue(rows, "Hotel"),
             Reference = GetValue(rows, "Reference"),
             Subject = GetValue(rows, "Subject")
         };
+        driver.Dispose();
+        return notification;
     }
     
     /// <summary>
     /// Gets a row value.
     /// </summary>
-    private string GetValue(IEnumerable<IWebElement> rows, string rowName)
+    private static string GetValue(IEnumerable<IWebElement> rows, string rowName)
     {
         var row = FindRow(rows, rowName);
         var tdElement = GetValue(row, rowName);
@@ -123,14 +133,14 @@ internal sealed class ReadOpenedNotifications
            || GetChildren(element).Any(child => HasContent(child, content));
 
 
-    private string GetContent()
-        => GetPreElement().GetAttribute("textContent")
+    private static string GetContent(this IWebDriver driver)
+        => driver.GetPreElement().GetAttribute("textContent")
            ?? throw new Exception("No text content could be found in the element");
-    private IEnumerable<IWebElement> GetTrElements()
-        => _driver.FindElements(By.TagName("tr"))
+    private static IEnumerable<IWebElement> GetTrElements(this IWebDriver driver)
+        => driver.FindElements(By.TagName("tr"))
            ?? throw new Exception("No 'tr' element found on the page");
-    private IWebElement GetPreElement()
-        => _driver.FindElement(By.TagName("pre"))
+    private static IWebElement GetPreElement(this IWebDriver driver)
+        => driver.FindElement(By.TagName("pre"))
            ?? throw new Exception("No pre element could be found on this page");
     
     /// <summary>
@@ -138,14 +148,18 @@ internal sealed class ReadOpenedNotifications
     /// </summary>
     /// <returns>Opened notification links.</returns>
     /// <exception cref="Exception">No links found on the page.</exception>
-    private IEnumerable<string> GetOpenedNotificationLinks()
+    private static IEnumerable<string> GetOpenedNotificationLinks(DriverOptions driverOptions)
     {
+        var driver = Driver.Chrome(driverOptions);
+        Login.Run(driver);
+        driver.GoToOpenedNotificationPage();
         var allPageLinks =
-            _driver.Wait().Until(driver => driver.FindElements(By.TagName("a")).Select(anchor => anchor.GetAttribute("href")))
+            driver.Wait().Until(webDriver => webDriver.FindElements(By.TagName("a")).Select(anchor => anchor.GetAttribute("href")))
             ?? throw new Exception("There were no links on the page.");
         
         var notificationLinkRegexPattern = new Regex(@"/jilhpp/messenger/viewmess/msgid/\d+/smid/1");
-        var openedNotificationLinks = allPageLinks.Where(link => notificationLinkRegexPattern.Match(link).Success);
+        var openedNotificationLinks = allPageLinks.Where(link => notificationLinkRegexPattern.Match(link).Success).ToList();
+        driver.Dispose();
         return openedNotificationLinks;
     }
     

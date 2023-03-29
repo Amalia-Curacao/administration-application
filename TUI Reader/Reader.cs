@@ -1,8 +1,7 @@
 ﻿using System.Text.Json;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
 using TUI_Reader.Actions;
 using TUI_Reader.Contracts;
+using TUI_Reader.Database;
 using TUI_Reader.Properties;
 
 namespace TUI_Reader;
@@ -31,10 +30,12 @@ public sealed class Reader
     }
     private static IWebDriver CreateWebDriver(bool headless)
     {
-        var options = new ChromeOptions();
-        if(headless) options.AddArgument("--headless");
-        options.SetLoggingPreference(LogType.Browser, LogLevel.Off);
-        options.SetLoggingPreference(LogType.Driver, LogLevel.Off);
-        return new ChromeDriver(options);
+		return new List<Notification>(ReadOpenedNotifications.Run(ReaderOptions));
     }
+
+    /// <summary>
+    /// Gets all notifications currently in the database.
+    /// </summary>
+    /// <returns>All saved notifications.</returns>
+    public async Task<IEnumerable<Notification>> GetNotifications() => Run();
 }
