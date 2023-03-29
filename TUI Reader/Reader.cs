@@ -37,5 +37,5 @@ public sealed class Reader
     /// Gets all notifications currently in the database.
     /// </summary>
     /// <returns>All saved notifications.</returns>
-    public async Task<IEnumerable<Notification>> GetNotifications() => Run();
+    public async Task<IEnumerable<Notification>> GetNotifications() => await Run();
 }

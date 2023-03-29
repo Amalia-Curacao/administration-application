@@ -13,43 +13,30 @@ internal static class ReadOpenedNotifications
     /// Gets all the opened notifications from JIL.
     /// </summary>
     /// <returns>Opened notifications.</returns>
-    public static IEnumerable<Notification> Run(ReaderOptions readerOptions)
+    public async static Task<IEnumerable<Notification>> Run(ReaderOptions readerOptions)
     {
         Console.WriteLine("Read opened notifications: start");
         // The to list forces the c# to irritate through the notifications.
-        var openedNotifications = GetOpenedNotifications(readerOptions).ToList();
+        var openedNotifications = (await GetOpenedNotifications(readerOptions)).ToArray();
+        Task.WhenAll(openedNotifications).Wait();
         Console.WriteLine("Read opened notifications: successful");
-        return openedNotifications;
+        return openedNotifications.Select(openedNotification => openedNotification.Result);
     }
     /// <summary>
     /// Gets all the opened notifications.
     /// </summary>
     /// <returns>Opened notifications.</returns>
-    private static IEnumerable<Notification> GetOpenedNotifications(ReaderOptions readerOptions)
+    private async static Task<IEnumerable<Task<Notification>>> GetOpenedNotifications(ReaderOptions readerOptions)
     {
         // The to list forces the c# to irritate through the notification links.
         var openNotificationLinks = GetOpenedNotificationLinks(readerOptions.DriverOptions).ToList();
-        var openedNotifications = new List<Notification>();
-        var i = 0;
-        Parallel.ForEach(
-            openNotificationLinks,
-            new ParallelOptions
-            {
-                MaxDegreeOfParallelism = readerOptions.MaximumParallelOperations
-            },
-            openedNotificationLink =>
-            {
-                i++;
-                Console.WriteLine($"Notification: {i}");
-                openedNotifications.Add(GetNotification(readerOptions.DriverOptions, openedNotificationLink));
-            });
-        return openedNotifications;
+        return openNotificationLinks.Select(notificationLink => Task.Run(() => GetNotification(readerOptions.DriverOptions, notificationLink)));
     }
     /// <summary>
     /// Gets the opened notification.
     /// </summary>
     /// <returns>Opened notification.</returns>
-    private static Notification GetNotification(DriverOptions driverOptions, string notificationLink)
+    private static Task<Notification> GetNotification(DriverOptions driverOptions, string notificationLink)
     {
         var driver = Driver.Chrome(driverOptions);
         Login.Run(driver);
@@ -64,7 +51,7 @@ internal static class ReadOpenedNotifications
             Subject = GetValue(rows, "Subject")
         };
         driver.Dispose();
-        return notification;
+        return new Task<Notification>(() => notification);
     }
     
     /// <summary>
