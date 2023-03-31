@@ -1,7 +1,11 @@
-﻿namespace TUI_Reader.Contracts;
+﻿using Microsoft.EntityFrameworkCore;
 
+namespace TUI_Reader.Contracts;
+
+[PrimaryKey(nameof(Id))]
 public class Notification
 {
+	public int Id { get; init; }
     public string Reference { get; init; } = null!;
     public DateTime ReceivedAt { get; init; }
     public string Hotel { get; init; } = null!;

@@ -1,66 +1,93 @@
 ﻿using System.Text.RegularExpressions;
 using OpenQA.Selenium;
 using TUI_Reader.Contracts;
+using TUI_Reader.Drivers;
 using TUI_Reader.Extensions;
 
 namespace TUI_Reader.Actions;
 
-internal sealed class ReadOpenedNotifications
+/// <summary>
+/// Used to read opened notifications in jil.travel.
+/// </summary>
+internal class ReadOpenedNotifications
 {
-    private readonly IWebDriver _driver;
-    public ReadOpenedNotifications(IWebDriver driver)
-    {
-        _driver = driver;
-    }
+    /// <summary>
+    /// Is used for logging purposes to display the amount of opened notifications has been processed.
+    /// </summary>
+    private static int NotificationNumber;
+    /// <summary>
+    /// <inheritdoc cref="Login"/>
+    /// </summary>
+    public Login Login { get; init; } = null!;
+    /// <summary>
+    /// <inheritdoc cref="ReaderOptions"/>
+    /// </summary>
+    public ReaderOptions ReaderOptions { get; init; } = null!;
     /// <summary>
     /// Gets all the opened notifications from JIL.
     /// </summary>
     /// <returns>Opened notifications.</returns>
-    public IEnumerable<Notification> Run()
+    public async Task<IEnumerable<Notification>> Run()
     {
-        Console.WriteLine("Read opened notifications: start");
-        var openedNotifications = GetOpenedNotifications();
-        Console.WriteLine("Read opened notifications: successful");
+        if (ReaderOptions.Logging) Console.WriteLine("Read opened notifications: start");
+        
+        var openedNotifications = await GetOpenedNotifications();
+        
+        if (ReaderOptions.Logging) Console.WriteLine("Read opened notifications: successful");
+        
         return openedNotifications;
     }
     /// <summary>
     /// Gets all the opened notifications.
     /// </summary>
     /// <returns>Opened notifications.</returns>
-    private IEnumerable<Notification> GetOpenedNotifications()
+    private async Task<IEnumerable<Notification>> GetOpenedNotifications()
     {
-        _driver.GoToOpenedNotificationPage();
-        foreach (var openedNotificationLink in GetOpenedNotificationLinks())
+        NotificationNumber = 0;
+        var parallelOptions = new ParallelOptions
         {
-            _driver.SwitchTo().NewWindow(WindowType.Tab);
-            yield return GetNotification(openedNotificationLink);
-            _driver.Close();
-            _driver.SwitchTo().Window(_driver.WindowHandles.First());
-        }
+            MaxDegreeOfParallelism = ReaderOptions.MaximumParallelOperations
+        };
+        // The to list forces the c# to irritate through the notification links.
+        var notificationUrls
+            = GetOpenedNotificationLinks().ToList();
+        
+        // Limits the amount of instances of chrome can be open at the same time.
+        var notifications = new List<Notification>();
+        await Parallel.ForEachAsync(
+            notificationUrls,
+            parallelOptions,
+            async (url, _) => notifications.Add(await GetNotification(url)));
+
+        return notifications;
     }
     /// <summary>
     /// Gets the opened notification.
     /// </summary>
-    /// <param name="notificationLink">Opened notification link.</param>
     /// <returns>Opened notification.</returns>
-    private Notification GetNotification(string notificationLink)
+    private Task<Notification> GetNotification(string notificationLink)
     {
-        _driver.Navigate().GoToUrl(notificationLink);
-        var rows = GetTrElements().ToArray();
-        return new Notification
+        var driver = Driver.Chrome(ReaderOptions.DriverOptions);
+        Login.Run(driver);
+        driver.WebDriver.Navigate().GoToUrl(notificationLink);
+        var rows = GetTrElements(driver.WebDriver).ToArray();
+        var notification = new Notification
         {
-            Content = GetContent(),
-            ReceivedAt = ParseToDateTime(GetValue(rows,"Date")),
+            Content = GetContent(driver.WebDriver),
+            ReceivedAt = ParseToDateTime(GetValue(rows, "Date")),
             Hotel = GetValue(rows, "Hotel"),
             Reference = GetValue(rows, "Reference"),
             Subject = GetValue(rows, "Subject")
         };
+        if(ReaderOptions.Logging) Console.WriteLine($"{NotificationNumber}) Notification");
+        driver.Dispose();
+        return Task.Run(() => notification);
     }
     
     /// <summary>
     /// Gets a row value.
     /// </summary>
-    private string GetValue(IEnumerable<IWebElement> rows, string rowName)
+    private static string GetValue(IEnumerable<IWebElement> rows, string rowName)
     {
         var row = FindRow(rows, rowName);
         var tdElement = GetValue(row, rowName);
@@ -121,16 +148,26 @@ internal sealed class ReadOpenedNotifications
         => (element.GetAttribute("innerText") 
             ?? throw new Exception("No \"innerText found\" in element")).Contains(content) 
            || GetChildren(element).Any(child => HasContent(child, content));
-
-
-    private string GetContent()
-        => GetPreElement().GetAttribute("textContent")
+    /// <summary>
+    /// Gets a opened notifications content.
+    /// </summary>
+    /// <returns>A opened notifications content.</returns>
+    private static string GetContent(IWebDriver driver)
+        => GetPreElement(driver).GetAttribute("textContent")
            ?? throw new Exception("No text content could be found in the element");
-    private IEnumerable<IWebElement> GetTrElements()
-        => _driver.FindElements(By.TagName("tr"))
+    /// <summary>
+    /// Gets every "tr" element from the page.
+    /// </summary>
+    /// <returns>A list of "tr" elements.</returns>
+    private static IEnumerable<IWebElement> GetTrElements(IWebDriver driver)
+        => driver.FindElements(By.TagName("tr"))
            ?? throw new Exception("No 'tr' element found on the page");
-    private IWebElement GetPreElement()
-        => _driver.FindElement(By.TagName("pre"))
+    /// <summary>
+    /// Gets every "pre" element from the page.
+    /// </summary>
+    /// <returns>A list of "pre: elements.</returns>
+    private static IWebElement GetPreElement(IWebDriver driver)
+        => driver.FindElement(By.TagName("pre"))
            ?? throw new Exception("No pre element could be found on this page");
     
     /// <summary>
@@ -140,15 +177,29 @@ internal sealed class ReadOpenedNotifications
     /// <exception cref="Exception">No links found on the page.</exception>
     private IEnumerable<string> GetOpenedNotificationLinks()
     {
-        var allPageLinks =
-            _driver.Wait().Until(driver => driver.FindElements(By.TagName("a")).Select(anchor => anchor.GetAttribute("href")))
-            ?? throw new Exception("There were no links on the page.");
+        var driver = Driver.Chrome(ReaderOptions.DriverOptions);
         
+        Login.Run(driver);
+        driver.GoToOpenedNotificationPage();
+        
+        var allPageLinks = GetAllLinks(driver) ?? throw new Exception("There were no links on the page.");
         var notificationLinkRegexPattern = new Regex(@"/jilhpp/messenger/viewmess/msgid/\d+/smid/1");
-        var openedNotificationLinks = allPageLinks.Where(link => notificationLinkRegexPattern.Match(link).Success);
+        var openedNotificationLinks = allPageLinks.Where(link => notificationLinkRegexPattern.Match(link).Success).ToList();
+        
+        driver.Dispose();
+        
         return openedNotificationLinks;
     }
-    
+    /// <summary>
+    /// Gathers all links on the page.
+    /// </summary>
+    /// <param name="driver"></param>
+    /// <returns>All links on the page.</returns>
+    private static IEnumerable<string> GetAllLinks(Driver driver) =>
+        driver.Wait()
+              .Until(webDriver => webDriver.FindElements(By.TagName("a"))
+                                           .Select(anchor => anchor.GetAttribute("href")));
+
     /// <summary>
     /// Parses TUI's string date time format to <see cref="DateTime"/>.
     /// </summary>
