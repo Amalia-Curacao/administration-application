@@ -14,11 +14,9 @@ internal static class DriverExtensions
     public static void GoToOpenedNotificationPage(this Driver driver) 
         => driver.WebDriver.Navigate().GoToUrl(@"https://www.jil.travel/jilhpp/messenger/read/page/0/sm/1/generalproductid/32185");
     /// <summary>
-    /// Creates a <see cref="WebDriverWait"/> with a 5 second wait time.
+    /// Creates a <see cref="WebDriverWait"/> with a default wait time of 5 second.
     /// </summary>
-    /// <param name="seconds">Amount of seconds to wait.</param>
-    /// <returns></returns>
-    public static WebDriverWait Wait(this Driver driver, int seconds = 5) => new (driver.WebDriver, TimeSpan.FromSeconds(seconds));
+    public static WebDriverWait Wait(this Driver driver, TimeSpan? time = null) => new (driver.WebDriver, time ?? TimeSpan.FromSeconds(5));
 
     
     

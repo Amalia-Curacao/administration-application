@@ -1,7 +1,7 @@
 ﻿namespace TUI_Reader.Contracts;
 
 /// <summary>
-/// Options for the reader.
+/// Options for the <see cref="Reader"/>.
 /// </summary>
 public class ReaderOptions
 {

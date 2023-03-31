@@ -9,11 +9,13 @@ var options = new ReaderOptions
 	DriverOptions = new DriverOptions
 	{
 		Logging = false,
-		Headless = false
-	},
-	MaximumParallelOperations = 5
+		Headless = true
+	}
 };
-var reader = new Reader(options);
+var reader = new Reader
+{
+	ReaderOptions = options
+};
 foreach (var notification in await reader.GetNotifications())
 {
 	Console.WriteLine(notification);
