@@ -5,6 +5,7 @@ namespace TUI_Reader.Database;
 
 internal class DatabaseContext: DbContext
 {
+	private const string ProjectName = "TUI Reader";
 	/// <summary>
 	/// Creates the Notifications table in the database.
 	/// </summary>
@@ -23,5 +24,6 @@ internal class DatabaseContext: DbContext
 	/// <remarks>
 	///	Assumes that the database name is in a folder called "Database".
 	/// </remarks>
-	protected static string DbPath => Path.Join(Path.GetFullPath("Database"), Name);
+	protected static string DbPath 
+		=> Path.Join(Environment.CurrentDirectory.Split(ProjectName)[0] += ProjectName , $"{nameof(Database)}\\{Name}.db"); 
 }

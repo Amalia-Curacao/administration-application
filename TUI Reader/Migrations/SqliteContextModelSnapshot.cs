@@ -10,7 +10,7 @@ using TUI_Reader.Database;
 namespace TUI_Reader.Migrations
 {
     [DbContext(typeof(SqliteContext))]
-    partial class ContextModelSnapshot : ModelSnapshot
+    partial class SqliteContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
