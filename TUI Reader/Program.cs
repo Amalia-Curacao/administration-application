@@ -1,24 +1,25 @@
-﻿using TUI_Reader;
-using TUI_Reader.Contracts;
+﻿using TUI_Reader.Contracts;
 
 Console.WriteLine("-----Start TUI Reader Console-----");
 
-var options = new ReaderOptions
+var watch = new System.Diagnostics.Stopwatch();
+watch.Start();
+var readerOptions = new ReaderContext
 {
 	Logging = true,
 	DriverOptions = new DriverOptions
 	{
 		Logging = false,
-		Headless = true
+		Headless = Environment.GetCommandLineArgs().Any(arg => arg.Equals("--headless"))
 	}
 };
-var reader = new Reader
-{
-	ReaderOptions = options
-};
-foreach (var notification in await reader.GetNotifications())
+var controller = await readerOptions.Execute();
+/*foreach (var notification in controller.ReadAll())
 {
 	Console.WriteLine(notification);
-}
+}*/
+watch.Stop();
+
+Console.WriteLine($"Execution time: {watch.ElapsedMilliseconds}ms");
 
 Console.WriteLine("-----End TUI Reader Console-----");

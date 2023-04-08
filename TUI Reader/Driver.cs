@@ -2,7 +2,7 @@
 using OpenQA.Selenium.Chrome;
 using DriverOptions = TUI_Reader.Contracts.DriverOptions;
 
-namespace TUI_Reader.Drivers;
+namespace TUI_Reader;
 
 /// <summary>
 /// A webdriver with a unique id. Is used for different operations.
@@ -10,9 +10,21 @@ namespace TUI_Reader.Drivers;
 internal class Driver : IDisposable
 {
 	/// <summary>
-	/// <inheritdoc cref="Guid"/>
+	/// Last id used for an operation.
 	/// </summary>
-	public Guid Id { get; } = Guid.NewGuid();
+	public static int LastId;
+	/// <summary>
+	/// Determines if activities should be logged.
+	/// </summary>
+	public bool Logging { get; init; }
+	/// <summary>
+	/// Indicates if driver is logged in to a website.
+	/// </summary>
+	public bool LoggedIn { get; set; } = false;
+	/// <summary>
+	/// Unique id. 
+	/// </summary>
+	public int Id { get; init; }
 	/// <summary>
 	/// <inheritdoc cref="IWebDriver"/>
 	/// </summary>
@@ -43,7 +55,11 @@ internal class Driver : IDisposable
 			DisableLoggingServices(chromeServices);
 		}
 		if(driverOptions.Headless) chromeOptions.AddArgument("--headless");
-		return new Driver(new ChromeDriver(chromeOptions), driverOptions);
+		return new Driver(new ChromeDriver(chromeOptions), driverOptions)
+		{
+			Logging = driverOptions.Logging,
+			Id = LastId++
+		};
 	}
 	/// <summary>
 	/// Disables logging for <see cref="ChromeOptions"/>.

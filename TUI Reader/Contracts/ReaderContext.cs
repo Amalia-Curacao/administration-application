@@ -3,7 +3,7 @@
 /// <summary>
 /// Options for the <see cref="Reader"/>.
 /// </summary>
-public class ReaderOptions
+public class ReaderContext
 {
 	/// <summary>
 	/// Indicates if logging should be done for the reader.
@@ -17,4 +17,13 @@ public class ReaderOptions
 	/// The maximum amount of parallel operations.
 	/// </summary>
 	public int MaximumParallelOperations { get; init; } = 5;
+	/// <summary>
+	/// <inheritdoc cref="LoginContext"/>
+	/// </summary>
+	/// <remarks>
+	/// If left empty will use value from the local appsettings.json.
+	/// </remarks>
+	public LoginContext LoginContext { get; init; } = LoginContext.DefaultLoginContext();
+
+
 }
