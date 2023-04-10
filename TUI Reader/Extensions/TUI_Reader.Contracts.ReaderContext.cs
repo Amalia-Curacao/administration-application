@@ -63,7 +63,7 @@ public static class ReaderContextExtensions
 		var notificationCounter = 0;
 
 		// The to list forces the c# to irritate through the notification links.
-		var notificationUrls = new Queue<string>(context.GetOpenedNotificationLinks());
+		var notificationUrls = new Queue<string>(context.GetOpenedNotificationLinks().Take(1));
 		var notifications = new List<Notification>();
 		var drivers = new List<Driver>();
 		for (var i = 0; i < context.MaximumParallelOperations; i++)

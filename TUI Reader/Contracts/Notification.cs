@@ -31,19 +31,25 @@ public class Notification : IEquatable<Notification>
 	/// </summary>
 	public override bool Equals(object? obj)
 	{
-		if (ReferenceEquals(null, obj)) return false;
-		if (ReferenceEquals(this, obj)) return true;
-		if (obj.GetType() != this.GetType()) return false;
-		return Equals((Notification)obj);
+		if(obj is Notification other)
+		{
+			return this.Equals(other);
+		}
+		return false;
 	}
 	/// <summary>
 	/// <inheritdoc cref="IEquatable{T}.Equals(T?)"/>
 	/// </summary>
 	public bool Equals(Notification? other)
 	{
-		if (ReferenceEquals(null, other)) return false;
-		if (ReferenceEquals(this, other)) return true;
-		return Reference == other.Reference && ReceivedAt.Equals(other.ReceivedAt) && Hotel == other.Hotel && Subject == other.Subject && Content == other.Content;
+		if (other is null) return false;
+		return Reference == other.Reference &&
+			   ReceivedAt.Equals(other.ReceivedAt) &&
+			   Hotel == other.Hotel &&
+			   Subject == other.Subject &&
+			   LastMinute == other.LastMinute &&
+			   Type == other.Type &&
+			   Content == other.Content;
 	}
 	/// <summary>
 	/// Generates a hashcode of the object.

@@ -7,6 +7,7 @@ watch.Start();
 var readerOptions = new ReaderContext
 {
 	Logging = true,
+	MaximumParallelOperations = 1,
 	DriverOptions = new DriverOptions
 	{
 		Logging = false,

@@ -29,18 +29,8 @@ public class NotificationController
 	/// <param name="overrideExisting">If received notifications should override existing one in the database.</param>
 	public async Task<NotificationController> Add(bool overrideExisting, params Notification[] notifications)
 	{
-		if(overrideExisting)
-		{
-			await SqliteContext.Notifications.AddRangeAsync(notifications);
-			await SqliteContext.SaveChangesAsync();
-		}
-		else
-		{
-			foreach (var notification in notifications)
-			{
-				await Add(overrideExisting, notification);
-			}
-		}
+		var tasks = notifications.Select(notification => Task.Run(() => Add(overrideExisting, notification)));
+		await Task.WhenAll(tasks);
 		return this;
 	}
 	/// <summary>
@@ -50,11 +40,14 @@ public class NotificationController
 	/// <param name="notification">Notification to add to the database.</param>
 	public async Task<NotificationController> Add(bool overrideExisting, Notification notification)
 	{
-		if (overrideExisting) await SqliteContext.Notifications.AddAsync(notification);
+		if (!overrideExisting) await SqliteContext.Notifications.AddAsync(notification);
 		else
 		{
-			if (!await ExistsAsync(notification)) 
-				await SqliteContext.AddAsync(notification);
+			if (await ExistsAsync(notification))
+				SqliteContext.Notifications.Update(notification);
+			else
+				await SqliteContext.Notifications.AddAsync(notification);
+			
 		}
 		await SqliteContext.SaveChangesAsync();
 		return this;
