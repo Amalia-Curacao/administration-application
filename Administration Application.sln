@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUI Reader", "TUI Reader\TUI Reader.csproj", "{FF00BBE7-CAA3-4398-9420-710F84299290}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TuiReader", "TuiReader\TuiReader.csproj", "{FF00BBE7-CAA3-4398-9420-710F84299290}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TUI Reader.specs", "TUI Reader.specs\TUI Reader.specs.csproj", "{AE3FF6A3-8090-4F7F-8EAD-5AAFA59CF42E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TuiReader.specs", "TuiReader.specs\TuiReader.specs.csproj", "{AE3FF6A3-8090-4F7F-8EAD-5AAFA59CF42E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
