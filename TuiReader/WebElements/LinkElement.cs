@@ -2,6 +2,9 @@
 
 namespace TuiReader.WebElements;
 
+/// <summary>
+/// Facade for <see cref="IWebElement"/>.
+/// </summary>
 internal class LinkElement
 {
 	/// <summary>

@@ -5,8 +5,14 @@ using TuiReader.Database;
 
 namespace TuiReader.Contracts;
 
+/// <summary>
+/// Extensions for <see cref="ReaderContext"/>.
+/// </summary>
 public static class ReaderContextExtensions
 {
+	/// <summary>
+	/// Creates a <see cref="NotificationController"/>.
+	/// </summary>
 	public async static Task<NotificationController> Execute(this ReaderContext context)
 	{
 		var notificationController = new NotificationController(new SqliteContext());
@@ -63,7 +69,7 @@ public static class ReaderContextExtensions
 		var notificationCounter = 0;
 
 		// The to list forces the c# to irritate through the notification links.
-		var notificationUrls = new Queue<string>(context.GetOpenedNotificationLinks().Take(1));
+		var notificationUrls = new Queue<string>(context.GetOpenedNotificationLinks());
 		var notifications = new List<Notification>();
 		var drivers = new List<Driver>();
 		for (var i = 0; i < context.MaximumParallelOperations; i++)

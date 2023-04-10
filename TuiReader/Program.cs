@@ -7,12 +7,13 @@ watch.Start();
 var readerOptions = new ReaderContext
 {
 	Logging = true,
-	MaximumParallelOperations = 1,
+	MaximumParallelOperations = 5,
 	DriverOptions = new DriverOptions
 	{
 		Logging = false,
 		Headless = Environment.GetCommandLineArgs().Any(arg => arg.Equals("--headless"))
-	}
+	},
+	OverrideDuplicates = true
 };
 var controller = await readerOptions.Execute();
 /*foreach (var notification in controller.ReadAll())

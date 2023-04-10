@@ -1,5 +1,8 @@
 ﻿namespace TuiReader.WebElements;
 
+/// <summary>
+/// Extensions for <see cref="PreElement"/>.
+/// </summary>
 internal static class PreElementExtensions
 {
 	

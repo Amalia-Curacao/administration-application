@@ -4,6 +4,9 @@ using TuiReader.WebElements;
 
 namespace OpenQA.Selenium;
 
+/// <summary>
+/// Extensions for <see cref="IWebDriver"/>.
+/// </summary>
 internal static class IWebDriverExtensions
 {
 	/// <summary>

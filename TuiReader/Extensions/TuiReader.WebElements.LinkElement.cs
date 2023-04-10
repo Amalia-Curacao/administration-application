@@ -1,5 +1,8 @@
 ﻿namespace TuiReader.WebElements;
 
+/// <summary>
+/// Extensions for <see cref="LinkElement"/>.
+/// </summary>
 internal static class LinkElementExtensions
 {
 	/// <summary>

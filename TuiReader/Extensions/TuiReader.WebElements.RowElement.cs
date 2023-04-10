@@ -2,6 +2,9 @@
 
 namespace TuiReader.WebElements;
 
+/// <summary>
+/// Extensions for <see cref="RowElement"/>.
+/// </summary>
 internal static class RowElementExtensions
 {
 	

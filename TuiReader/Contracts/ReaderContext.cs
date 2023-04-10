@@ -1,10 +1,14 @@
 ﻿namespace TuiReader.Contracts;
 
 /// <summary>
-/// Options for the <see cref="Reader"/>.
+/// Context used to execute the <see cref="TuiReader"/>.
 /// </summary>
 public class ReaderContext
 {
+	/// <summary>
+	/// Indicates if duplicate notifications get overriden.
+	/// </summary>
+	public bool OverrideDuplicates { get; init; } = true;
 	/// <summary>
 	/// Indicates if logging should be done for the reader.
 	/// </summary>

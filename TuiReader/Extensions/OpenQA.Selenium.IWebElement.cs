@@ -1,5 +1,8 @@
 ﻿namespace OpenQA.Selenium;
 
+/// <summary>
+/// Extensions for <see cref="IWebElement"/>.
+/// </summary>
 internal static class IWebElementExtensions
 {
 	

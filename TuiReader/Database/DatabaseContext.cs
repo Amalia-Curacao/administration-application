@@ -1,11 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Reflection;
+using Microsoft.EntityFrameworkCore;
 using TuiReader.Contracts;
 
 namespace TuiReader.Database;
 
+/// <summary>
+/// Database context used for the <see cref="TuiReader"/>.
+/// </summary>
 internal class DatabaseContext: DbContext
 {
-	private const string ProjectName = "TuiReader";
+	/// <summary>
+	/// The name of the current project.
+	/// </summary>
+	private static string ProjectName => Assembly.GetExecutingAssembly().GetName().Name ?? throw new InvalidOperationException("Project name is null.");
 	/// <summary>
 	/// Creates the Notifications table in the database.
 	/// </summary>

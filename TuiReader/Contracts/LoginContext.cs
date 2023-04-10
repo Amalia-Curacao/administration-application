@@ -17,9 +17,12 @@ public class LoginContext
 	/// </summary>
 	public string Password { get; init; } = null!;
 
+	/// <summary>
+	/// Gets the login context from the appsettings.development.json file.
+	/// </summary>
 	public static LoginContext DefaultLoginContext()
 	{
-		var appsettings = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(@"./Properties/appsettings.json"))!;
+		var appsettings = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText($".\\Properties\\appsettings.development.json"))!;
 		return new LoginContext
 		{
 			Email = appsettings.Email,

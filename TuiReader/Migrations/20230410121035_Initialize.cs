@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace TuiReader.Migrations
+namespace TUI_Reader.Migrations
 {
     /// <inheritdoc />
     public partial class Initialize : Migration

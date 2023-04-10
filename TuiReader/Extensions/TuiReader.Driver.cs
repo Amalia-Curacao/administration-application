@@ -10,6 +10,9 @@ namespace TuiReader;
 /// </summary>
 internal static class DriverExtensions
 {
+    /// <summary>
+    /// Gets used for logging to keep track of notifications read.
+    /// </summary>
     private static int NotificationNumber;
     /// <summary>
     /// Login to JILL's website.
@@ -18,9 +21,9 @@ internal static class DriverExtensions
     {
         if(driver.Logging) Console.WriteLine($"{driver.Id}: login start");
         
-        var successfulLogin = AttemptLogin(driver, context);
+        driver.LoggedIn = AttemptLogin(driver, context);
         
-        if (!successfulLogin) throw new Exception($"{driver.Id}: login failed");
+        if (!driver.LoggedIn) throw new Exception($"{driver.Id}: login failed");
         
         if (driver.Logging) Console.WriteLine($"{driver.Id}: login successful");
         return driver;
@@ -47,7 +50,7 @@ internal static class DriverExtensions
             }
             catch (Exception) { /*ignored*/ }
         }
-        throw new Exception("Email address and/or password is incorrect");
+        throw new Exception("Email address and/or password is incorrect.");
     }
     /// <summary>
     /// Gets the opened notification.

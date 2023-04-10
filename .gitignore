@@ -10,6 +10,9 @@
 # User secrets
 *.development.json
 
+# Local database (sqlite)
+*.db
+
 # User-specific files
 *.rsuser
 *.suo
