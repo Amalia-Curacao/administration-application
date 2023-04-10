@@ -1,6 +1,7 @@
 ﻿using TuiReader.Contracts;
 
 Console.WriteLine("-----Start TuiReader Console-----");
+Console.WriteLine();
 
 var watch = new System.Diagnostics.Stopwatch();
 watch.Start();
@@ -15,13 +16,9 @@ var readerOptions = new ReaderContext
 	},
 	OverrideDuplicates = true
 };
-var controller = await readerOptions.Execute();
-/*foreach (var notification in controller.ReadAll())
-{
-	Console.WriteLine(notification);
-}*/
+await readerOptions.Execute();
 watch.Stop();
 
 Console.WriteLine($"Execution time: {watch.ElapsedMilliseconds}ms");
-
+Console.WriteLine();
 Console.WriteLine("-----End TuiReader Console-----");

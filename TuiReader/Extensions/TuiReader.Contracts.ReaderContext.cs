@@ -70,12 +70,9 @@ public static class ReaderContextExtensions
 
 		// The to list forces the c# to irritate through the notification links.
 		var notificationUrls = new Queue<string>(context.GetOpenedNotificationLinks());
+		
 		var notifications = new List<Notification>();
-		var drivers = new List<Driver>();
-		for (var i = 0; i < context.MaximumParallelOperations; i++)
-		{
-			drivers.Add(Driver.Chrome(context.DriverOptions).Login(context.LoginContext));
-		}
+		var drivers = context.DriverOptions.Create(context.MaximumParallelOperations).Login(context.LoginContext).ToArray();
 
 		await Parallel.ForEachAsync(
 			drivers,
@@ -84,23 +81,15 @@ public static class ReaderContextExtensions
 			{
 				while (notificationUrls.Any())
 				{
-					string url;
-					try
-					{
-						url = notificationUrls.Dequeue();
-						if (string.IsNullOrEmpty(url)) break;
-					}
-					catch
-					{
-						break;
-					}
+					if (!notificationUrls.TryDequeue(out var url)) continue;
+					if (string.IsNullOrWhiteSpace(url)) continue;
 					if (context.Logging) Console.WriteLine($"Notification: {notificationCounter++}");
 					notifications.Add(await driver.GetNotification(url));
 				}
 			});
 		
 		
-		drivers.ForEach(driver => driver.Dispose());
+		drivers.Dispose();
 		
 		return notifications;
 	}

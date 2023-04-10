@@ -11,13 +11,14 @@ public class NotificationController
 	/// <summary>
 	/// Context for the database.
 	/// </summary>
-	private DatabaseContext Context { get; }
+	private SqliteContext Context { get; }
 	/// <summary>
 	/// Constructor for the <see cref="NotificationController"/>.
 	/// </summary>
-	internal NotificationController(DatabaseContext context)
+	internal NotificationController(SqliteContext context)
 	{
 		Context = context;
+		Context.Database.EnsureCreated();
 	}
 	/// <summary>
 	/// Checks if given notification exists in the database.
@@ -38,27 +39,51 @@ public class NotificationController
 	/// <param name="overrideExisting">If received notifications should override existing one in the database.</param>
 	public async Task<NotificationController> Add(bool overrideExisting, params Notification[] notifications)
 	{
-		var tasks = notifications.Select(notification => Task.Run(() => Add(overrideExisting, notification)));
-		await Task.WhenAll(tasks);
+		if (overrideExisting)
+		{
+			var existingNotifications = await GetExisting(notifications);
+			var nonExistingNotifications = await GetNonExisting(notifications);
+			Context.Notifications.UpdateRange(existingNotifications);
+			await Context.Notifications.AddRangeAsync(nonExistingNotifications);
+		}
+		else
+			await Context.Notifications.AddRangeAsync(notifications);
+		await Context.SaveChangesAsync();
 		return this;
 	}
 	/// <summary>
-	/// Adds a notification to the database.
+	/// Filters the only notifications that exist in the database.
 	/// </summary>
-	/// <param name="overrideExisting">If received notification should override existing one in the database.</param>
-	/// <param name="notification">Notification to add to the database.</param>
-	public async Task<NotificationController> Add(bool overrideExisting, Notification notification)
+	private async Task<IEnumerable<Notification>> GetExisting(IEnumerable<Notification> notifications)
 	{
-		if (!overrideExisting) await Context.Notifications.AddAsync(notification);
-		else
+		var existing = new List<Notification>();
+
+		foreach (var notification in notifications)
 		{
 			if (await ExistsAsync(notification))
-				Context.Notifications.Update(notification);
-			else
-				await Context.Notifications.AddAsync(notification);
-			
+			{
+				existing.Add(notification);
+			}
 		}
-		await Context.SaveChangesAsync();
-		return this;
+		
+		return existing;
+	}
+	
+	/// <summary>
+	/// Filters the only notifications that do not exist in the database.
+	/// </summary>
+	private async Task<IEnumerable<Notification>> GetNonExisting(IEnumerable<Notification> notifications)
+	{
+		var nonExisting = new List<Notification>();
+
+		foreach (var notification in notifications)
+		{
+			if (!await ExistsAsync(notification))
+			{
+				nonExisting.Add(notification);
+			}
+		}
+		
+		return nonExisting;
 	}
 }
