@@ -67,30 +67,16 @@ public class Notification : IEquatable<Notification>
 		{
 			return false;
 		}
-
-		return Reference == other.Reference
-			   && ReceivedAt == other.ReceivedAt
-			   && Hotel == other.Hotel
-			   && Subject == other.Subject
-			   && LastMinute == other.LastMinute
-			   && Type == other.Type
-			   && Content == other.Content;
+		else
+		{
+			return ToString().Equals(other.ToString());
+		}
 	}
 	/// <summary>
 	/// Generates a hashcode of the object.
 	/// </summary>
 	public override int GetHashCode()
-	{
-		return HashCode.Combine(
-			Reference,
-			ReceivedAt,
-			Hotel,
-			Subject,
-			LastMinute,
-			Type,
-			Content
-		);
-	}
+		=> HashCode.Combine(ToString());
 }
 
 /// <summary>

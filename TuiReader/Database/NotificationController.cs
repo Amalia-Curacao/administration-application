@@ -24,7 +24,7 @@ public class NotificationController
 	/// </summary>
 	/// <returns>Existence of <see cref="Notification"/> in the database.</returns>
 	public bool Exists(Notification notification)
-	=> Context.Notifications.Any(n => n.Equals(notification));
+	=> Enumerable.Any(Context.Notifications, existingNotification => notification.Equals(existingNotification));
 	/// <summary>
 	/// Gets all notifications from the database.
 	/// </summary>
@@ -44,5 +44,5 @@ public class NotificationController
 	}
 
 	public IEnumerable<Notification> GetNewNotifications(params Notification[] notifications)
-		=> notifications.Where(notification => !Context.Notifications.Any(n => n.Equals(notification)));
+		=> notifications.Where(notification => !Exists(notification));
 }

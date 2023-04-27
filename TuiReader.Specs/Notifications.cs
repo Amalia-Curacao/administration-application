@@ -8,10 +8,10 @@ public class Can_be_compared_to_a
 	[Test]
 	public void notification_and_returns_true_if_they_are_the_same_except_for_the_id()
 	{
-		var subject = "New Last Minute";
-		var reference = "A12B23C45";
-		var hotel = "Amalia";
-		var content = "content";
+		const string subject = "New Last Minute";
+		const string reference = "A12B23C45";
+		const string hotel = "Amalia";
+		const string content = "content";
 		var recievedAt = new DateTime(year: 2023, month: 04, day: 27, hour: 09, minute: 01, second: 01);
 		
 		var notification = new Notification

@@ -12,7 +12,33 @@ public class Can_detect : TestDatabaseFixture
 	{
 		PopulateTestContext();
 		var controller = new NotificationController(TestContext);
-		var notifications = controller.ReadAll().ToArray();
+		var notifications = new Notification[]
+		{
+			new()
+			{
+				Content = "content1",
+				Reference = "reference1",
+				ReceivedAt = new DateTime(year: 2023, month: 04, day: 27, hour: 11, minute: 08, second: 01),
+				Hotel = "hotel1",
+				Subject = "subject1"
+			},
+			new()
+			{
+				Content = "content2",
+				Reference = "reference2",
+				ReceivedAt = new DateTime(year: 2023, month: 04, day: 27, hour: 11, minute: 08, second: 01),
+				Hotel = "hotel2",
+				Subject = "subject2"
+			},
+			new()
+			{
+				Content = "content3",
+				Reference = "reference3",
+				ReceivedAt = new DateTime(year: 2023, month: 04, day: 27, hour: 11, minute: 08, second: 01),
+				Hotel = "hotel3",
+				Subject = "subject3"
+			},
+		};
 		var newNotifications = controller.GetNewNotifications(notifications.ToArray());
 
 		newNotifications.Should().HaveCount(0);
@@ -23,7 +49,33 @@ public class Can_detect : TestDatabaseFixture
 	{
 		PopulateTestContext();
 		var controller = new NotificationController(TestContext);
-		var notifications = controller.ReadAll().ToList();
+		var notifications = new List<Notification>()
+		{
+			new()
+			{
+				Content = "content1",
+				Reference = "reference1",
+				ReceivedAt = new DateTime(year: 2023, month: 04, day: 27, hour: 11, minute: 08, second: 01),
+				Hotel = "hotel1",
+				Subject = "subject1"
+			},
+			new()
+			{
+				Content = "content2",
+				Reference = "reference2",
+				ReceivedAt = new DateTime(year: 2023, month: 04, day: 27, hour: 11, minute: 08, second: 01),
+				Hotel = "hotel2",
+				Subject = "subject2"
+			},
+			new()
+			{
+				Content = "content3",
+				Reference = "reference3",
+				ReceivedAt = new DateTime(year: 2023, month: 04, day: 27, hour: 11, minute: 08, second: 01),
+				Hotel = "hotel3",
+				Subject = "subject3"
+			},
+		};
 		var newNotification = new Notification
 		{
 			Content = "unique content",
@@ -47,7 +99,33 @@ public class Saves_notifications_in_the_database : TestDatabaseFixture
 	{
 		PopulateTestContext();
 		var controller = new NotificationController(TestContext);
-		var notifications = controller.ReadAll().ToArray();
+		var notifications = new Notification[]
+		{
+			new()
+			{
+				Content = "content1",
+				Reference = "reference1",
+				ReceivedAt = new DateTime(year: 2023, month: 04, day: 27, hour: 11, minute: 08, second: 01),
+				Hotel = "hotel1",
+				Subject = "subject1"
+			},
+			new()
+			{
+				Content = "content2",
+				Reference = "reference2",
+				ReceivedAt = new DateTime(year: 2023, month: 04, day: 27, hour: 11, minute: 08, second: 01),
+				Hotel = "hotel2",
+				Subject = "subject2"
+			},
+			new()
+			{
+				Content = "content3",
+				Reference = "reference3",
+				ReceivedAt = new DateTime(year: 2023, month: 04, day: 27, hour: 11, minute: 08, second: 01),
+				Hotel = "hotel3",
+				Subject = "subject3"
+			},
+		};
 		await controller.Add(notifications);
 		
 		controller.ReadAll().Should().HaveCount(notifications.Length).And.OnlyHaveUniqueItems();
@@ -59,9 +137,35 @@ public class Saves_notifications_in_the_database : TestDatabaseFixture
 	{
 		PopulateTestContext();
 		var controller = new NotificationController(TestContext);
-		var notifications = controller.ReadAll().ToList();
+		var notifications = new List<Notification>
+		{
+			new()
+			{
+				Content = "content1",
+				Reference = "reference1",
+				ReceivedAt = new DateTime(year: 2023, month: 04, day: 27, hour: 11, minute: 08, second: 01),
+				Hotel = "hotel1",
+				Subject = "subject1"
+			},
+			new()
+			{
+				Content = "content2",
+				Reference = "reference2",
+				ReceivedAt = new DateTime(year: 2023, month: 04, day: 27, hour: 11, minute: 08, second: 01),
+				Hotel = "hotel2",
+				Subject = "subject2"
+			},
+			new()
+			{
+				Content = "content3",
+				Reference = "reference3",
+				ReceivedAt = new DateTime(year: 2023, month: 04, day: 27, hour: 11, minute: 08, second: 01),
+				Hotel = "hotel3",
+				Subject = "subject3"
+			},
+		};
 		var originalCount = notifications.Count;
-		var newNotification = new Notification[]
+		var newNotifications = new Notification[]
 		{
 			new()
 			{
@@ -81,10 +185,10 @@ public class Saves_notifications_in_the_database : TestDatabaseFixture
 			},
 		};
 		
-		notifications.AddRange(newNotification);
+		notifications.AddRange(newNotifications);
 		await controller.Add(notifications.ToArray());
 
-		controller.ReadAll().Should().HaveCount(originalCount + newNotification.Length).And.OnlyHaveUniqueItems();
+		controller.ReadAll().Should().HaveCount(originalCount + newNotifications.Length).And.OnlyHaveUniqueItems();
 		
 	}
 }
