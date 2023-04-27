@@ -10,4 +10,11 @@ internal class PreElement
 	/// <inheritdoc cref="IWebElement"/>
 	/// </summary>
 	public IWebElement Element { get; init; } = null!;
+	
+	
+	/// <summary>
+	/// Gets a text content from <see cref="PreElement">element</see>.
+	/// </summary>
+	public string GetContent()
+		=> Element.GetAttribute("textContent") ?? throw new Exception("No text content could be found in the element");
 }

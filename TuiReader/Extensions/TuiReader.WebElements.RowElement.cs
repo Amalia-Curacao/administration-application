@@ -7,20 +7,6 @@ namespace TuiReader.WebElements;
 /// </summary>
 internal static class RowElementExtensions
 {
-	
-	/// <summary>
-	/// Gets the child in the row element that contains the values.
-	/// </summary>
-	public static IWebElement GetValue(this RowElement row, string name)
-	{
-		foreach (var child in row.Element.GetChildren())
-		{
-			var childValue = child.GetAttribute("innerText") ?? throw new Exception("No innerText was found in child element.");
-			if(!childValue.Contains(name))
-				return child;
-		}
-		throw new Exception("No \"value child\" was found");
-	}
 	/// <summary>
 	/// Finds a row with a child that has the same content as <see cref="rowName"/>.
 	/// </summary>

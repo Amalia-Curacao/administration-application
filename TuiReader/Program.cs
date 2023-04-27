@@ -12,13 +12,12 @@ var readerOptions = new ReaderContext
 	DriverOptions = new DriverOptions
 	{
 		Logging = false,
-		Headless = Environment.GetCommandLineArgs().Any(arg => arg.Equals("--headless"))
-	},
-	OverrideDuplicates = true
+		Headless = /*Environment.GetCommandLineArgs().Any(arg => arg.Equals("--headless"))*/ true
+	}
 };
 await readerOptions.Execute();
 watch.Stop();
 
-Console.WriteLine($"Execution time: {watch.ElapsedMilliseconds}ms");
+Console.WriteLine($"Execution time: {watch.Elapsed.Minutes} minutes");
 Console.WriteLine();
 Console.WriteLine("-----End TuiReader Console-----");

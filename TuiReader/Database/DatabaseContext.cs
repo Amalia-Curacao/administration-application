@@ -7,7 +7,7 @@ namespace TuiReader.Database;
 /// <summary>
 /// Database context used for the <see cref="TuiReader"/>.
 /// </summary>
-internal class DatabaseContext: DbContext
+public class DatabaseContext: DbContext
 {
 	/// <summary>
 	/// The name of the current project.
