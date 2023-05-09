@@ -12,7 +12,7 @@ var readerOptions = new ReaderContext
 	DriverOptions = new DriverOptions
 	{
 		Logging = false,
-		Headless = /*Environment.GetCommandLineArgs().Any(arg => arg.Equals("--headless"))*/ true
+		Headless = Environment.GetCommandLineArgs().Any(arg => arg.Equals("--headless"))
 	}
 };
 await readerOptions.Execute();

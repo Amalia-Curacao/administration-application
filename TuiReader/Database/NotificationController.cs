@@ -20,12 +20,6 @@ public class NotificationController
 		Context.Database.EnsureCreated();
 	}
 	/// <summary>
-	/// Checks if given notification exists in the database.
-	/// </summary>
-	/// <returns>Existence of <see cref="Notification"/> in the database.</returns>
-	public bool Exists(Notification notification)
-	=> Enumerable.Any(Context.Notifications, existingNotification => notification.Equals(existingNotification));
-	/// <summary>
 	/// Gets all notifications from the database.
 	/// </summary>
 	/// <returns>All notifications from the database.</returns>
@@ -38,11 +32,31 @@ public class NotificationController
 	public async Task<NotificationController> Add(params Notification[] notifications)
 	{
 		var newNotifications = GetNewNotifications(notifications);
-		await Context.Notifications.AddRangeAsync(newNotifications);
+		Context.Notifications.AddRange(newNotifications);
 		await Context.SaveChangesAsync();
 		return this;
 	}
-
+	/// <summary>
+	/// Gathers notifications that do not exists in the database.
+	/// </summary>
 	public IEnumerable<Notification> GetNewNotifications(params Notification[] notifications)
-		=> notifications.Where(notification => !Exists(notification));
+	{
+		var existingNotifications = Context.Notifications.ToArray();
+		foreach (var notification in notifications)
+		{
+			var exists = false;
+			foreach (var existingNotification in existingNotifications)
+			{
+				if (notification.Equals(existingNotification))
+				{
+					exists = true;
+				}
+			}
+			if (!exists)
+			{
+				yield return notification;
+			}
+		}
+	}
+	
 }

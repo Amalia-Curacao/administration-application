@@ -32,5 +32,5 @@ public class DatabaseContext: DbContext
 	///	Assumes that the database name is in a folder called "Database".
 	/// </remarks>
 	protected static string DbPath 
-		=> Path.Join(Environment.CurrentDirectory.Split(ProjectName)[0] += ProjectName , $"{nameof(Database)}\\{Name}.db"); 
+		=> Path.Join(Environment.CurrentDirectory.Split(ProjectName)[0] + ProjectName, $"Database\\{Name}.db"); 
 }
