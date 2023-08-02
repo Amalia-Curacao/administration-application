@@ -1,5 +1,8 @@
-﻿namespace TUI_Reader.Properties;
+﻿namespace TuiReader.Properties;
 
+/// <summary>
+/// Structure for the appsettings.json.
+/// </summary>
 internal sealed class AppSettings
 {
     /// <summary>

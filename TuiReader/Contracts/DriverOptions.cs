@@ -1,4 +1,4 @@
-﻿namespace TUI_Reader.Contracts;
+﻿namespace TuiReader.Contracts;
 
 /// <summary>
 /// Options for web drivers.
@@ -13,4 +13,14 @@ public class DriverOptions
 	/// Indicates if browsers will be headless.
 	/// </summary>
 	public bool Headless { get; init; } = true;
+	/// <summary>
+	/// Creates <see cref="Driver">drivers</see>.
+	/// </summary>
+	internal IEnumerable<Driver> Create(int amount = 1)
+	{
+		for (var i = 0; i < amount; i++)
+		{
+			yield return Driver.Chrome(this);
+		}
+	}
 }
