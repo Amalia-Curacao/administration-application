@@ -1,4 +1,4 @@
-﻿namespace TuiReader.Properties;
+﻿namespace TUI_Reader.Properties;
 
 /// <summary>
 /// Structure for the appsettings.json.

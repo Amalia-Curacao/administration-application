@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using TuiReader.Database;
+using TUI_Reader.Database;
 
 #nullable disable
 
 namespace TUI_Reader.Migrations
 {
-    [DbContext(typeof(SqliteContext))]
+    [DbContext(typeof(SQLiteContext))]
     [Migration("20230410121035_Initialize")]
     partial class Initialize
     {

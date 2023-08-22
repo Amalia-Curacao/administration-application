@@ -3,13 +3,13 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using TuiReader.Database;
+using TUI_Reader.Database;
 
 #nullable disable
 
 namespace TUI_Reader.Migrations
 {
-    [DbContext(typeof(SqliteContext))]
+    [DbContext(typeof(SQLiteContext))]
     partial class SqliteContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

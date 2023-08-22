@@ -1,4 +1,4 @@
-﻿using TuiReader.Contracts;
+﻿using TUI_Reader.Contracts;
 
 Console.WriteLine("-----Start TuiReader Console-----");
 Console.WriteLine();
