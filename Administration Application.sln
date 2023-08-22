@@ -7,15 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TuiReader", "TuiReader\TuiR
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TuiReader.Specs", "TuiReader.Specs\TuiReader.Specs.csproj", "{6F229388-1A6F-4043-81D7-37AC297569EA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scheduler", "Scheduler\Scheduler.csproj", "{E65D17D9-DBFC-47A6-815F-574F7A723FDF}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scheduler.Test", "Scheduler.Test\Scheduler.Test.csproj", "{3C17E822-F76C-47C4-B316-814A3C79A509}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Creative.Database", "CreativeDatabase\Creative.Database.csproj", "{7D63C587-75BE-4EE0-9E46-C4062D5F7A56}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Creative.Api", "CreativeApi\Creative.Api.csproj", "{08191CE5-9789-4BBA-BB9E-4610F1A11A08}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Creative.Test", "Creative.Test\Creative.Test.csproj", "{15EA6D84-3ACE-41F2-BADD-C3EAEC5BF757}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Creative.Test", "Creative.Test\Creative.Test.csproj", "{15EA6D84-3ACE-41F2-BADD-C3EAEC5BF757}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,14 +27,6 @@ Global
 		{6F229388-1A6F-4043-81D7-37AC297569EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F229388-1A6F-4043-81D7-37AC297569EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6F229388-1A6F-4043-81D7-37AC297569EA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E65D17D9-DBFC-47A6-815F-574F7A723FDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E65D17D9-DBFC-47A6-815F-574F7A723FDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E65D17D9-DBFC-47A6-815F-574F7A723FDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E65D17D9-DBFC-47A6-815F-574F7A723FDF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3C17E822-F76C-47C4-B316-814A3C79A509}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3C17E822-F76C-47C4-B316-814A3C79A509}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3C17E822-F76C-47C4-B316-814A3C79A509}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3C17E822-F76C-47C4-B316-814A3C79A509}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7D63C587-75BE-4EE0-9E46-C4062D5F7A56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7D63C587-75BE-4EE0-9E46-C4062D5F7A56}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7D63C587-75BE-4EE0-9E46-C4062D5F7A56}.Release|Any CPU.ActiveCfg = Release|Any CPU
