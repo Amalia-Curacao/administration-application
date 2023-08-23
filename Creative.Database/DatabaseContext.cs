@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
-namespace Scheduler.Database;
+namespace Creative.Database;
 
 /// <summary> Has some helper functions for creating a <see cref="DbContext"/>. </summary>
 public abstract class DatabaseContext : DbContext

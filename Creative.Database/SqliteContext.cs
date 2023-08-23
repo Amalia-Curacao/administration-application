@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Scheduler.Database;
 
-namespace CreativeDatabase;
+namespace Creative.Database;
 
 /// <summary> <see cref="DatabaseContext"/> that uses SQLite. </summary>
 public class SqliteContext : DatabaseContext

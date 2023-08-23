@@ -22,8 +22,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CreativeApi\Creative.Api.csproj" />
-    <ProjectReference Include="..\CreativeDatabase\Creative.Database.csproj" />
+    <ProjectReference Include="..\Creative.Api\Creative.Api.csproj" />
+    <ProjectReference Include="..\Creative.Database\Creative.Database.csproj" />
   </ItemGroup>
 
 </Project>

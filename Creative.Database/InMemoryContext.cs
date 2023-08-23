@@ -1,6 +1,4 @@
-﻿using CreativeDatabase;
-using Microsoft.EntityFrameworkCore;
-using Scheduler.Database;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Creative.Database
 {
