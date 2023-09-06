@@ -1,0 +1,44 @@
+﻿@model Reservation
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row div-centered">
+    <div class="col-xs-8 w-50">
+        <p>
+        <h1>Reservation</h1>
+            <h4>Edit</h4>
+        </p>
+        <div class="row">
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <div class="form-group">
+                    <!--TODO - Change date format to dd-MM-yyyy -->
+                    <label asp-for="CheckIn" class="control-label"></label>
+                    <br/>
+                    <span asp-validation-for="CheckIn" class="text-danger"></span>
+                    <input type="date" asp-for="CheckIn" class="form-control" value="@Model.CheckIn" placeholder="DD-MM-YYYY" />
+                </div>
+                <div class="form-group">
+                    <!--TODO - Change date format to dd-MM-yyyy -->
+                    <label asp-for="CheckOut" class="control-label"></label>
+                    <br/>
+                    <span asp-validation-for="CheckOut" class="text-danger"></span>
+                    <input type="date" asp-for="CheckOut" class="form-control" value="@Model.CheckOut" placeholder="DD-MM-YYYY" />
+                </div>
+                <div class="form-group">
+                    <label asp-for="RoomNumber" class="control-label"></label>
+                    <br/>
+                    <span asp-validation-for="RoomNumber" class="text-danger"></span>
+                    <input type="number" asp-for="RoomNumber" class="form-control" value="@Model.RoomNumber" placeholder="@Model.RoomNumber"/>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Save" class="btn btn-outline-success"/>
+                    <a class="btn btn-danger" asp-controller="Rooms" asp-action="Index" asp-route-id="@Model.RoomScheduleId">Back</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

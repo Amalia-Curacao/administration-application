@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-namespace Creative.Database.Interfaces;
+﻿namespace Creative.Database.Interfaces;
 
 public interface IDbObject<DbType>
 {

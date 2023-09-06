@@ -1,6 +1,6 @@
 ﻿using Creative.Database;
 using Microsoft.EntityFrameworkCore;
-using Roster.Models;
+using Scheduler.Data.Models;
 
 namespace Roster.Data;
 

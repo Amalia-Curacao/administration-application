@@ -1,5 +1,4 @@
 ﻿using System.Text.RegularExpressions;
-using TUI_Reader;
 using TUI_Reader.Database;
 using TUI_Reader.Extensions;
 

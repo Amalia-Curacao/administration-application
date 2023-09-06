@@ -12,7 +12,7 @@ public abstract class DatabaseContext : DbContext
     }
 
     /// <summary> The name of the current project. </summary>
-    private static string ProjectName => Assembly.GetExecutingAssembly().GetName().Name 
+    private static string ProjectName => Assembly.GetCallingAssembly().GetName().Name
         ?? throw new InvalidOperationException("Project name is null.");
 
 
@@ -22,5 +22,5 @@ public abstract class DatabaseContext : DbContext
     /// <summary> The absolute path of the database. </summary>
     /// <remarks> Assumes that the database name is in a folder called "Database". </remarks>
     protected static string DbPath
-        => Path.Join(Environment.CurrentDirectory.Split(ProjectName)[0] + ProjectName, $"Database\\{Name}.db");
+        => Path.Join(Environment.CurrentDirectory.Split(ProjectName)[0], $"Data\\{Name}.db");
 }

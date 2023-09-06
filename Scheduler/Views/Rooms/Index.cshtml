@@ -1,0 +1,18 @@
+﻿@using Microsoft.AspNetCore;
+@using System.Text.Json;
+@using System.Text.Json.Serialization;
+@model IEnumerable<Room>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var ModelJson = JsonSerializer.Serialize(Model, new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.IgnoreCycles });
+}
+
+<input id="rooms" hidden value="@ModelJson" runat="server"/>
+<h1>Rooms</h1>
+
+<p>
+    <a class="btn btn-primary" asp-action="Create" asp-controller="Rooms">Add</a>
+</p>
+<script src="~/js/rooms-tables.js" >
+</script>
