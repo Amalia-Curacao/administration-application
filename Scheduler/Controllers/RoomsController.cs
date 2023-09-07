@@ -43,13 +43,14 @@ public sealed class RoomsController : Controller
         return RedirectToAction(controllerName: "Rooms", actionName: "Index");
     }
 
-    public async Task<IActionResult> AddReservation(int id) 
+    public async Task<IActionResult> AddReservation(int id, DateOnly checkIn) 
     {
         var schedule = TempData.Peek<Schedule>("Schedule");
         if (schedule is null) return RedirectToAction(controllerName: "Schedules", actionName: "Index");
         var room = await _crud.GetLazy((id, schedule.Id));
         if (room is null) return RedirectToAction(actionName: "Index");
         TempData.Put("Room", room);
+        TempData["CheckIn"] = checkIn;
         return RedirectToAction(controllerName: "Reservations", actionName: "Create");
     }
 

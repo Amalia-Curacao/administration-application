@@ -16,20 +16,22 @@ namespace Scheduler.Controllers
         // GET: Reservations/Create
         public IActionResult Create()
         {
-            if (TempData.Peek<Room>("Room") is null) return RedirectToAction(controllerName: "Rooms", actionName: "Index"); 
+            if (TempData.Peek<Room>("Room") is null || TempData.Peek("CheckIn") is null) return RedirectToAction(controllerName: "Rooms", actionName: "Index"); 
             return View();
         }
 
         // POST: Reservations/Create
         [HttpPost]
-        public IActionResult Create([Bind("CheckIn,CheckOut")] Reservation reservation)
+        public IActionResult Create(Reservation reservation)
         {
             var room = TempData.Peek<Room>("Room");
-            if (room is null) return RedirectToAction(controllerName: "Rooms", actionName: "Index");
+            var checkIn = TempData.Peek("CheckIn");
+            if (room is null || checkIn is null) return RedirectToAction(controllerName: "Rooms", actionName: "Index");
 
             //TODO - Fix this, model state is never valid.
             // if (!ModelState.IsValid) return View(reservation);
 
+            reservation.CheckIn = (DateOnly)checkIn;
             reservation.RoomScheduleId = room.ScheduleId;
             reservation.ScheduleId = room.ScheduleId;
             reservation.RoomNumber = room.Number;

@@ -21,7 +21,9 @@ public class RoomService : ICrud<Room>
 
     public async void Delete(ITuple id)
     {
-        _db.Rooms.Remove(await Get(id));
+        var room = await Get(id);
+        _db.Reservations.RemoveRange(room.Reservations);
+        _db.Rooms.Remove(room);
         await _db.SaveChangesAsync();
     }
 
