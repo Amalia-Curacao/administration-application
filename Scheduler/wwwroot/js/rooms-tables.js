@@ -1,10 +1,10 @@
 ﻿let month = 0;
 let year = 0;
-let rooms = JSON.parse(document.getElementById("rooms").value);
 
 window.onload = function () {
 	let main = document.getElementsByTagName("main")[0];
-	main.appendChild(loadTable());
+	let rooms = JSON.parse(document.getElementById("rooms").value);
+	loadTables(rooms).forEach(table => { main.appendChild(table) });
 	cleanup();
 	events();
 }
@@ -19,12 +19,23 @@ function events() {
 	// document.getElementById("month-selector").onchange = selectorUpdate();
 }
 
-function loadTable() {
+function loadTables(rooms) {
+	let tables = [];
+	let onlyRooms = rooms.filter(room => room.Type === 2);
+	let onlyApartments = rooms.filter(room => room.Type === 1);
+	loadTable(onlyRooms);
+	loadTable(onlyApartments);
+	tables.push(loadTable(onlyRooms));
+	tables.push(loadTable(onlyApartments));
+	return tables;
+}
+
+function loadTable(rooms) {
 	let table = document.createElement("table");
 	table.id = "rooms-table";
-	table.classList = "table";
-	table.appendChild(loadTableHead());
-	table.appendChild(loadTableBody());
+	table.classList = "table table-condensed no-spaccing";
+	table.appendChild(loadTableHead(rooms[0].Type));
+	table.appendChild(loadTableBody(rooms));
 	return table;
 }
 
@@ -33,13 +44,12 @@ function reloadTable() {
 	table.replaceWith(loadTable());
 }
 
-function loadTableHead() {
+function loadTableHead(type) {
 	let tableHead = document.createElement("thead");
 	let tableHeadRow = document.createElement("tr");
 
-	tableHeadRow.appendChild(loadTableHeadCell("Actions"));
-	tableHeadRow.appendChild(loadTableHeadCell("Type"));
-	tableHeadRow.appendChild(loadTableHeadCell("Number"));
+	tableHeadRow.appendChild(loadTableTypeHeader(roomTypeToString(type)));
+	tableHeadRow.appendChild(loadTableHeadCell("#"));
 	loadReservationHead().forEach(day => { tableHeadRow.appendChild(day) });
 
 	tableHead.appendChild(tableHeadRow);
@@ -49,17 +59,48 @@ function loadTableHead() {
 function loadReservationHead() {
 	let days = [];
 	for (let i = 1; i <= getDaysInMonth(getMonthYear().month, getMonthYear().year); i++) {
-        let day = document.createElement("th");
-		day.classList.add("text-center", "date-header");
+		let dateHead = document.createElement("th");
+		let day = document.createElement("div");
+		let date = document.createElement("div");
+
+		dateHead.classList.add("text-center", "date-header", "border-dark", "border");
+
 		day.innerHTML = i;
-		days.push(day);
+		let weekday = new Date(getMonthYear().year, getMonthYear().month - 1, i).getDay();
+		date.innerHTML = dayToString(weekday).slice(0, 3);
+		date.classList.add("week-day-font");
+
+		dateHead.appendChild(day);
+		dateHead.appendChild(date);
+		days.push(dateHead);
     }
 
 	return days;
 }
 
+function dayToString(day) {
+	switch (day) {
+		case 1: return "Monday";
+		case 2: return "Tuesday";
+		case 3: return "Wednesday";
+		case 4: return "Thursday";
+		case 5: return "Friday";
+		case 6: return "Saturday";
+		case 0: return "Sunday";
+		default: return day + " Is not a valid day.";
+	}
+}
+
+function loadTableTypeHeader(type) {
+	let tableHeadCell = document.createElement("th");
+	tableHeadCell.classList.add("text-center", "room-type-header", "border-dark", "border");
+	tableHeadCell.innerHTML = type;
+	return tableHeadCell;
+}
+
 function loadTableHeadCell(name) {
 	let tableHeadCell = document.createElement("th");
+	tableHeadCell.classList.add("text-center", "border-dark", "border");
 	tableHeadCell.innerHTML = name;
 	return tableHeadCell;
 }
@@ -93,7 +134,7 @@ function monthSelector() {
 }
 
 function selectorUpdate() {
-	console.log("Selector update");
+	// TODO - reload table
 	let selector = document.getElementById("month-selector");
 	let index = selector.selectedIndex;
 	let date = new Date(selector.options[index]);
@@ -102,13 +143,14 @@ function selectorUpdate() {
 	reloadTable();
 }
 
-function loadTableBody() {
+function loadTableBody(rooms) {
 	let tableBody = document.createElement("tbody");
 
 	rooms.forEach(room => {
 		let row = document.createElement("tr");
+		row.classList = "room-row";
 		row.appendChild(loadRoomActions(room));
-		row.appendChild(loadRoomType(room));
+		// row.appendChild(loadRoomType(room));
 		row.appendChild(loadRoomNumber(room));
 		loadReservations(room).forEach(reservation => { row.appendChild(reservation) });
 		tableBody.appendChild(row);
@@ -144,14 +186,15 @@ function getDaysInMonth(month, year) {
 function loadRoomNumber(room) {
 	let element = document.createElement("td");
 
+	element.classList.add("no-padding-block");
 	element.innerHTML = room.Number;
 
 	return element;
 }
 
 function loadRoomType(room) {
-	let element = document.createElement("td");
-
+	let element = document.createElement("td")
+		
 	element.innerHTML = roomTypeToString(room.Type);
 
 	return element;
@@ -171,7 +214,7 @@ function roomTypeToString(type) {
 function loadRoomActions(room) {
 	let element = document.createElement("td");
 
-	element.classList.add("btn-group");
+	element.classList.add("btn-group", "btn-div", "no-padding");
 	element.appendChild(addReservatioButton(room, element));
 	element.appendChild(deleteRoomButton(room, element));
 
@@ -181,7 +224,7 @@ function loadRoomActions(room) {
 function addReservatioButton(room) {
 	let btn = document.createElement("a");
 
-	btn.classList.add("btn", "btn-success");
+	btn.classList.add("btn", "btn-success", "btn-size", "rounded-0", "btn-border");
 	btn.href = "/Rooms/AddReservation/" + room.Number;
 	btn.appendChild(addIcon());
 
@@ -190,14 +233,14 @@ function addReservatioButton(room) {
 
 function addIcon() {
 	let icon = document.createElement("i");
-	icon.classList.add("bi", "bi-plus-circle-fill");
+	icon.classList.add("bi", "bi-plus-circle-fill", "icon-size");
 	return icon;
 }
 
 function deleteRoomButton(room) {
 	let btn = document.createElement("a");
 
-	btn.classList.add("btn", "btn-danger");
+	btn.classList.add("btn", "btn-danger", "btn-size", "rounded-0", "btn-border");
 	btn.href = "/Rooms/Delete/" + room.Number;
 	btn.appendChild(deleteIcon());
 
@@ -206,7 +249,7 @@ function deleteRoomButton(room) {
 
 function deleteIcon() {
 	let icon = document.createElement("i");
-	icon.classList.add("bi", "bi-trash-fill");
+	icon.classList.add("bi", "bi-trash-fill", "icon-size");
 	return icon;
 }
 
@@ -220,8 +263,10 @@ function loadReservations(room) {
 		let checkInReservation = getCheckIn(reservations, currentDate);
 		let checkOutReservation = getCheckOut(reservations, currentDate);
 		let occupiedReservation = getOccupied(reservations, currentDate);
-		let fullCell = document.createElement("td");
-		fullCell.classList.add("cell", "text-center");
+		let padding = document.createElement("td");
+		padding.classList.add("cell");
+		let fullCell = document.createElement("div");
+		fullCell.classList.add("cell-inner", "text-center");
 
 		if (checkInReservation !== null && checkOutReservation !== null) {
 			addCellCheckInCheckOut(checkInReservation, checkOutReservation).forEach(cell => fullCell.appendChild(cell));
@@ -238,7 +283,8 @@ function loadReservations(room) {
 		else if (occupiedReservation === null) {
 			fullCell.appendChild(addCellEmpty());
 		}
-		row.push(fullCell);
+		padding.appendChild(fullCell);
+		row.push(padding);
 	}
 	return row;
 }
@@ -307,7 +353,6 @@ function filterReservation(reservations) {
 		let checkIn = dateToDays(r.CheckIn);
 		let checkOut = dateToDays(r.CheckOut);
 		let result = checkIn <= endOfMonth && checkOut >= beginOfMonth;
-        console.log("checkin: " + checkIn + "\ncheckout: " + checkOut + "\nbm: " + beginOfMonth + "\nem: " + endOfMonth + "\nrci: " + r.CheckIn + "\nrco: " + r.CheckOut + "\nr: " + result);
 		return result;
 	});
 	return filtered;

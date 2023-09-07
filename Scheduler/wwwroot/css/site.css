@@ -25,6 +25,11 @@ div {
     position: relative;
 }
 
+th{
+    box-sizing: content-box;
+    width: 35px;
+}
+
 .div-centered {
     display: flex;
     justify-content: center;
@@ -37,6 +42,9 @@ div {
     height: 100%;
     padding: 0px;
     float: left;
+    border: 1px solid black;
+    border-right: dashed 1px black;
+    border-collapse: collapse;
 }
 
 .cell-half-right {
@@ -45,40 +53,54 @@ div {
     height: 100%;
     padding: 0px;
     float: right;
+    border: 1px solid black;
+    border-left: dashed 1px black;
+    border-collapse: collapse;
 }
 
 .cell {
     height : 25px;
     width : 25px;
     padding: 0px !important;
-    border: 1px solid black;
 }
 
 .cell-empty {
+    border: 1px solid black;
     display: block;
+    height: 100%;
+}
+
+.cell-inner{
+    width: 100%;
     height: 100%;
 }
 
 .check-in {
-    background-color: #3fb2e0 !important;
+    border: 1px solid black;
+    background-color: #87CEEB !important;
     border-left: dashed 1px black;
     display: block;
     height: 100%;
     width: 50%;
+    border-collapse: collapse;
 }
 
 .check-out {
-    background-color: #FF5050 !important;
+    border: 1px solid black;
+    background-color: #191970 !important;
     border-right: dashed 1px black;
     display: block;
     height: 100%;
     width: 50%;
+    border-collapse: collapse;
 }
 
 .occupied {
-    background-color: #fcf877 !important;
+    border: 1px solid black;
+    background-color: #4682B4 !important;
     display: block;
     height: 100%;
+    border-collapse: collapse;
 }
 
 .fill-cell {
@@ -88,7 +110,55 @@ div {
 }
 
 .date-header{
-    width: 35px;
-    min-width: 35px;
-    max-width: 35px;
+    width: 15px;
+    max-width: 15px;
+}
+
+.room-type-header{
+   min-width: 100px;
+   width: 100px;
+   max-width: 100px;
+}
+
+.room-row {
+    min-height: 25px;
+    height: 25px;
+}
+
+.btn-size {
+    padding: 3px;
+    display: grid;
+    align-items: center;
+}
+
+.icon-size{
+    font-size: 12px;
+}
+
+.btn-div{
+    display: flex;
+}
+
+.btn-border {
+    border-inline: 1px solid black;
+    border-radius: 0 !important;
+}
+
+.no-padding-block{
+    padding-block: 0px !important;
+}
+
+.no-padding{
+    padding: 0px !important;
+}
+
+table.no-spaccing {
+    border-spacing: 0; 
+    border-collapse: collapse;
+    border: 0px;
+    width: max-content;
+}
+
+.week-day-font{
+    font-size: 8px;
 }
