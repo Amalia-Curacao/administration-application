@@ -7,6 +7,7 @@ public interface ICrud<T>
     Task<IEnumerable<T>> GetAll();
     Task<T> Get(ITuple id);
     Task<T> GetLazy(ITuple id);
+    Task<T> GetNoCycle(ITuple id);
     void Add(T obj);
     Task<T> Update(T obj);
     void Delete(ITuple id);

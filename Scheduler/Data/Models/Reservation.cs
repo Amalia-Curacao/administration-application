@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Scheduler.Data.Extensions;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -9,7 +10,7 @@ public sealed class Reservation
 {
     public int Id { get; set; }
 
-    [Display(Name = "People")]
+    [Display(Name = "Guest(s)")]
     [InverseProperty(nameof(Person.Reservation))]
     public ICollection<Person>? People { get; set; } = new List<Person>();
 
@@ -43,6 +44,28 @@ public sealed class Reservation
     [Required(ErrorMessage = "Room type is required.")]
     [RegularExpression(@"^(Room|Apartment)$", ErrorMessage = "Please select between type \"Room\" or \"Apartment\".")]
     public required RoomType? RoomType { get; set; }
+
+    [Display(Name = "Total nights")]
+    public int? TotalNights() => CheckOut!.Value.DaysDifference(CheckIn!.Value);
+
+    [Display(Name = "Guests amount")]
+    public int GuestsAmount() => People?.Count ?? 0;
+
+    [Display(Name = "Flight arrival #")]
+    public string? FlightArrivalNumber { get; set; }
+
+    [Display(Name = "Flight departure #")]
+    public string? FlightDepartureNumber { get; set; }
+
+    [Display(Name = "Flight arrival time")]
+    public TimeOnly? FlightArrivalTime { get; set; }
+
+    [Display(Name = "Flight departure time")]
+    public TimeOnly? FlightDepartureTime { get; set; }
+
+    [Display(Name = "Booking source")]
+    [EnumDataType(typeof(BookingSource))]
+    public BookingSource? BookingSource { get; set; }
 
     public bool Overlap(DateOnly date)
     {

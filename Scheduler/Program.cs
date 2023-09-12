@@ -11,6 +11,7 @@ builder.Services.AddDbContext<ScheduleDb>(builder => new ScheduleDb(builder.Opti
 builder.Services.AddScoped<ICrud<Schedule>, ScheduleService>();
 builder.Services.AddScoped<ICrud<Room>, RoomService>();
 builder.Services.AddScoped<ICrud<Reservation>, ReservationService>();
+builder.Services.AddScoped<ICrud<Person>, PersonService>();
 
 var app = builder.Build();
 

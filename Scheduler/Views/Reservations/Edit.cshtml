@@ -1,44 +1,162 @@
-﻿@model Reservation
+﻿@using System.Globalization;
+@model Reservation
 
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var checkin = Model.CheckIn!.Value.ToString("yyyy-MM-dd");
+    var ckeckout = Model.CheckOut!.Value.ToString("yyyy-MM-dd");
+    var totalNights = Model.TotalNights();
+    var depTime = Model.FlightDepartureTime!.Value.ToString("hh:mm");
+    var arrTime = Model.FlightArrivalTime!.Value.ToString("hh:mm");
 }
 
 <div class="row div-centered">
     <div class="col-xs-8 w-50">
-        <p>
-        <h1>Reservation</h1>
-            <h4>Edit</h4>
-        </p>
-        <div class="row">
-            <form asp-action="Edit">
+        <form asp-action="Edit">
+            <p>
+                <h1>Reservation</h1>
+                <select class="form-control-plaintext h4" asp-for="BookingSource"
+                        asp-items="@Html.GetEnumSelectList<BookingSource>()
+                        .Where(e => int.Parse(e.Value) != (int)BookingSource.None && (int)Model.BookingSource.Value != int.Parse(e.Value))">
+                    <option value="@Model.BookingSource!.Value">@Html.DisplayFor(r => r.BookingSource)</option>
+                </select>
+            </p>
+            <div class="row">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <input type="hidden" asp-for="Id" />
-                <div class="form-group">
-                    <!--TODO - Change date format to dd-MM-yyyy -->
-                    <label asp-for="CheckIn" class="control-label"></label>
-                    <br/>
-                    <span asp-validation-for="CheckIn" class="text-danger"></span>
-                    <input type="date" asp-for="CheckIn" class="form-control" value="@Model.CheckIn" placeholder="DD-MM-YYYY" />
+                <div class="row">
+                    <div class="form-group w-50 float-start">
+                        <label asp-for="CheckIn" class="control-label"></label>
+                        <br />
+                        <span asp-validation-for="CheckIn" class="text-danger"></span>
+                        <input id="check-in" type="date" asp-for="CheckIn" class="form-control" value="@checkin"/>
+                    </div>
+                    <div class="w-50 float-end">
+                        <div class="w-50 float-start pe-4">
+                            <label asp-for="FlightArrivalNumber" class="control-label">Flight arr. #</label>
+                            <br />
+                            <span asp-validation-for="FlightArrivalNumber" class="text-danger"></span>
+                            <input type="text" asp-for="FlightArrivalNumber" class="form-control" value="@Model.FlightArrivalNumber" />
+                        </div>
+                        <div class="w-50 float-end">
+                            <label asp-for="FlightArrivalTime" class="control-label">Flight arr. time</label>
+                            <br />
+                            <span asp-validation-for="FlightArrivalTime" class="text-danger"></span>
+                            <input id="arr-time" type="time" asp-for="FlightArrivalTime" class="form-control" value="@arrTime" />
+                        </div>
+                    </div>
+                    <div class="form-group w-50 float-start">
+                        <label asp-for="CheckOut" class="control-label"></label>
+                        <br />
+                        <span asp-validation-for="CheckOut" class="text-danger"></span>
+                        <input id="check-out" type="date" asp-for="CheckOut" class="form-control" value="@ckeckout" />
+                    </div>
+                    <div class="w-50 float-end">
+                        <div class="w-50 float-start pe-4">
+                            <label asp-for="FlightDepartureNumber" class="control-label">Flight dep. #</label>
+                            <br />
+                            <span asp-validation-for="FlightDepartureNumber" class="text-danger"></span>
+                            <input type="text" asp-for="FlightDepartureNumber" class="form-control" value="@Model.FlightDepartureNumber" />
+                        </div>
+                        <div class="w-50 float-end">
+                            <label asp-for="FlightDepartureTime" class="control-label text-nowrap">Flight dep. time</label>
+                            <br />
+                            <span asp-validation-for="FlightDepartureTime" class="text-danger text-nowrap"></span>
+                            <input id="dep-time" type="time" asp-for="FlightDepartureTime" class="form-control" value="@depTime"/>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <!--TODO - Change date format to dd-MM-yyyy -->
-                    <label asp-for="CheckOut" class="control-label"></label>
-                    <br/>
-                    <span asp-validation-for="CheckOut" class="text-danger"></span>
-                    <input type="date" asp-for="CheckOut" class="form-control" value="@Model.CheckOut" placeholder="DD-MM-YYYY" />
+                <div>
+                    <div class="w-25">
+                        <div class="form-group">
+                            <div class="w-25">
+                                <label class="control-label">Night(s)</label>
+                                <br />
+                                <input type="number" class="form-control-plaintext" id="nights-label text-center" value="@totalNights" readonly />
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label asp-for="RoomNumber" class="control-label"></label>
                     <br/>
                     <span asp-validation-for="RoomNumber" class="text-danger"></span>
-                    <input type="number" asp-for="RoomNumber" class="form-control" value="@Model.RoomNumber" placeholder="@Model.RoomNumber"/>
+                    <input id="room-number" type="number" asp-for="RoomNumber" class="form-control" value="@Model.RoomNumber"/>
                 </div>
                 <div class="form-group">
-                    <input type="submit" value="Save" class="btn btn-outline-success"/>
-                    <a class="btn btn-danger" asp-controller="Rooms" asp-action="Index" asp-route-id="@Model.RoomScheduleId">Back</a>
+                    <label asp-for="People" class="control-label"></label>
+                    <div class="row person-div">
+                        @{
+                            if(Model.People!.Count == 0)
+                            {
+                                            <a class="person w-100 text-center" asp-controller="People" asp-action="Create" asp->Add person</a>
+                            }
+                            else if(Model.People!.Count == 1)
+                            {
+                                var person = Model.People.Single();
+                                var personName = $"{person.Prefix.ToString()} {person.FirstName} {person.LastName} ({person.Age})";
+                                            <a class="person-select mb-2 w-100" asp-controller="People" asp-action="Edit" asp-route-id="@person.Id">@personName</a>
+                                            <a class="btn btn-outline-success w-100" asp-controller="People" asp-action="Create" asp->Add person</a>
+                            }
+                            else if(Model.People!.Count >= 2)
+                            {
+                                foreach (var person in Model.People!)
+                                {
+                                    var personName = $"{person.Prefix.ToString()} {person.FirstName} {person.LastName} ({person.Age})";
+                                                <a class="person-select  w-100" asp-controller="People" asp-action="Edit" asp-route-id="@person.Id">@personName</a>
+                                }
+                            }
+
+                        }
+                    </div>
                 </div>
-            </form>
-        </div>
+                <div class="form-group form-btn-group">
+                    <input type="submit" value="Save" class="btn btn-outline-success"/>
+                    <a class="btn btn-outline-danger" asp-controller="Rooms" asp-action="Index" asp-route-id="@Model.RoomScheduleId">Back</a>
+                    <a class="btn btn-danger float-end" asp-controller="Reservations" asp-action="Delete" asp-route-id="@Model.Id">Delete</a>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
+
+@section Scripts{
+    <script>
+
+
+
+        $("#check-in").change(function () {
+            let checkIn = new Date(this.value);
+            let checkOut = new Date($("#check-out").val());
+            let nights = Math.floor((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+            $("#nights-label").val(nights);
+        });
+
+
+        $("#check-out").change(function () {
+            let checkIn = new Date($("#check-in").val());
+            let checkOut = new Date(this.value);
+            let nights = Math.floor((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+            $("#nights-label").val(nights);
+        });
+
+        // follows ISO 8601 standard for formatting dates to strings.
+        function dateOnlyToString(date) {
+            let dateString = "" + date.getFullYear();
+
+            if (date.getMonth() < 10) {
+                dateString += "-0" + (date.getMonth() + 1);
+            }
+            else {
+                dateString += "-" + (date.getMonth() + 1);
+            }
+            if (date.getDate() < 10) {
+                dateString += "-0" + date.getDate();
+            }
+            else {
+                dateString += "-" + date.getDate();
+            }
+            return dateString;
+        }
+    </script>
+}

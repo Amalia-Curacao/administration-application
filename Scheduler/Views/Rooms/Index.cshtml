@@ -11,11 +11,6 @@
 	};
 }
 
-<h1>Rooms</h1>
-
-<p>
-    <a class="btn btn-primary" asp-action="Create" asp-controller="Rooms">Add</a>
-</p>
 <script type="text/javascript">
 	let month = 0;
 	let year = 0;
@@ -63,7 +58,6 @@
 		let tableHeadRow = document.createElement("tr");
 
 		tableHeadRow.appendChild(loadTableTypeHeader(roomTypeToString(type)));
-		tableHeadRow.appendChild(loadTableHeadCell("#"));
 		loadReservationHead().forEach(day => { tableHeadRow.appendChild(day) });
 
 		tableHead.appendChild(tableHeadRow);
@@ -163,8 +157,6 @@
 		rooms.forEach(room => {
 			let row = document.createElement("tr");
 			row.classList = "room-row";
-			row.appendChild(loadRoomActions(room));
-			// row.appendChild(loadRoomType(room));
 			row.appendChild(loadRoomNumber(room));
 			loadReservations(room).forEach(reservation => { row.appendChild(reservation) });
 			tableBody.appendChild(row);
@@ -200,7 +192,7 @@
 	function loadRoomNumber(room) {
 		let element = document.createElement("td");
 
-		element.classList.add("no-padding-block");
+		element.classList.add("no-padding-block", "room-number", "border", "border-dark");
 		element.innerHTML = room.Number;
 
 		return element;
@@ -225,48 +217,6 @@
 		}
 	}
 
-	function loadRoomActions(room) {
-		let element = document.createElement("td");
-
-		element.classList.add("btn-group", "btn-div", "no-padding");
-		element.appendChild(addReservatioButton(room, element));
-		element.appendChild(deleteRoomButton(room, element));
-
-		return element;
-	}
-
-	function addReservatioButton(room) {
-		let btn = document.createElement("a");
-
-		btn.classList.add("btn", "btn-success", "btn-size", "rounded-0", "btn-border");
-		btn.href = "/Rooms/AddReservation/" + room.Number;
-		btn.appendChild(addIcon());
-
-		return btn;
-	}
-
-	function addIcon() {
-		let icon = document.createElement("i");
-		icon.classList.add("bi", "bi-plus-circle-fill", "icon-size");
-		return icon;
-	}
-
-	function deleteRoomButton(room) {
-		let btn = document.createElement("a");
-
-		btn.classList.add("btn", "btn-danger", "btn-size", "rounded-0", "btn-border");
-		btn.href = "/Rooms/Delete/" + room.Number;
-		btn.appendChild(deleteIcon());
-
-		return btn;
-	}
-
-	function deleteIcon() {
-		let icon = document.createElement("i");
-		icon.classList.add("bi", "bi-trash-fill", "icon-size");
-		return icon;
-	}
-
 	function loadReservations(room) {
 		let reservations = filterReservation(room.Reservations);
 		let days = getDaysInMonth(getMonthYear().month, getMonthYear().year);
@@ -286,16 +236,16 @@
 				addCellCheckInCheckOut(checkInReservation, checkOutReservation).forEach(cell => fullCell.appendChild(cell));
 			}
 			else if (checkOutReservation !== null && checkInReservation === null) {
-				addCellCheckOut(checkOutReservation).forEach(cell => fullCell.appendChild(cell));
+				addCellCheckOut(checkOutReservation, room, currentDate).forEach(cell => fullCell.appendChild(cell));
 			}
 			else if (checkInReservation !== null && checkOutReservation === null) {
-				addCellCheckIn(checkInReservation).forEach(cell => fullCell.appendChild(cell));
+				addCellCheckIn(checkInReservation, room, currentDate).forEach(cell => fullCell.appendChild(cell));
 			}
 			else if (occupiedReservation !== null) {
 				fullCell.appendChild(addCellOccupied(occupiedReservation));
 			}
 			else if (occupiedReservation === null) {
-				fullCell.appendChild(addCellEmpty(room));
+				fullCell.appendChild(addCellEmpty(room, currentDate));
 			}
 			padding.appendChild(fullCell);
 			row.push(padding);
@@ -310,11 +260,30 @@
 		return link;
 	}
 
-	function getRoomAddReservationLink(room) {
+	function getRoomAddReservationLink(room, currentDate) {
 		let link = document.createElement("a");
 		link.classList = "fill-cell";
-		link.href = "/Rooms/AddReservation/" + room.Number;
+		link.href = "/Rooms/AddReservation/" + room.Number + "/" + dateOnlyToString(currentDate);
 		return link;
+	}
+	
+	// follows ISO 8601 standard for formatting dates to strings.
+	function dateOnlyToString(date) {
+		let dateString = "" + date.getFullYear();
+
+		if (date.getMonth() < 10) {
+			dateString += "-0" + (date.getMonth() + 1);
+		}
+		else {
+			dateString += "-" + (date.getMonth() + 1);
+		}
+		if (date.getDate() < 10) {
+			dateString += "-0" + date.getDate();
+		}
+		else {
+			dateString += "-" + date.getDate();
+		}
+		return dateString;
 	}
 
 	function dateToDays(date) {
@@ -379,11 +348,10 @@
 		return filtered;
 	}
 
-	function addCellEmpty(room) {
+	function addCellEmpty(room, currentDate) {	
 		let cell = document.createElement("div");
 		cell.classList.add("cell-empty", "fill-cell");
-		let link = getRoomAddReservationLink(room);
-		console.log(link);
+		let link = getRoomAddReservationLink(room, currentDate);
 		cell.appendChild(link);
 		return cell;
 	}
@@ -395,10 +363,11 @@
 		return cell;
 	}
 
-	function addCellCheckIn(reservation) {
+	function addCellCheckIn(reservation, room, currentDate) {
 		let lCell = document.createElement("div");
 		let rCell = document.createElement("div");
 
+		lCell.appendChild(getRoomAddReservationLink(room, currentDate));
 		lCell.classList.add("cell-half-left");
 		rCell.classList.add("cell-half-right", "check-in");
 		rCell.appendChild(getReservationEditLink(reservation));
@@ -406,10 +375,11 @@
 		return [lCell, rCell];
 	}
 
-	function addCellCheckOut(reservation) {
+	function addCellCheckOut(reservation, room, currentDate) {
 		let lCell = document.createElement("div");
 		let rCell = document.createElement("div");
 
+		rCell.appendChild(getRoomAddReservationLink(room, currentDate));
 		lCell.classList.add("cell-half-left", "check-out");
 		rCell.classList.add("cell-half-right");
 

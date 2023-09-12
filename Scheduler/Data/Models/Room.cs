@@ -30,7 +30,7 @@ public sealed class Room
     public required int? Floor { get; set; }
 
     [InverseProperty(nameof(Reservation.Room))]
-    public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
+    public ICollection<Reservation>? Reservations { get; set; } = new List<Reservation>();
 
     /// <summary>Returns a everyday of a month with the reservation information of a single day.</summary>
     /// <param name="month">Month to return all information.</param>
@@ -40,7 +40,7 @@ public sealed class Room
         for (int day = 1; day <= DateTime.DaysInMonth(year: month.Year, month: month.Month); day++)
         {
             var date = new DateOnly(year: month.Year, month: month.Month, day: day);
-            var activeReservations = Reservations.Where(r => r.Overlap(date)).ToArray();
+            var activeReservations = Reservations!.Where(r => r.Overlap(date)).ToArray();
             activeReservations = activeReservations.Length > 0 ? activeReservations : null;
             yield return (date, activeReservations);
         }

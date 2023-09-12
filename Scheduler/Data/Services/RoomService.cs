@@ -22,7 +22,7 @@ public class RoomService : ICrud<Room>
     public async void Delete(ITuple id)
     {
         var room = await Get(id);
-        _db.Reservations.RemoveRange(room.Reservations);
+        _db.Reservations.RemoveRange(room.Reservations!);
         _db.Rooms.Remove(room);
         await _db.SaveChangesAsync();
     }
@@ -37,6 +37,17 @@ public class RoomService : ICrud<Room>
         => await LazyLoad().SingleOrDefaultAsync(r => r.Number == (int)id[0]! && r.ScheduleId == (int)id[1]!) 
         ?? throw new InvalidOperationException($"No {nameof(Room)} object can be found with id: {id}.");
 
+    public async Task<Room> GetNoCycle(ITuple id)
+    {
+        var room = await Get(id);
+        foreach (var reservation in room.Reservations!)
+        {
+            reservation.Room = null;
+            reservation.Schedule = null;
+        }
+        room.Schedule!.Rooms = null;
+        return room;
+    }
 
     public async Task<Room> Update(Room obj)
     {

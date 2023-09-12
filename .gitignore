@@ -579,3 +579,7 @@ fabric.properties
 # End of https://www.toptal.com/developers/gitignore/api/rider,jetbrains,dotnetcore,csharp
 /Scheduler/Data/Schedule.db
 /Scheduler/Migrations
+/Scheduler/Data/Schedule.db-shm
+/Scheduler/Data/Schedule.db-wal
+/Scheduler/Data/Schedule.db-shm
+/Scheduler/Data/Schedule.db-wal

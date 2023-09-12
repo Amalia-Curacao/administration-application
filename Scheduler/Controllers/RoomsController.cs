@@ -22,7 +22,7 @@ public sealed class RoomsController : Controller
         {
             return View((await _crud.GetAll()).Where(r => r.ScheduleId == schedule.Id));
         }
-        return RedirectToAction(controllerName: "Schedules", actionName: "Index"); 
+        return RedirectToAction(controllerName: "Schedules", actionName: "Index");
     }
 
     // GET: Rooms/Create
@@ -43,19 +43,21 @@ public sealed class RoomsController : Controller
         return RedirectToAction(controllerName: "Rooms", actionName: "Index");
     }
 
-    public async Task<IActionResult> AddReservation(int id, DateOnly checkIn) 
+
+	[HttpGet("[controller]/[action]/{id}/{checkIn}")]
+	public async Task<IActionResult> AddReservation([FromRoute]int id, [FromRoute]DateOnly checkIn) 
     {
         var schedule = TempData.Peek<Schedule>("Schedule");
         if (schedule is null) return RedirectToAction(controllerName: "Schedules", actionName: "Index");
         var room = await _crud.GetLazy((id, schedule.Id));
         if (room is null) return RedirectToAction(actionName: "Index");
         TempData.Put("Room", room);
-        TempData["CheckIn"] = checkIn;
+        TempData.Put("CheckIn", checkIn);
         return RedirectToAction(controllerName: "Reservations", actionName: "Create");
     }
 
-    // GET: Rooms/Delete/5
-    public IActionResult Delete(int id)
+	// GET: Rooms/Delete/5
+	public IActionResult Delete(int id)
     {
         var schedule = TempData.Peek<Schedule>("Schedule");
         if (schedule is null) return RedirectToAction(controllerName: "Schedules", actionName: "Index");

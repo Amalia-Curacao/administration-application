@@ -47,4 +47,20 @@ public class ScheduleService : ICrud<Schedule>
         await _db.SaveChangesAsync();
         return newSchedule.Entity;
     }
+
+    public async Task<Schedule> GetNoCycle(ITuple id)
+    {
+        var schedule = await Get(id);
+        foreach (var room in schedule.Rooms!)
+        {
+            room.Schedule = null;
+            room.Reservations = null;
+        }
+        foreach (var reservation in schedule.Reservations!)
+        {
+            reservation.Schedule = null;
+            reservation.Room = null;
+        }
+        return schedule;
+    }
 }
