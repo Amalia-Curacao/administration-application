@@ -8,19 +8,37 @@
     var totalNights = Model.TotalNights();
     var depTime = Model.FlightDepartureTime!.Value.ToString("hh:mm");
     var arrTime = Model.FlightArrivalTime!.Value.ToString("hh:mm");
+    var remarks = Model.Remarks;
+    var roomtypeInt = (int)Model.RoomType!.Value;
 }
+
 
 <div class="row div-centered">
     <div class="col-xs-8 w-50">
         <form asp-action="Edit">
-            <p>
-                <h1>Reservation</h1>
-                <select class="form-control-plaintext h4" asp-for="BookingSource"
-                        asp-items="@Html.GetEnumSelectList<BookingSource>()
-                        .Where(e => int.Parse(e.Value) != (int)BookingSource.None && (int)Model.BookingSource.Value != int.Parse(e.Value))">
-                    <option value="@Model.BookingSource!.Value">@Html.DisplayFor(r => r.BookingSource)</option>
-                </select>
-            </p>
+            <h1>Reservation</h1>
+            <div class="flex">
+                <div class="flex">
+                    <div class="w-75 float-start d-inline-flex align-items-center">
+                        <select for="room-number" id="room-type" class="remove-arrow form-control-plaintext text-nowrap mb-2 pe-1 py-0 h4 w-auto"
+                                asp-items="@Html.GetEnumSelectList<RoomType>().Where(e => int.Parse(e.Value) != (int)RoomType.None && int.Parse(e.Value) != (int)Model.RoomType)"
+                                asp-for="RoomType" >
+                            <option value="@roomtypeInt">@Html.DisplayFor(r => r.RoomType)</option>
+                        </select>
+                        <label asp-for="RoomNumber" class="control-label-plaintext text-nowrap w-auto h4">number:</label>
+                        <br />
+                        <span for="room-number" asp-validation-for="RoomNumber" class="text-danger text-nowrap"></span>
+                        <input id="room-number" type="number" asp-for="RoomNumber" class="form-control-plaintext text-nowrap pt-0 ps-1 w-25 h4" value="@Model.RoomNumber" />
+                    </div>
+                    <div class="w-25 float-end pe-4">
+                        <select class="form-control-plaintext remove-arrow right-align pe-3 h4" asp-for="BookingSource"
+                                asp-items="@Html.GetEnumSelectList<BookingSource>()
+                                .Where(e => int.Parse(e.Value) != (int)BookingSource.None && (int)Model.BookingSource.Value != int.Parse(e.Value))">
+                            <option value="@Model.BookingSource!.Value">@Html.DisplayFor(r => r.BookingSource)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
             <div class="row">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <input type="hidden" asp-for="Id" />
@@ -72,45 +90,51 @@
                             <div class="w-25">
                                 <label class="control-label">Night(s)</label>
                                 <br />
-                                <input type="number" class="form-control-plaintext" id="nights-label text-center" value="@totalNights" readonly />
+                                <input type="number" class="form-control-plaintext" id="nights-label" value="@totalNights" readonly />
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label asp-for="RoomNumber" class="control-label"></label>
-                    <br/>
-                    <span asp-validation-for="RoomNumber" class="text-danger"></span>
-                    <input id="room-number" type="number" asp-for="RoomNumber" class="form-control" value="@Model.RoomNumber"/>
-                </div>
-                <div class="form-group">
                     <label asp-for="People" class="control-label"></label>
-                    <div class="row person-div">
+                    <div class="row person-div pe-4">
                         @{
                             if(Model.People!.Count == 0)
                             {
-                                            <a class="person w-100 text-center" asp-controller="People" asp-action="Create" asp->Add person</a>
+                                                    <a class="person w-100 text-center" asp-controller="People" asp-action="Create" asp->Add person</a>
                             }
                             else if(Model.People!.Count == 1)
                             {
                                 var person = Model.People.Single();
                                 var personName = $"{person.Prefix.ToString()} {person.FirstName} {person.LastName} ({person.Age})";
-                                            <a class="person-select mb-2 w-100" asp-controller="People" asp-action="Edit" asp-route-id="@person.Id">@personName</a>
-                                            <a class="btn btn-outline-success w-100" asp-controller="People" asp-action="Create" asp->Add person</a>
+                                                    <a class="person-select mb-2 w-100" asp-controller="People" asp-action="Edit" asp-route-id="@person.Id">@personName</a>
+                                        <a class="btn btn-outline-success w-100" asp-controller="People" asp-action="Create" asp->Add person</a>
                             }
                             else if(Model.People!.Count >= 2)
                             {
+                                int i = 0;
                                 foreach (var person in Model.People!)
                                 {
+                                    i++;
+                                    var margin = "mb-2";
+                                    if(i >= Model.People!.Count) margin = "";
                                     var personName = $"{person.Prefix.ToString()} {person.FirstName} {person.LastName} ({person.Age})";
-                                                <a class="person-select  w-100" asp-controller="People" asp-action="Edit" asp-route-id="@person.Id">@personName</a>
+                                                        <a class="person-select w-100 @margin" asp-controller="People" asp-action="Edit" asp-route-id="@person.Id">@personName</a>
                                 }
                             }
 
                         }
                     </div>
                 </div>
-                <div class="form-group form-btn-group">
+                <div class="row">
+                    <div class="form-group">
+                        <label asp-for="Remarks" class="control-label"></label>
+                        <br />
+                        <span asp-validation-for="Remarks" class="text-danger"></span>
+                        <textarea asp-for="Remarks" class="form-control" placeholder="Remarks..." value="@remarks"></textarea>
+                    </div>
+                </div>
+                <div class="form-group form-btn-group pe-6">
                     <input type="submit" value="Save" class="btn btn-outline-success"/>
                     <a class="btn btn-outline-danger" asp-controller="Rooms" asp-action="Index" asp-route-id="@Model.RoomScheduleId">Back</a>
                     <a class="btn btn-danger float-end" asp-controller="Reservations" asp-action="Delete" asp-route-id="@Model.Id">Delete</a>
@@ -121,42 +145,44 @@
 </div>
 
 @section Scripts{
-    <script>
+
+<script>
+    $("#room-type").change(function () {
+        $("#room-type").width($("#room-type").find(":selected").val());
+    });
+
+    $("#check-in").change(function () {
+        let checkIn = new Date(this.value);
+        let checkOut = new Date($("#check-out").val());
+        let nights = Math.floor((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+        $("#nights-label").val(nights);
+    });
 
 
+    $("#check-out").change(function () {
+        let checkIn = new Date($("#check-in").val());
+        let checkOut = new Date(this.value);
+        let nights = Math.floor((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+        $("#nights-label").val(nights);
+    });
 
-        $("#check-in").change(function () {
-            let checkIn = new Date(this.value);
-            let checkOut = new Date($("#check-out").val());
-            let nights = Math.floor((checkOut - checkIn) / (1000 * 60 * 60 * 24));
-            $("#nights-label").val(nights);
-        });
+    // follows ISO 8601 standard for formatting dates to strings.
+    function dateOnlyToString(date) {
+        let dateString = "" + date.getFullYear();
 
-
-        $("#check-out").change(function () {
-            let checkIn = new Date($("#check-in").val());
-            let checkOut = new Date(this.value);
-            let nights = Math.floor((checkOut - checkIn) / (1000 * 60 * 60 * 24));
-            $("#nights-label").val(nights);
-        });
-
-        // follows ISO 8601 standard for formatting dates to strings.
-        function dateOnlyToString(date) {
-            let dateString = "" + date.getFullYear();
-
-            if (date.getMonth() < 10) {
-                dateString += "-0" + (date.getMonth() + 1);
-            }
-            else {
-                dateString += "-" + (date.getMonth() + 1);
-            }
-            if (date.getDate() < 10) {
-                dateString += "-0" + date.getDate();
-            }
-            else {
-                dateString += "-" + date.getDate();
-            }
-            return dateString;
+        if (date.getMonth() < 10) {
+            dateString += "-0" + (date.getMonth() + 1);
         }
-    </script>
+        else {
+            dateString += "-" + (date.getMonth() + 1);
+        }
+        if (date.getDate() < 10) {
+            dateString += "-0" + date.getDate();
+        }
+        else {
+            dateString += "-" + date.getDate();
+        }
+        return dateString;
+    }
+</script>
 }

@@ -15,7 +15,7 @@ public sealed class Reservation
     public ICollection<Person>? People { get; set; } = new List<Person>();
 
     [Required(ErrorMessage = "Room is required.")]
-    [Display(Name = "Room")]
+    [Display(Name = "Room #")]
     [ForeignKey(nameof(Models.Room.Number))]
     public int? RoomNumber { get; set; }
 
@@ -67,6 +67,8 @@ public sealed class Reservation
     [EnumDataType(typeof(BookingSource))]
     public BookingSource? BookingSource { get; set; }
 
+    [Display(Name = "Remarks")]
+    public string? Remarks { get; set; }
     public bool Overlap(DateOnly date)
     {
         if (CheckIn is null || CheckOut is null)

@@ -37,19 +37,19 @@
                         </div>
                     </div>
                 </div>
-                <div class="form-group">
+                <div class="form-group pe-4">
                     <label asp-for="Age" class="control-label"></label>
                     <span asp-validation-for="Age" class="text-danger"></span>
                     <input asp-for="Age" class="form-control" />
                 </div>
-                <div class="form-group">
+                <div class="form-group pe-4">
                     <label asp-for="Note" class="control-label"></label>
                     <span asp-validation-for="Note" class="text-danger"></span>
                     <textarea asp-for="Note" class="form-control"></textarea>
                 </div>
-                <div class="form-group form-btn-group">
+                <div class="form-group form-btn-group pe-4">
                     <input type="submit" value="Save" class="btn btn-outline-success"/>
-                    <a class="btn btn-outline-danger" asp-controller="Rooms" asp-action="Index">Back</a>
+                    <a class="btn btn-outline-danger" asp-controller="Rooms" asp-action="Index" asp-route-id="@Model.ReservationId">Back</a>
                     <a class="btn btn-danger float-end" asp-controller="People" asp-action="Delete" asp-route-id="@Model.Id">Delete</a>
                 </div>
             </form>

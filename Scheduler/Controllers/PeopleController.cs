@@ -69,7 +69,7 @@ namespace Scheduler.Controllers
             oldPerson.Prefix = person.Prefix;
 
             await _crud.Update(oldPerson);
-            return RedirectToAction(controllerName: "Reservations", actionName: "Edit", routeValues: oldPerson.ReservationId);
+            return RedirectToAction(controllerName: "Reservations", actionName: "Edit", routeValues: new {id = oldPerson.ReservationId });
         }
 
         // GET: People/Delete/5

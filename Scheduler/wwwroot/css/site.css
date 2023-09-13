@@ -201,3 +201,19 @@ table.no-spaccing {
 .form-btn-group{
     padding-block: 0.5rem;
 }
+
+.remove-arrow{
+    -webkit-appearance: none;
+}
+
+select.right-align {
+    text-align-last: right;
+}
+
+option.right-align {
+    direction: rtl;
+}
+
+.pe-6{
+    padding-right: 2rem;
+}
