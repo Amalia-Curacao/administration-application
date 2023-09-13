@@ -11,392 +11,395 @@
 	};
 }
 
-<script type="text/javascript">
-	let month = 0;
-	let year = 0;
-
-	window.onload = function () {
-		let main = document.getElementsByTagName("main")[0];
+@section Scripts{
+	<script type="text/javascript">
 		let rooms = @Html.Raw(JsonSerializer.Serialize(Model, jsonOption));
-		loadTables(rooms).forEach(table => { main.appendChild(table) });
-			
-		events();
-	}
+		let month = 0;
+		let year = 0;
 
-	// Adds event listeners to elements.
-	function events() {
-		// document.getElementById("month-selector").onchange = selectorUpdate();
-	}
+		$(document).ready(function () {
+			$("main").append(monthSelector());
+			loadTables(rooms).forEach(table => { $("main").append(table) });
+		});
 
-	function loadTables(rooms) {
-		let tables = [];
-		let onlyRooms = rooms.filter(room => room.Type === 2);
-		let onlyApartments = rooms.filter(room => room.Type === 1);
-		loadTable(onlyRooms);
-		loadTable(onlyApartments);
-		tables.push(loadTable(onlyRooms));
-		tables.push(loadTable(onlyApartments));
-		return tables;
-	}
 
-	function loadTable(rooms) {
-		let table = document.createElement("table");
-		table.id = "rooms-table";
-		table.classList = "table table-condensed no-spaccing";
-		table.appendChild(loadTableHead(rooms[0].Type));
-		table.appendChild(loadTableBody(rooms));
-		return table;
-	}
+		$(document).on("change", "#month-selector", function () {
+            let date = $(this).val().split("-");
+            month = parseInt(date[1]);
+            year = parseInt(date[0]);
+            reloadTables();
+        })
 
-	function reloadTable() {
-		let table = document.getElementById("rooms-table");
-		table.replaceWith(loadTable());
-	}
 
-	function loadTableHead(type) {
-		let tableHead = document.createElement("thead");
-		let tableHeadRow = document.createElement("tr");
-
-		tableHeadRow.appendChild(loadTableTypeHeader(roomTypeToString(type)));
-		loadReservationHead().forEach(day => { tableHeadRow.appendChild(day) });
-
-		tableHead.appendChild(tableHeadRow);
-		return tableHead;
-	}
-
-	function loadReservationHead() {
-		let days = [];
-		for (let i = 1; i <= getDaysInMonth(getMonthYear().month, getMonthYear().year); i++) {
-			let dateHead = document.createElement("th");
-			let day = document.createElement("div");
-			let date = document.createElement("div");
-
-			dateHead.classList.add("text-center", "date-header", "border-dark", "border");
-
-			day.innerHTML = i;
-			let weekday = new Date(getMonthYear().year, getMonthYear().month - 1, i).getDay();
-			date.innerHTML = dayToString(weekday).slice(0, 3);
-			date.classList.add("week-day-font");
-
-			dateHead.appendChild(day);
-			dateHead.appendChild(date);
-			days.push(dateHead);
-		}
-
-		return days;
-	}
-
-	function dayToString(day) {
-		switch (day) {
-			case 1: return "Monday";
-			case 2: return "Tuesday";
-			case 3: return "Wednesday";
-			case 4: return "Thursday";
-			case 5: return "Friday";
-			case 6: return "Saturday";
-			case 0: return "Sunday";
-			default: return day + " Is not a valid day.";
-		}
-	}
-
-	function loadTableTypeHeader(type) {
-		let tableHeadCell = document.createElement("th");
-		tableHeadCell.classList.add("text-center", "room-type-header", "border-dark", "border");
-		tableHeadCell.innerHTML = type;
-		return tableHeadCell;
-	}
-
-	function loadTableHeadCell(name) {
-		let tableHeadCell = document.createElement("th");
-		tableHeadCell.classList.add("text-center", "border-dark", "border");
-		tableHeadCell.innerHTML = name;
-		return tableHeadCell;
-	}
-
-	function getMonthYear() {
-		if (month === 0 || year === 0) {
+		function monthSelector() {
+			let div = document.createElement("div");
+			div.classList.add("d-flex", "mb-3");
+			let selector = document.createElement("select");
+			selector.type = "month";
+			selector.id = "month-selector";
+			selector.classList.add("form-select-xxl", "remove-arrow", "form-control-plaintext", "w-auto", "h4");
 			let date = new Date();
-			month = date.getMonth() + 1;
-			year = date.getFullYear();
-		}
-		return { month: month, year: year };
-	}
+			for (let i = 0; i < 12; i++) {
+				let option = document.createElement("option");
 
-	function monthSelector() {
-		let selector = document.createElement("select");
-		selector.type = "month";
-		selector.id = "month-selector";
-		selector.classList.add("form-select-sm");
-		// TODO - selector.onchange = reloadTable();
-		let date = new Date();
-		for (let i = 0; i < 12; i++) {
-			let option = document.createElement("option");
-			option.selected = i === 0;
-			option.value = date.getFullYear() + "-" + (date.getMonth() + 1);
-			option.innerHTML = date.toLocaleString('default', { month: 'long' });
-			selector.appendChild(option);
-			date.setMonth(date.getMonth() + 1);
-		}
+				option.selected = i === 0;
 
-		return selector;
-	}
+				option.value = date.getFullYear() + "-" + (date.getMonth() + 1);
 
-	function selectorUpdate() {
-		// TODO - reload table
-		let selector = document.getElementById("month-selector");
-		let index = selector.selectedIndex;
-		let date = new Date(selector.options[index]);
-		month = date.getMonth();
-		year = date.getFullYear();
-		reloadTable();
-	}
+				option.innerHTML = date.toLocaleString('default', { month: 'long', year: 'numeric' });
 
-	function loadTableBody(rooms) {
-		let tableBody = document.createElement("tbody");
+				selector.appendChild(option);
 
-		rooms.forEach(room => {
-			let row = document.createElement("tr");
-			row.classList = "room-row";
-			row.appendChild(loadRoomNumber(room));
-			loadReservations(room).forEach(reservation => { row.appendChild(reservation) });
-			tableBody.appendChild(row);
-		});
-
-		return tableBody;
-	}
-
-	function getDaysInMonth(month, year) {
-		const isLeapYear = year % 4 === 0 && year % 100 !== 0 || year % 400 === 0;
-
-		switch (month) {
-			case 1:
-			case 3:
-			case 5:
-			case 7:
-			case 8:
-			case 10:
-			case 12:
-				return 31;
-			case 4:
-			case 6:
-			case 9:
-			case 11:
-				return 30;
-			case 2:
-				return isLeapYear ? 29 : 28;
-			default:
-				throw new Error("Invalid month");
-		}
-	}
-
-	function loadRoomNumber(room) {
-		let element = document.createElement("td");
-
-		element.classList.add("no-padding-block", "room-number", "border", "border-dark");
-		element.innerHTML = room.Number;
-
-		return element;
-	}
-
-	function loadRoomType(room) {
-		let element = document.createElement("td")
-
-		element.innerHTML = roomTypeToString(room.Type);
-
-		return element;
-	}
-
-	function roomTypeToString(type) {
-		switch (type) {
-			case 0:
-				return "None";
-			case 1:
-				return "Apartment";
-			case 2:
-				return "Room";
-		}
-	}
-
-	function loadReservations(room) {
-		let reservations = filterReservation(room.Reservations);
-		let days = getDaysInMonth(getMonthYear().month, getMonthYear().year);
-		let row = [];
-
-		for (let i = 1; i <= days; i++) {
-			let currentDate = new Date(getMonthYear().year, getMonthYear().month - 1, i);
-			let checkInReservation = getCheckIn(reservations, currentDate);
-			let checkOutReservation = getCheckOut(reservations, currentDate);
-			let occupiedReservation = getOccupied(reservations, currentDate);
-			let padding = document.createElement("td");
-			padding.classList.add("cell");
-			let fullCell = document.createElement("div");
-			fullCell.classList.add("cell-inner", "text-center");
-
-			if (checkInReservation !== null && checkOutReservation !== null) {
-				addCellCheckInCheckOut(checkInReservation, checkOutReservation).forEach(cell => fullCell.appendChild(cell));
+				date.setMonth(date.getMonth() + 1);
 			}
-			else if (checkOutReservation !== null && checkInReservation === null) {
-				addCellCheckOut(checkOutReservation, room, currentDate).forEach(cell => fullCell.appendChild(cell));
+			div.appendChild(selector);
+			return div;
+		}
+
+		function loadTables(rooms) {
+			let onlyRooms = rooms.filter(room => room.Type === 2);
+			let onlyApartments = rooms.filter(room => room.Type === 1);
+			let roomTable = loadTable(onlyRooms);
+			roomTable.classList.add("rooms-table");
+			let apartmentsTable = loadTable(onlyApartments);
+			apartmentsTable.classList.add("rooms-table");
+			return [roomTable, apartmentsTable];
+		}
+
+		function loadTable(rooms) {
+			let table = document.createElement("table");
+			table.id = "rooms-table";
+			table.classList = "table table-condensed no-spaccing";
+			table.appendChild(loadTableHead(rooms[0].Type));
+			table.appendChild(loadTableBody(rooms));
+			return table;
+		}
+
+		function reloadTables() {
+			let main = document.getElementsByTagName("main")[0];
+			let tables = document.getElementsByClassName("rooms-table");
+			for (var i = tables.length - 1; i >= 0; --i) {
+				tables[i].remove();
 			}
-			else if (checkInReservation !== null && checkOutReservation === null) {
-				addCellCheckIn(checkInReservation, room, currentDate).forEach(cell => fullCell.appendChild(cell));
+			loadTables(rooms).forEach(table => { main.appendChild(table) });
+		}
+
+		function loadTableHead(type) {
+			let tableHead = document.createElement("thead");
+			let tableHeadRow = document.createElement("tr");
+
+			tableHeadRow.appendChild(loadTableTypeHeader(roomTypeToString(type)));
+			loadReservationHead().forEach(day => { tableHeadRow.appendChild(day) });
+
+			tableHead.appendChild(tableHeadRow);
+			return tableHead;
+		}
+
+		function loadReservationHead() {
+			let days = [];
+			let daysInMonth = getDaysInMonth(getMonthYear().month, getMonthYear().year);
+			for (let i = 1; i <= daysInMonth; i++) {
+				let dateHead = document.createElement("th");
+				let day = document.createElement("div");
+				let date = document.createElement("div");
+
+				dateHead.classList.add("text-center", "date-header", "border-dark", "border");
+
+				day.innerHTML = i;
+				let weekday = new Date(getMonthYear().year, getMonthYear().month - 1, i).getDay();
+				date.innerHTML = dayToString(weekday).slice(0, 3);
+				date.classList.add("week-day-font");
+
+				dateHead.appendChild(day);
+				dateHead.appendChild(date);
+				days.push(dateHead);
 			}
-			else if (occupiedReservation !== null) {
-				fullCell.appendChild(addCellOccupied(occupiedReservation));
-			}
-			else if (occupiedReservation === null) {
-				fullCell.appendChild(addCellEmpty(room, currentDate));
-			}
-			padding.appendChild(fullCell);
-			row.push(padding);
+
+			return days;
 		}
-		return row;
-	}
 
-	function getReservationEditLink(reservarion) {
-		let link = document.createElement("a");
-		link.classList = "fill-cell";
-		link.href = "/Reservations/Edit/" + reservarion.Id;
-		return link;
-	}
-
-	function getRoomAddReservationLink(room, currentDate) {
-		let link = document.createElement("a");
-		link.classList = "fill-cell";
-		link.href = "/Rooms/AddReservation/" + room.Number + "/" + dateOnlyToString(currentDate);
-		return link;
-	}
-	
-	// follows ISO 8601 standard for formatting dates to strings.
-	function dateOnlyToString(date) {
-		let dateString = "" + date.getFullYear();
-
-		if (date.getMonth() < 10) {
-			dateString += "-0" + (date.getMonth() + 1);
-		}
-		else {
-			dateString += "-" + (date.getMonth() + 1);
-		}
-		if (date.getDate() < 10) {
-			dateString += "-0" + date.getDate();
-		}
-		else {
-			dateString += "-" + date.getDate();
-		}
-		return dateString;
-	}
-
-	function dateToDays(date) {
-		return Math.floor(new Date(date).getTime() / (1000 * 60 * 60 * 24));
-	}
-
-	function getOccupied(reservations, date) {
-		let dateOnly = dateToDays(date);
-
-		for (let i = 0; i < reservations.length; i++) {
-			let checkIn = dateToDays(reservations[i].CheckIn);
-			let checkOut = dateToDays(reservations[i].CheckOut);
-
-			if (checkIn <= dateOnly && checkOut >= dateOnly) {
-
-				return reservations[i];
+		function dayToString(day) {
+			switch (day) {
+				case 1: return "Monday";
+				case 2: return "Tuesday";
+				case 3: return "Wednesday";
+				case 4: return "Thursday";
+				case 5: return "Friday";
+				case 6: return "Saturday";
+				case 0: return "Sunday";
+				default: return day + " Is not a valid day.";
 			}
 		}
 
-		return null;
-	}
+		function loadTableTypeHeader(type) {
+			let tableHeadCell = document.createElement("th");
+			tableHeadCell.classList.add("text-center", "room-type-header", "border-dark", "border");
+			tableHeadCell.innerHTML = type;
+			return tableHeadCell;
+		}
 
-	function getCheckOut(reservations, date) {
-		let dateOnly = dateToDays(date);
+		function loadTableHeadCell(name) {
+			let tableHeadCell = document.createElement("th");
+			tableHeadCell.classList.add("text-center", "border-dark", "border");
+			tableHeadCell.innerHTML = name;
+			return tableHeadCell;
+		}
 
-		for (let i = 0; i < reservations.length; i++) {
-			let checkOut = dateToDays(reservations[i].CheckOut);
+		function getMonthYear() {
+			if (month == 0 || year == 0) {
+				let date = new Date();
+				month = date.getMonth() + 1;
+				year = date.getFullYear();
+			}
+			return { month: month, year: year };
+		}
 
-			if (checkOut === dateOnly) {
+		function loadTableBody(rooms) {
+			let tableBody = document.createElement("tbody");
 
-				return reservations[i];
+			rooms.forEach(room => {
+				let row = document.createElement("tr");
+				row.classList = "room-row";
+				row.appendChild(loadRoomNumber(room));
+				loadReservations(room).forEach(reservation => { row.appendChild(reservation) });
+				tableBody.appendChild(row);
+			});
+
+			return tableBody;
+		}
+
+		function getDaysInMonth(month, year) {
+			const isLeapYear = year % 4 === 0 && year % 100 !== 0 || year % 400 === 0;
+
+			switch (month) {
+				case 1:
+				case 3:
+				case 5:
+				case 7:
+				case 8:
+				case 10:
+				case 12:
+					return 31;
+				case 4:
+				case 6:
+				case 9:
+				case 11:
+					return 30;
+				case 2:
+					return isLeapYear ? 29 : 28;
+				default:
+					throw new Error("Invalid month");
 			}
 		}
 
-		return null;
-	}
+		function loadRoomNumber(room) {
+			let element = document.createElement("td");
 
-	function getCheckIn(reservations, date) {
-		let dateOnly = dateToDays(date);
+			element.classList.add("no-padding-block", "room-number", "border", "border-dark");
+			element.innerHTML = room.Number;
 
-		for (let i = 0; i < reservations.length; i++) {
-			let checkIn = dateToDays(reservations[i].CheckIn);
+			return element;
+		}
 
-			if (checkIn === dateOnly) {
+		function loadRoomType(room) {
+			let element = document.createElement("td")
 
-				return reservations[i];
+			element.innerHTML = roomTypeToString(room.Type);
+
+			return element;
+		}
+
+		function roomTypeToString(type) {
+			switch (type) {
+				case 0:
+					return "None";
+				case 1:
+					return "Apartment";
+				case 2:
+					return "Room";
 			}
 		}
 
-		return null;
-	}
+		function loadReservations(room) {
+			let reservations = filterReservation(room.Reservations);
+			let days = getDaysInMonth(getMonthYear().month, getMonthYear().year);
+			let row = [];
+			for (let i = 1; i <= days; i++) {
+				let currentDate = new Date(getMonthYear().year, getMonthYear().month - 1, i);
+				let checkInReservation = getCheckIn(reservations, currentDate);
+				let checkOutReservation = getCheckOut(reservations, currentDate);
+				let occupiedReservation = getOccupied(reservations, currentDate);
+				let padding = document.createElement("td");
+				padding.classList.add("cell");
+				let fullCell = document.createElement("div");
+				fullCell.classList.add("cell-inner", "text-center");
 
-	function filterReservation(reservations) {
-		var filtered = reservations.filter(r => {
-			let beginOfMonth = dateToDays(new Date(getMonthYear().year, getMonthYear().month - 1, 1));
-			let endOfMonth = dateToDays(new Date(getMonthYear().year, getMonthYear().month - 1, getDaysInMonth(getMonthYear().month)));
-			let checkIn = dateToDays(r.CheckIn);
-			let checkOut = dateToDays(r.CheckOut);
-			let result = checkIn <= endOfMonth && checkOut >= beginOfMonth;
-			return result;
-		});
-		return filtered;
-	}
+				if (checkInReservation !== null && checkOutReservation !== null) {
+					addCellCheckInCheckOut(checkInReservation, checkOutReservation).forEach(cell => fullCell.appendChild(cell));
+				}
+				else if (checkOutReservation !== null && checkInReservation === null) {
+					addCellCheckOut(checkOutReservation, room, currentDate).forEach(cell => fullCell.appendChild(cell));
+				}
+				else if (checkInReservation !== null && checkOutReservation === null) {
+					addCellCheckIn(checkInReservation, room, currentDate).forEach(cell => fullCell.appendChild(cell));
+				}
+				else if (occupiedReservation !== null) {
+					fullCell.appendChild(addCellOccupied(occupiedReservation));
+				}
+				else if (occupiedReservation === null) {
+					fullCell.appendChild(addCellEmpty(room, currentDate));
+				}
+				padding.appendChild(fullCell);
+				row.push(padding);
+			}
+			return row;
+		}
 
-	function addCellEmpty(room, currentDate) {	
-		let cell = document.createElement("div");
-		cell.classList.add("cell-empty", "fill-cell");
-		let link = getRoomAddReservationLink(room, currentDate);
-		cell.appendChild(link);
-		return cell;
-	}
+		function getReservationEditLink(reservarion) {
+			let link = document.createElement("a");
+			link.classList = "fill-cell";
+			link.href = "/Reservations/Edit/" + reservarion.Id;
+			return link;
+		}
 
-	function addCellOccupied(reservation) {
-		let cell = document.createElement("div");
-		cell.classList.add("occupied", "fill-cell");
-		cell.appendChild(getReservationEditLink(reservation));
-		return cell;
-	}
+		function getRoomAddReservationLink(room, currentDate) {
+			let link = document.createElement("a");
+			link.classList = "fill-cell";
+			link.href = "/Rooms/AddReservation/" + room.Number + "/" + dateOnlyToString(currentDate);
+			return link;
+		}
 
-	function addCellCheckIn(reservation, room, currentDate) {
-		let lCell = document.createElement("div");
-		let rCell = document.createElement("div");
+		// follows ISO 8601 standard for formatting dates to strings.
+		function dateOnlyToString(date) {
+			let dateString = "" + date.getFullYear();
 
-		lCell.appendChild(getRoomAddReservationLink(room, currentDate));
-		lCell.classList.add("cell-half-left");
-		rCell.classList.add("cell-half-right", "check-in");
-		rCell.appendChild(getReservationEditLink(reservation));
+			if (date.getMonth() + 1 < 10) {
+				dateString += "-0" + (date.getMonth() + 1);
+			}
+			else {
+				dateString += "-" + (date.getMonth() + 1);
+			}
+			if (date.getDate() < 10) {
+				dateString += "-0" + date.getDate();
+			}
+			else {
+				dateString += "-" + date.getDate();
+			}
+			return dateString;
+		}
 
-		return [lCell, rCell];
-	}
+		function dateToDays(date) {
+			return Math.floor(new Date(date).getTime() / (1000 * 60 * 60 * 24));
+		}
 
-	function addCellCheckOut(reservation, room, currentDate) {
-		let lCell = document.createElement("div");
-		let rCell = document.createElement("div");
+		function getOccupied(reservations, date) {
+			let dateOnly = dateToDays(date);
 
-		rCell.appendChild(getRoomAddReservationLink(room, currentDate));
-		lCell.classList.add("cell-half-left", "check-out");
-		rCell.classList.add("cell-half-right");
+			for (let i = 0; i < reservations.length; i++) {
+				let checkIn = dateToDays(reservations[i].CheckIn);
+				let checkOut = dateToDays(reservations[i].CheckOut);
 
-		lCell.appendChild(getReservationEditLink(reservation));
-		return [lCell, rCell];
-	}
+				if (checkIn <= dateOnly && checkOut >= dateOnly) {
 
-	function addCellCheckInCheckOut(checkinReservation, checkoutReservation) {
-		let lCell = document.createElement("div");
-		let rCell = document.createElement("div");
+					return reservations[i];
+				}
+			}
 
-		lCell.classList.add("cell-half-left", "check-out");
-		rCell.classList.add("cell-half-right", "check-in");
+			return null;
+		}
 
-		lCell.appendChild(getReservationEditLink(checkoutReservation));
-		rCell.appendChild(getReservationEditLink(checkinReservation));
+		function getCheckOut(reservations, date) {
+			let dateOnly = dateToDays(date);
 
-		return [lCell, rCell];
-	}
-</script>
+			for (let i = 0; i < reservations.length; i++) {
+				let checkOut = dateToDays(reservations[i].CheckOut);
+
+				if (checkOut === dateOnly) {
+
+					return reservations[i];
+				}
+			}
+
+			return null;
+		}
+
+		function getCheckIn(reservations, date) {
+			let dateOnly = dateToDays(date);
+
+			for (let i = 0; i < reservations.length; i++) {
+				let checkIn = dateToDays(reservations[i].CheckIn);
+
+				if (checkIn === dateOnly) {
+
+					return reservations[i];
+				}
+			}
+
+			return null;
+		}
+
+		function filterReservation(reservations) {
+			var filtered = reservations.filter(r => {
+				let beginOfMonth = dateToDays(new Date(getMonthYear().year, getMonthYear().month - 1, 1));
+				let endOfMonth = dateToDays(new Date(getMonthYear().year, getMonthYear().month - 1, getDaysInMonth(getMonthYear().month)));
+				let checkIn = dateToDays(r.CheckIn);
+				let checkOut = dateToDays(r.CheckOut);
+				let result = checkIn <= endOfMonth && checkOut >= beginOfMonth;
+				return result;
+			});
+			return filtered;
+		}
+
+		function addCellEmpty(room, currentDate) {
+			let cell = document.createElement("div");
+			cell.classList.add("cell-empty", "fill-cell");
+			let link = getRoomAddReservationLink(room, currentDate);
+			cell.appendChild(link);
+			return cell;
+		}
+
+		function addCellOccupied(reservation) {
+			let cell = document.createElement("div");
+			cell.classList.add("occupied", "fill-cell");
+			cell.appendChild(getReservationEditLink(reservation));
+			return cell;
+		}
+
+		function addCellCheckIn(reservation, room, currentDate) {
+			let lCell = document.createElement("div");
+			let rCell = document.createElement("div");
+
+			lCell.appendChild(getRoomAddReservationLink(room, currentDate));
+			lCell.classList.add("cell-half-left");
+			rCell.classList.add("cell-half-right", "check-in");
+			rCell.appendChild(getReservationEditLink(reservation));
+
+			return [lCell, rCell];
+		}
+
+		function addCellCheckOut(reservation, room, currentDate) {
+			let lCell = document.createElement("div");
+			let rCell = document.createElement("div");
+
+			rCell.appendChild(getRoomAddReservationLink(room, currentDate));
+			lCell.classList.add("cell-half-left", "check-out");
+			rCell.classList.add("cell-half-right");
+
+			lCell.appendChild(getReservationEditLink(reservation));
+			return [lCell, rCell];
+		}
+
+		function addCellCheckInCheckOut(checkinReservation, checkoutReservation) {
+			let lCell = document.createElement("div");
+			let rCell = document.createElement("div");
+
+			lCell.classList.add("cell-half-left", "check-out");
+			rCell.classList.add("cell-half-right", "check-in");
+
+			lCell.appendChild(getReservationEditLink(checkoutReservation));
+			rCell.appendChild(getReservationEditLink(checkinReservation));
+
+			return [lCell, rCell];
+		}
+	</script>
+}

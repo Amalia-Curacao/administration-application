@@ -102,7 +102,7 @@
 		function dateOnlyToString(date) {
 			let dateString = "" + date.getFullYear();
 
-			if (date.getMonth() < 10) {
+			if (date.getMonth() + 1 < 10) {
 				dateString += "-0" + (date.getMonth() + 1);
 			}
 			else {
