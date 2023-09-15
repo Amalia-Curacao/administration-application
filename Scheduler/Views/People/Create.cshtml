@@ -16,6 +16,7 @@
                 <div class="form-group row">
                     <div class="w-25">
                         <label asp-for="Prefix" class="control-label"></label>
+                        <br />
                         <span asp-validation-for="Prefix" class="text-danger"></span>
                         <select asp-for="Prefix" class="form-control"
                         asp-items="@Html.GetEnumSelectList<PersonPrefix>().Where(p => p.Text != PersonPrefix.Unknown.ToString())">
@@ -24,11 +25,13 @@
                     <div class="row w-75">
                         <div class="w-50">
                             <label asp-for="FirstName" class="control-label"></label>
+                            <br/>
                             <span asp-validation-for="FirstName" class="text-danger"></span>
                             <input asp-for="FirstName" class="form-control" />
                         </div>
                         <div class="w-50">
                             <label asp-for="LastName" class="control-label"></label>
+                            <br />
                             <span asp-validation-for="LastName" class="text-danger"></span>
                             <input asp-for="LastName" class="form-control" />
                         </div>
@@ -36,11 +39,13 @@
                 </div>
                 <div class="form-group">
                     <label asp-for="Age" class="control-label"></label>
+                    <br />
                     <span asp-validation-for="Age" class="text-danger"></span>
                     <input asp-for="Age" class="form-control" />
                 </div>
                 <div class="form-group">
                     <label asp-for="Note" class="control-label"></label>
+                    <br />
                     <span asp-validation-for="Note" class="text-danger"></span>
                     <textarea asp-for="Note" class="form-control"></textarea>
                 </div>

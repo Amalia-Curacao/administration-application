@@ -15,12 +15,11 @@ public sealed class Person
     public Reservation? Reservation { get; set; }
 
     [Display(Name = "First name")]
-
-    public required string FirstName { get; set; }
+    public required string? FirstName { get; set; }
 
     [Display(Name = "Last name")]
-    public required string LastName { get; set; }
-    public int Age { get; set; }
+    public required string? LastName { get; set; }
+    public int? Age { get; set; }
     public string? Note { get; set; } = "";
     public PersonPrefix? Prefix { get; set; } = PersonPrefix.Unknown;
 }

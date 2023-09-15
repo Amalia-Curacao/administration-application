@@ -14,7 +14,6 @@ public sealed class Reservation
     [InverseProperty(nameof(Person.Reservation))]
     public ICollection<Person>? People { get; set; } = new List<Person>();
 
-    [Required(ErrorMessage = $"Room/apartment number is required.")]
     [Display(Name = "Room #")]
     [ForeignKey(nameof(Models.Room.Number))]
     public int? RoomNumber { get; set; }
@@ -32,17 +31,13 @@ public sealed class Reservation
     public Schedule? Schedule { get; set; }
 
     [Display(Name = "Check-in")]
-    [Required(ErrorMessage = "Check-in date is required.")]
     public required DateOnly? CheckIn { get; set; }
 
     [Display(Name = "Check out")]
-    [Required(ErrorMessage = "Check out date is required.")]
     public required DateOnly? CheckOut { get; set; }
 
     [Display(Name = "Room type")]
     [EnumDataType(typeof(RoomType))]
-    [Required(ErrorMessage = "Room type is required.")]
-    [RegularExpression(@"^(Room|Apartment)$", ErrorMessage = "Please select between type \"Room\" or \"Apartment\".")]
     public RoomType? RoomType => Room?.Type;
 
     [Display(Name = "Flight arrival #")]

@@ -14,6 +14,7 @@ public class PersonValidator : AbstractValidator<Person>
 			.NotEmpty().WithMessage($"Person's last name is required.")
 			.MaximumLength(50).WithMessage($"Person's last name can not be longer than 50 characters.");
 		RuleFor(p => p.Age)
+			.NotEmpty().WithMessage($"Person's age is required.")
 			.InclusiveBetween(0, 150).WithMessage($"Person's age needs to be between 0 and 150 years.");
 		RuleFor(p => p.Prefix)
 			.IsInEnum().WithMessage($"Person's prefix needs to match with one of the following \"Mr.\", \"Ms\", \"Mrs.\" or \"Other\".");

@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Scheduler.Data.Models;
 using Scheduler.Data.Services.Interfaces;
@@ -35,11 +36,7 @@ namespace Scheduler.Controllers
             var result = _validator.Validate(person);
             if (!result.IsValid)
             {
-				foreach (var error in result.Errors)
-                {
-					ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
-				}
-
+                result.AddToModelState(ModelState);
 				return View(person);
 			}
 
