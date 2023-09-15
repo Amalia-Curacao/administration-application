@@ -3,7 +3,9 @@
 
 @{
 	Layout = "~/Views/Shared/_Layout.cshtml";
-	var checkInDate = (DateOnly?)ViewData["CheckIn"];
+	var checkInDate = TempData.Peek<DateOnly>("CheckIn");
+	var roomNumbers = TempData.Peek<Room[]>("ViewRooms")!.Select(r => r.Number);
+	var selectedRoom = TempData.Peek<Room>("ViewRoom");
 }
 
 <div class="row div-centered">
@@ -16,13 +18,19 @@
 			<form asp-action="Create" asp-controller="Reservations">
 				<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 				<div class="row">
-					<div class="w-25">
+					<div class="w-auto">
 						<label asp-for="BookingSource" class="control-label">Source</label>
 						<br />
 						<span asp-validation-for="BookingSource" class="text-danger"></span>
 						<select asp-for="BookingSource"
 								asp-items="@Html.GetEnumSelectList<BookingSource>().Where(e => e.Text != BookingSource.None.ToString())"
 								class="form-control"></select>
+					</div>
+					<div class="w-auto float-end">
+						<label asp-for="RoomNumber" class="control-label">@selectedRoom!.Type!.Value.ToString() number:</label>
+						<br />	
+						<span asp-validation-for="RoomNumber" class="text-danger"></span>
+						<select asp-for="RoomNumber" asp-items="@roomNumbers.Select(rn => new SelectListItem(rn.ToString(), rn.ToString(), rn!.Value == selectedRoom!.Number))" class="form-control"></select>
 					</div>
 				</div>
 				<div class="row">
@@ -93,8 +101,7 @@
 @section Scripts {
 	<script type="text/javascript">
 		$(document).ready(function () {
-
-			var date = new Date(@checkInDate.Value.Year, @checkInDate.Value.Month - 1, @checkInDate.Value.Day);
+			var date = new Date(@checkInDate.Year, @checkInDate.Month - 1, @checkInDate.Day);
 			$("#CheckIn").val(dateOnlyToString(date));
         });
 

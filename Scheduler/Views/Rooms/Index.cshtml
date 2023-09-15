@@ -24,11 +24,11 @@
 
 
 		$(document).on("change", "#month-selector", function () {
-            let date = $(this).val().split("-");
-            month = parseInt(date[1]);
-            year = parseInt(date[0]);
-            reloadTables();
-        })
+			let date = $(this).val().split("-");
+			month = parseInt(date[1]);
+			year = parseInt(date[0]);
+			reloadTables();
+		});
 
 
 		function monthSelector() {
@@ -97,6 +97,7 @@
 
 		function loadReservationHead() {
 			let days = [];
+			let currentDate = new Date();
 			let daysInMonth = getDaysInMonth(getMonthYear().month, getMonthYear().year);
 			for (let i = 1; i <= daysInMonth; i++) {
 				let dateHead = document.createElement("th");
@@ -112,6 +113,11 @@
 
 				dateHead.appendChild(day);
 				dateHead.appendChild(date);
+
+				if (currentDate.getDate() === i && currentDate.getMonth() + 1 === getMonthYear().month && currentDate.getFullYear() === getMonthYear().year) {
+					dateHead.classList.add("current-date");
+				}
+
 				days.push(dateHead);
 			}
 
@@ -224,6 +230,7 @@
 			let reservations = filterReservation(room.Reservations);
 			let days = getDaysInMonth(getMonthYear().month, getMonthYear().year);
 			let row = [];
+			let lastOccupied = null;
 			for (let i = 1; i <= days; i++) {
 				let currentDate = new Date(getMonthYear().year, getMonthYear().month - 1, i);
 				let checkInReservation = getCheckIn(reservations, currentDate);
@@ -244,7 +251,18 @@
 					addCellCheckIn(checkInReservation, room, currentDate).forEach(cell => fullCell.appendChild(cell));
 				}
 				else if (occupiedReservation !== null) {
-					fullCell.appendChild(addCellOccupied(occupiedReservation));
+					let occupiedCell = addCellOccupied(occupiedReservation);
+					fullCell.appendChild(occupiedCell);
+					if (lastOccupied === null || occupiedReservation !== lastOccupied) {
+						lastOccupied = occupiedReservation;
+						console.log("Reservation: " + JSON.stringify(occupiedReservation));
+						let nameElement = getReservationEditLink(occupiedReservation);
+						nameElement.classList.add("name", "text-nowrap");
+						if(occupiedReservation.People[0] !== undefined)
+                            nameElement.innerHTML = occupiedReservation.People[0].LastName;
+						occupiedCell.appendChild(nameElement);
+					}
+
 				}
 				else if (occupiedReservation === null) {
 					fullCell.appendChild(addCellEmpty(room, currentDate));

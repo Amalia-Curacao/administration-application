@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Scheduler.Data.Extensions;
 using Scheduler.Data.Models;
 using Scheduler.Data.Services.Interfaces;
 
@@ -17,6 +18,7 @@ public sealed class RoomsController : Controller
     public async Task<IActionResult> Index()
     {
         TempData.Remove("Room");
+        TempData.Remove("Rooms");
         var schedule = TempData.Peek<Schedule>("Schedule");
         if (schedule is not null)
         {
@@ -30,7 +32,7 @@ public sealed class RoomsController : Controller
 
     // POST: Rooms/Create
     [HttpPost]
-    public IActionResult Create([Bind("Type,Number,Floor")] Room room)
+    public async Task<IActionResult> Create(Room room)
     {
         if (!ModelState.IsValid) return View(room);
 
@@ -38,7 +40,7 @@ public sealed class RoomsController : Controller
         if (schedule is null) return RedirectToAction(controllerName: "Schedules", actionName: "Index");
 
         room.ScheduleId = schedule.Id;
-        _crud.Add(room);
+        await _crud.Add(room);
 
         return RedirectToAction(controllerName: "Rooms", actionName: "Index");
     }
@@ -49,8 +51,10 @@ public sealed class RoomsController : Controller
     {
         var schedule = TempData.Peek<Schedule>("Schedule");
         if (schedule is null) return RedirectToAction(controllerName: "Schedules", actionName: "Index");
-        var room = await _crud.GetLazy((id, schedule.Id));
+        var room = await _crud.GetNoCycle((id, schedule.Id));
         if (room is null) return RedirectToAction(actionName: "Index");
+
+		TempData.Put("Rooms", await _crud.GetAllNoCycle().ToListAsync());
         TempData.Put("Room", room);
         TempData.Put("CheckIn", checkIn);
         return RedirectToAction(controllerName: "Reservations", actionName: "Create");

@@ -217,3 +217,24 @@ option.right-align {
 .pe-6{
     padding-right: 2rem;
 }
+
+.current-date{
+    background-color: yellow !important;
+    color: black;
+}
+
+.name {
+    font-size: 14px;
+    color: white;
+    position: absolute;
+    z-index: 1;
+    -webkit-text-decoration: none !important;
+    text-decoration: none !important;
+    padding-left: .25rem!important;
+}
+
+.name:hover {
+    color: white !important;
+    -webkit-text-decoration: none !important;
+    text-decoration: none !important;
+}

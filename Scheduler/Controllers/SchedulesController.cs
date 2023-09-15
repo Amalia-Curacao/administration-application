@@ -28,9 +28,9 @@ public class SchedulesController : Controller
     }
 
     // GET: Schedules/Create
-    public IActionResult Create()
+    public async Task<IActionResult> Create()
     {
-        _crud.Add(new Schedule());
+        await _crud.Add(new Schedule());
         return RedirectToAction(nameof(Index));
     }
 

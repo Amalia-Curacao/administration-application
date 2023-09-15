@@ -13,10 +13,12 @@ public class PersonService : ICrud<Person>
 	{
 		_db = db;
 	}
-	public async void Add(Person obj)
+
+	public async Task<bool> Add(Person obj)
 	{
 		await _db.Person.AddAsync(obj);
 		await _db.SaveChangesAsync();
+		return true;
 	}
 
 	public async void Delete(ITuple id)
@@ -61,4 +63,16 @@ public class PersonService : ICrud<Person>
 		await _db.SaveChangesAsync();
 		return person;
 	}
+
+    public async IAsyncEnumerable<Person> GetAllNoCycle()
+    {
+        foreach (var person in await GetAll())
+		{
+            person.Reservation!.People = null;
+			person.Reservation!.Schedule = null;
+			person.Reservation!.Room = null;
+
+			yield return person;
+        }
+    }
 }

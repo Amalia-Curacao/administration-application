@@ -2,6 +2,7 @@
 using Roster.Data;
 using Scheduler.Data.Models;
 using Scheduler.Data.Services.Interfaces;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace Scheduler.Data.Services;
@@ -13,10 +14,11 @@ public class RoomService : ICrud<Room>
     {
         _db = db;
     }
-    public async void Add(Room obj)
+    public async Task<bool> Add(Room obj)
     {
         _db.Rooms.Add(obj);
         await _db.SaveChangesAsync();
+        return true;
     }
 
     public async void Delete(ITuple id)
@@ -37,6 +39,22 @@ public class RoomService : ICrud<Room>
         => await LazyLoad().SingleOrDefaultAsync(r => r.Number == (int)id[0]! && r.ScheduleId == (int)id[1]!) 
         ?? throw new InvalidOperationException($"No {nameof(Room)} object can be found with id: {id}.");
 
+    public async IAsyncEnumerable<Room> GetAllNoCycle()
+    {
+        foreach (var room in await GetAll())
+        {
+			foreach (var reservation in room.Reservations!)
+            {
+				reservation.Room = null;
+				reservation.Schedule = null;
+                reservation.People = null;
+			}
+			room.Schedule!.Rooms = null;
+            room.Schedule!.Reservations = null;
+			yield return room;
+		}
+	}
+
     public async Task<Room> GetNoCycle(ITuple id)
     {
         var room = await Get(id);
@@ -44,8 +62,10 @@ public class RoomService : ICrud<Room>
         {
             reservation.Room = null;
             reservation.Schedule = null;
+            reservation.People = null;
         }
         room.Schedule!.Rooms = null;
+        room.Schedule!.Reservations = null;
         return room;
     }
 
@@ -60,7 +80,8 @@ public class RoomService : ICrud<Room>
     }
 
     private IQueryable<Room> EagerLoad()
-        => _db.Rooms.Include(r => r.Reservations)
+        => _db.Rooms.Include(r => r.Reservations!)
+                    .ThenInclude(r => r.People)
                     .Include(r => r.Schedule);
     private IQueryable<Room> LazyLoad()
         => _db.Rooms;

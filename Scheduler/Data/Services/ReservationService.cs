@@ -9,14 +9,25 @@ namespace Scheduler.Data.Services;
 public class ReservationService : ICrud<Reservation>
 {
     private readonly ScheduleDb _db;
-    public ReservationService(ScheduleDb db)
+    private readonly IRead<Room> _readRoom;
+    public ReservationService(ScheduleDb db, IRead<Room> readRoom)
     {
         _db = db;
+        _readRoom = readRoom;
     }
-    public async void Add(Reservation obj)
+
+    /// <summary> Adds a <see cref="Reservation"/> to the database. </summary>
+    /// <returns>True if the reservation was added, false if the reservation could not be added.</returns>
+    public async Task<bool> Add(Reservation obj)
     {
-        _db.Reservations.Add(obj);
-        await _db.SaveChangesAsync();
+        var room = await _readRoom.Get(Tuple.Create(obj.RoomNumber, obj.ScheduleId));
+		if (room.CanFit(obj))
+		{
+			_db.Reservations.Add(obj);
+			await _db.SaveChangesAsync();
+            return true;
+		}
+        return false;
     }
 
     public async void Delete(ITuple id)
@@ -34,8 +45,7 @@ public class ReservationService : ICrud<Reservation>
     public async Task<Reservation> GetNoCycle(ITuple id)
     {
         var reservation = await Get(id);
-        reservation.Room!.Reservations = null;
-        reservation.Room!.Schedule = null;
+        reservation.Room!.RemoveRelations();
         reservation.Schedule!.Reservations = null;
         reservation.Schedule!.Rooms = null;
         foreach (var person in reservation.People!)
@@ -60,11 +70,8 @@ public class ReservationService : ICrud<Reservation>
     {
         var reservation = await Get(Tuple.Create(obj.Id));
         reservation.RoomNumber = obj.RoomNumber;
-        // TODO change when People/Edit view is finished
-        // reservation.People = obj.People;
         reservation.CheckIn = obj.CheckIn;
         reservation.CheckOut = obj.CheckOut;
-        reservation.RoomType = obj.RoomType;
         reservation.FlightArrivalNumber = obj.FlightArrivalNumber;
         reservation.FlightArrivalTime = obj.FlightArrivalTime;
         reservation.FlightDepartureNumber = obj.FlightDepartureNumber;
@@ -78,4 +85,19 @@ public class ReservationService : ICrud<Reservation>
     public async Task<Reservation> GetLazy(ITuple id)
         => await LazyLoad().SingleOrDefaultAsync(r => r.Id == (int)id[0]!) 
         ?? throw new InvalidOperationException($"No {nameof(Reservation)} found with id: {id}.");
+
+	public async IAsyncEnumerable<Reservation> GetAllNoCycle()
+	{
+        foreach (var reservation in await GetAll())
+        {
+            reservation.Room!.RemoveRelations();
+            reservation.Schedule!.Reservations = null;
+            reservation.Schedule!.Rooms = null;
+            foreach (var person in reservation.People!)
+            {
+				person.Reservation = null;
+			}
+            yield return reservation;
+        }
+	}
 }

@@ -14,10 +14,11 @@ public class ScheduleService : ICrud<Schedule>
         _db = db;
     }
 
-    public async void Add(Schedule obj)
+    public async Task<bool> Add(Schedule obj)
     {
         _db.Schedules.Add(obj);
         await _db.SaveChangesAsync();
+        return true;
     }
 
     public async void Delete(ITuple id)
@@ -53,8 +54,7 @@ public class ScheduleService : ICrud<Schedule>
         var schedule = await Get(id);
         foreach (var room in schedule.Rooms!)
         {
-            room.Schedule = null;
-            room.Reservations = null;
+            room.RemoveRelations();
         }
         foreach (var reservation in schedule.Reservations!)
         {
@@ -63,4 +63,22 @@ public class ScheduleService : ICrud<Schedule>
         }
         return schedule;
     }
+
+	public async IAsyncEnumerable<Schedule> GetAllNoCycle()
+	{
+        foreach (var schedule in await GetAll())
+        {
+            foreach (var room in schedule.Rooms!)
+            {
+				room.RemoveRelations();
+			}
+            foreach (var reservation in schedule.Reservations!)
+            {
+                reservation.Schedule = null;
+				reservation.Room = null;
+                reservation.People = null;
+            }
+            yield return schedule;
+        }
+	}
 }

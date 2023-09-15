@@ -30,19 +30,35 @@ public sealed class Room
     public required int? Floor { get; set; }
 
     [InverseProperty(nameof(Reservation.Room))]
-    public ICollection<Reservation>? Reservations { get; set; } = new List<Reservation>();
+    public ICollection<Reservation>? Reservations { get; private set; } = new List<Reservation>();
 
-    /// <summary>Returns a everyday of a month with the reservation information of a single day.</summary>
-    /// <param name="month">Month to return all information.</param>
-    /// <returns>Returns the dates and reservations of a month.</returns>
-    public IEnumerable<(DateOnly, Reservation[]?)> MonthOverview(DateOnly month)
+    /// <summary> Checks if the room can fit the reservation. </summary>
+    /// <returns> Returns true if the room can fit the reservation. </returns>
+    public bool CanFit(Reservation reservation)
+        => Reservations!.All(r => !r.Overlap(reservation));
+
+    /// <summary> Adds reservations to the room with out overlap. </summary>
+    /// <param name="forceAdd"> If true, the reservation will be added even if it overlaps with another reservation. </param>
+    /// <returns> Returns true if reservations has been successfully added to room. </returns>
+    public bool AddReservation(Reservation reservation, bool forceAdd = false)
     {
-        for (int day = 1; day <= DateTime.DaysInMonth(year: month.Year, month: month.Month); day++)
-        {
-            var date = new DateOnly(year: month.Year, month: month.Month, day: day);
-            var activeReservations = Reservations!.Where(r => r.Overlap(date)).ToArray();
-            activeReservations = activeReservations.Length > 0 ? activeReservations : null;
-            yield return (date, activeReservations);
-        }
+        if (CanFit(reservation) && !forceAdd)
+            return false;
+
+        Reservations!.Add(reservation);
+        return true;
+    }
+
+    /// <inheritdoc cref="ICollection{T}.Remove(T)"/>
+    public bool RemoveReservation(Reservation reservation)
+        => Reservations!.Remove(reservation);
+
+    /// <summary> Removes relations with objects. </summary>
+    /// <remarks> This method is used to avoid circular references when serializing to JSON. </remarks>
+    public Room RemoveRelations()
+    {
+        Reservations = null; 
+        Schedule = null;
+        return this;
     }
 }

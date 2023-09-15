@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using Roster.Data;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
 using Scheduler.Data.Models;
 using Scheduler.Data.Services.Interfaces;
 
@@ -10,10 +8,12 @@ namespace Scheduler.Controllers
 	public class PeopleController : Controller
     {
         private readonly ICrud<Person> _crud;
+        private readonly IValidator<Person> _validator;
 
-        public PeopleController(ICrud<Person> crud)
+		public PeopleController(ICrud<Person> crud, IValidator<Person> validator)
         {
             _crud = crud;
+            _validator = validator;
         }
 
         // GET: People/Create
@@ -25,14 +25,26 @@ namespace Scheduler.Controllers
 
         // POST: People/Create
         [HttpPost]
-        public IActionResult Create([Bind("FirstName, LastName, Age, Note, Prefix")] Person person)
+        public async Task<IActionResult> Create(Person person)
         {
             var reservation = TempData.Peek<Reservation>("Reservation");
             if (reservation is null) return RedirectToAction(controllerName: "Rooms", actionName: "Index");
 
             person.ReservationId = reservation.Id;
 
-            _crud.Add(person);
+            var result = _validator.Validate(person);
+            if (!result.IsValid)
+            {
+				foreach (var error in result.Errors)
+                {
+					ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+				}
+
+				return View(person);
+			}
+
+            await _crud.Add(person);
+
             if (TempData["Number of People"] is not null)
             {
                 if ((int)TempData["Number of People"]! == 1)
@@ -57,7 +69,7 @@ namespace Scheduler.Controllers
 
         // POST: People/Edit/5
         [HttpPost]
-        public async Task<IActionResult> Edit([Bind("FirstName, LastName, Age, Note, Prefix")] Person person)
+        public async Task<IActionResult> Edit(Person person)
         {
             var oldPerson = TempData.Get<Person>("Person");
             if (oldPerson is null) return RedirectToAction(controllerName: "Reservations", actionName: "Edit");

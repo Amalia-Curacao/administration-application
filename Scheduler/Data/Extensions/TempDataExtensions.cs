@@ -29,4 +29,8 @@ public static class TempDataExtensions
         var result = JsonSerializer.Deserialize<T>((string)o);
         return result;
     }
+
+    /// <summary> This method is used to check if the TempData contains a value for the given key. </summary>
+    public static bool IsNull(this ITempDataDictionary tempData, string key)
+		=> tempData.Peek(key) is null;
 }
