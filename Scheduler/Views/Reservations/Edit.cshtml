@@ -3,11 +3,11 @@
 
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var checkin = Model.CheckIn!.Value.ToString("yyyy-MM-dd");
-    var ckeckout = Model.CheckOut!.Value.ToString("yyyy-MM-dd");
+    var checkIn = Model.CheckIn!.Value.ToString("yyyy-MM-dd");
+    var ckeckOut = Model.CheckOut!.Value.ToString("yyyy-MM-dd");
     var totalNights = Model.TotalNights();
-    var depTime = Model.FlightDepartureTime is null ? null : Model.FlightDepartureTime.Value.ToString("hh:mm");
-    var arrTime = Model.FlightArrivalTime is null ? null : Model.FlightArrivalTime.Value.ToString("hh:mm");
+    var departureTime = Model.FlightDepartureTime is null ? null : Model.FlightDepartureTime.Value.ToString("hh:mm");
+    var arrivalTime = Model.FlightArrivalTime is null ? null : Model.FlightArrivalTime.Value.ToString("hh:mm");
     var remarks = Model.Remarks;
 }
 
@@ -42,7 +42,7 @@
                         <label asp-for="CheckIn" class="control-label"></label>
                         <br />
                         <span asp-validation-for="CheckIn" class="text-danger"></span>
-                        <input id="check-in" type="date" asp-for="CheckIn" class="form-control" value="@checkin"/>
+                        <input id="check-in" type="date" asp-for="CheckIn" class="form-control" value="@checkIn"/>
                     </div>
                     <div class="w-50 float-end">
                         <div class="w-50 float-start pe-4">
@@ -55,14 +55,14 @@
                             <label asp-for="FlightArrivalTime" class="control-label">Flight arr. time</label>
                             <br />
                             <span asp-validation-for="FlightArrivalTime" class="text-danger"></span>
-                            <input id="arr-time" type="time" asp-for="FlightArrivalTime" class="form-control" value="@arrTime" />
+                            <input id="arr-time" type="time" asp-for="FlightArrivalTime" class="form-control" value="@arrivalTime" />
                         </div>
                     </div>
                     <div class="form-group w-50 float-start">
                         <label asp-for="CheckOut" class="control-label"></label>
                         <br />
                         <span asp-validation-for="CheckOut" class="text-danger"></span>
-                        <input id="check-out" type="date" asp-for="CheckOut" class="form-control" value="@ckeckout" />
+                        <input id="check-out" type="date" asp-for="CheckOut" class="form-control" value="@ckeckOut" />
                     </div>
                     <div class="w-50 float-end">
                         <div class="w-50 float-start pe-4">
@@ -75,7 +75,7 @@
                             <label asp-for="FlightDepartureTime" class="control-label text-nowrap">Flight dep. time</label>
                             <br />
                             <span asp-validation-for="FlightDepartureTime" class="text-danger text-nowrap"></span>
-                            <input id="dep-time" type="time" asp-for="FlightDepartureTime" class="form-control" value="@depTime"/>
+                            <input id="dep-time" type="time" asp-for="FlightDepartureTime" class="form-control" value="@departureTime"/>
                         </div>
                     </div>
                 </div>
