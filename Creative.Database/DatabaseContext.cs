@@ -11,6 +11,8 @@ public abstract class DatabaseContext : DbContext
         Name = DbName;
     }
 
+    protected DatabaseContext(DbContextOptions options) : base(options) { }
+
     /// <summary> The name of the current project. </summary>
     private static string ProjectName => Assembly.GetCallingAssembly().GetName().Name
         ?? throw new InvalidOperationException("Project name is null.");

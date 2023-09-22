@@ -3,7 +3,7 @@
 namespace Creative.Database;
 
 /// <summary> <see cref="DatabaseContext"/> that uses SQLite. </summary>
-public class SqliteContext : DatabaseContext
+public abstract class SqliteContext : DatabaseContext
 {   
     /// <summary> Constructor for the <see cref="SqliteContext"/>. </summary>
     public SqliteContext(string DbName, DbContextOptions options) : base(DbName, options) { }
