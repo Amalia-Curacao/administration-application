@@ -4,14 +4,15 @@ using Scheduler.Data.Models;
 
 namespace Roster.Data;
 
-public class ScheduleDb : SqliteContext
+public class ScheduleDb : SqlServerContext
 {
-    public ScheduleDb() : base("Schedule")
+    public ScheduleDb(string connectionString) : base(connectionString)
     {
     }
 
-    public ScheduleDb(DbContextOptions options) : base("Schedule", options)
+    public ScheduleDb(DbContextOptions options) : base(options)
     {
+
     }
 
     public DbSet<Schedule> Schedules { get; set; }
