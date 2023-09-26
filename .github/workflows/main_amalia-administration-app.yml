@@ -24,9 +24,6 @@ jobs:
       - name: Init user-secrets
         run: dotnet user-secrets init --project Scheduler
 
-      - name: Unmask secrets
-        run: echo ${{ secrets.AZURE_SQL_CONNECTIONSTRING }} | add-mask
-
       - name: Add-secrets
         run: dotnet user-secrets set AZURE_SQL_CONNECTIONSTRING ${{ secrets.AZURE_SQL_CONNECTIONSTRING }} --project Scheduler
 
