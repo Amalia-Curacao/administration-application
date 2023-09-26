@@ -4,7 +4,9 @@
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "VaultUri": "https://connection-string-az.vault.azure.net/",
+        "AZURE_USERNAME": "info@amaliacuracao.com"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5241"
@@ -13,7 +15,9 @@
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "VaultUri": "https://connection-string-az.vault.azure.net/",
+        "AZURE_USERNAME": "info@amaliacuracao.com"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7003;http://localhost:5241"
@@ -22,7 +26,9 @@
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "VaultUri": "https://connection-string-az.vault.azure.net/",
+        "AZURE_USERNAME": "info@amaliacuracao.com"
       }
     },
     "WSL": {
@@ -31,7 +37,9 @@
       "launchUrl": "https://localhost:7003",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "ASPNETCORE_URLS": "https://localhost:7003;http://localhost:5241"
+        "ASPNETCORE_URLS": "https://localhost:7003;http://localhost:5241",
+        "VaultUri": "https://connection-string-az.vault.azure.net/",
+        "AZURE_USERNAME": "info@amaliacuracao.com"
       },
       "distributionName": ""
     }

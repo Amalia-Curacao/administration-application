@@ -6,11 +6,18 @@ using Scheduler.Data.Services;
 using Scheduler.Data.Services.Interfaces;
 using Scheduler.Data.Validators;
 using Scheduler.Data.Validators.Abstract;
+using Azure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("AZURE_SQL_CONNECTIONSTRING") 
-    ?? throw new ArgumentNullException("Connection string not found. Please add to local Secrets.json file under \"AZURE_SQL_CONNECTIONSTRING\".");
+if (builder.Environment.IsProduction())
+{
+    var keyVaultEndpoint = new Uri(Environment.GetEnvironmentVariable("VaultUri"));
+    builder.Configuration.AddAzureKeyVault(keyVaultEndpoint, new DefaultAzureCredential());
+}
+
+var connectionString = builder.Configuration.GetConnectionString("AZURE-SQL-CONNECTIONSTRING") 
+    ?? throw new ArgumentNullException("Connection string not found. Please add to local Secrets.json file under \"AZURE-SQL-CONNECTIONSTRING\".");
 builder.Services.AddDbContext<ScheduleDb>(_ => new ScheduleDb(connectionString));
 
 
