@@ -9,22 +9,9 @@ using Scheduler.Data.Validators.Abstract;
 
 var builder = WebApplication.CreateBuilder(args);
 
-Console.WriteLine("Username: ");
-var username = Console.ReadLine();
-Console.WriteLine("Password: ");
-var password = Console.ReadLine();
-
-var connectionString = $"" +
-    $"Server=tcp:amalia-administration.database.windows.net,1433;" +
-    $"Initial Catalog=amalia-administration;" +
-    $"Persist Security Info=False;" +
-    $"User ID={username};" +
-    $"Password={password};" +
-    $"MultipleActiveResultSets=False;" +
-    $"Encrypt=True;" +
-    $"TrustServerCertificate=False;" +
-    $"Connection Timeout=30;";
-
+builder.Configuration.AddUserSecrets<Program>();
+var connectionString = builder.Configuration["AZURE_SQL_CONNECTIONSTRING"] 
+    ?? throw new ArgumentNullException("Connection string not found. Please add to local Secrets.json file under \"AZURE-SQL-CONNECTIONSTRING\".");
 builder.Services.AddDbContext<ScheduleDb>(_ => new ScheduleDb(connectionString));
 
 

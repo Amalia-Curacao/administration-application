@@ -3,6 +3,8 @@
 
 name: Build and deploy ASP.Net Core app to Azure Web App - amalia-administration-app
 
+env: "AZURE_SQL_CONNECTIONSTRING: ${{ secrets.AZURE_SQL_CONNECTIONSTRING }}"
+
 on:
   push:
     branches:
