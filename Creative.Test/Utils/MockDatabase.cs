@@ -59,6 +59,7 @@ public abstract class MockDatabase
 
 
     [TearDown]
+    [OneTimeTearDown]
     public void Cleanup()
     {
         _dbContext.Database.EnsureDeleted();
