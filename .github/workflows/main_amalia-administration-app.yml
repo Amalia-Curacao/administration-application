@@ -25,7 +25,7 @@ jobs:
         run: dotnet user-secrets init --project Scheduler
 
       - name: Add-secrets
-        run: dotnet user-secrets set AZURE_SQL_CONNECTIONSTRING ${{secrets.AZURE_SQL_CONNECTIONSTRING}} --project Scheduler
+        run: dotnet user-secrets set AZURE_SQL_CONNECTIONSTRING ${{ secrets.AZURE_SQL_CONNECTIONSTRING }} --project Scheduler
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
