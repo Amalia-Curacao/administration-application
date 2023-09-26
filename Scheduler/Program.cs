@@ -6,18 +6,25 @@ using Scheduler.Data.Services;
 using Scheduler.Data.Services.Interfaces;
 using Scheduler.Data.Validators;
 using Scheduler.Data.Validators.Abstract;
-using Azure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
-if (builder.Environment.IsProduction())
-{
-    var keyVaultEndpoint = new Uri(Environment.GetEnvironmentVariable("VaultUri"));
-    builder.Configuration.AddAzureKeyVault(keyVaultEndpoint, new DefaultAzureCredential());
-}
+Console.WriteLine("Username: ");
+var username = Console.ReadLine();
+Console.WriteLine("Password: ");
+var password = Console.ReadLine();
 
-var connectionString = builder.Configuration.GetConnectionString("AZURE-SQL-CONNECTIONSTRING") 
-    ?? throw new ArgumentNullException("Connection string not found. Please add to local Secrets.json file under \"AZURE-SQL-CONNECTIONSTRING\".");
+var connectionString = $"" +
+    $"Server=tcp:amalia-administration.database.windows.net,1433;" +
+    $"Initial Catalog=amalia-administration;" +
+    $"Persist Security Info=False;" +
+    $"User ID={username};" +
+    $"Password={password};" +
+    $"MultipleActiveResultSets=False;" +
+    $"Encrypt=True;" +
+    $"TrustServerCertificate=False;" +
+    $"Connection Timeout=30;";
+
 builder.Services.AddDbContext<ScheduleDb>(_ => new ScheduleDb(connectionString));
 
 
