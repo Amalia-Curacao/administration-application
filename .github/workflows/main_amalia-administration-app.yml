@@ -12,12 +12,10 @@ on:
 jobs:
 
   build:
+    env: 
+        AZURE_SQL_CONNECTIONSTRING: "${{ secrets.AZURE_SQL_CONNECTIONSTRING }}"
     runs-on: windows-latest
     steps:
-      - name: secrets
-        uses: azure/login@v1
-        env: 
-            AZURE_SQL_CONNECTIONSTRING: "${{ secrets.AZURE_SQL_CONNECTIONSTRING }}"
       - uses: actions/checkout@v2
 
       - name: Set up .NET Core
