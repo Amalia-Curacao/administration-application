@@ -22,11 +22,10 @@ jobs:
           dotnet-version: '7.x'
           include-prerelease: true
       - name: Init user-secrets
-        run: dotnet user-secrets init
+        run: dotnet user-secrets init --project Scheduler
 
       - name: Add-secrets
-        run: dotnet user-secrets set AZURE_SQL_CONNECTIONSTRING "${{env.AZURE_SQL_CONNECTIONSTRING}}"
-        
+        run: dotnet user-secrets set AZURE_SQL_CONNECTIONSTRING "${{env.AZURE_SQL_CONNECTIONSTRING}}" --project Scheduler
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
@@ -41,8 +40,6 @@ jobs:
           path: ${{env.DOTNET_ROOT}}/myapp
 
   deploy:
-    env: 
-        AZURE_SQL_CONNECTIONSTRING: "${{ secrets.AZURE_SQL_CONNECTIONSTRING }}"
     runs-on: windows-latest
     needs: build
     environment:
