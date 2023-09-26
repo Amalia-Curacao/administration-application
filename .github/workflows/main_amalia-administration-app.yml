@@ -28,7 +28,7 @@ jobs:
         run: echo ${{ secrets.AZURE_SQL_CONNECTIONSTRING }} | add-mask
 
       - name: Add-secrets
-        run: dotnet user-secrets set AZURE_SQL_CONNECTIONSTRING ${{ secrets.AZURE_SQL_CONNECTIONSTRING }} --project Scheduler
+        run: dotnet user-secrets set AZURE_SQL_CONNECTIONSTRING ${{ secrets.AZURE_SQL_CONNECTIONSTRING }} --project Scheduler | add-mask
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
