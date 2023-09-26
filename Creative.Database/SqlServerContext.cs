@@ -19,7 +19,7 @@ public abstract class SqlServerContext : DatabaseContext
     /// <summary> Initialize <see cref="DbContextOptions{TContext}"/> for <see cref="SqliteContext"/>. </summary>
     private static DbContextOptions<SqlServerContext> InitDbContextOptions(string connectionString)
         => new DbContextOptionsBuilder<SqlServerContext>()
-           .UseSqlServer(connectionString)
+           .UseSqlServer(connectionString, options => options.EnableRetryOnFailure())
            .Options;
 
     /// <inheritdoc/>
