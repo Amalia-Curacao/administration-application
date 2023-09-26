@@ -63,5 +63,6 @@ public abstract class MockDatabase
     public void Cleanup()
     {
         _dbContext.Database.EnsureDeleted();
+        _dbContext.Dispose();
     }
 }
