@@ -8,7 +8,7 @@ using Scheduler.Data.Validators.Abstract;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration["AZURE-SQL-CONNECTIONSTRING"];
+var connectionString = builder.Configuration.GetConnectionString("AZURE-SQL-CONNECTIONSTRING");
 builder.Services.AddDbContext<ScheduleDb>(_ => new ScheduleDb(connectionString));
 
 
