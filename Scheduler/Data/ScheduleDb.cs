@@ -1,18 +1,69 @@
 ﻿using Creative.Database;
+using Creative.Database.Data;
 using Microsoft.EntityFrameworkCore;
 using Scheduler.Data.Models;
 
 namespace Roster.Data;
 
-public class ScheduleDb : SqlServerContext
+public class ScheduleDb : DatabaseContext
 {
-    public ScheduleDb(string connectionString) : base(connectionString)
+    private ScheduleDb(DatabaseContextOptions options) : base(options)
     {
-    }
 
+    }
     public ScheduleDb(DbContextOptions options) : base(options)
     {
 
+    }
+
+    public static ScheduleDb Create(DatabaseContextOptions options)
+    => options.DatabaseSrc switch
+    {
+        DatabaseSrc.Sqlite => InitializeAsSqlite((SqliteOptions)options),
+        DatabaseSrc.SqlServer => InitializeAsSqlServer((SqlServerOptions)options),
+        _ => throw new NotImplementedException("Database src is not supported.")
+    };
+    
+
+    private static ScheduleDb InitializeAsSqlite(SqliteOptions options)
+    {
+        options.DbOptions = SqliteContextTool.InitDbContextOptions<ScheduleDb>(DbPath(options.DbName));
+        return new ScheduleDb(options);
+    }
+
+    private static ScheduleDb InitializeAsSqlServer(SqlServerOptions options)
+    {
+        options.DbOptions = SqlServerContextTool.InitDbContextOptions<ScheduleDb>(options.ConnectionString);
+        return new ScheduleDb(options);
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+        switch (Options.DatabaseSrc)
+        {
+            case DatabaseSrc.Sqlite:
+                SqliteContextTool.OnConfiguring(optionsBuilder, DbPath());
+                break;
+            case DatabaseSrc.SqlServer:
+                SqlServerContextTool.OnConfiguring(optionsBuilder, ((SqlServerOptions)Options).ConnectionString);
+                break;
+            default:
+                throw new NotImplementedException("Database src is not supported.");
+        }
+    }
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        base.ConfigureConventions(configurationBuilder);
+        switch (Options.DatabaseSrc)
+        {
+            case DatabaseSrc.SqlServer:
+                SqlServerContextTool.ConfigureConventions(configurationBuilder);
+                break;
+            default:
+                break;
+        }
     }
 
     public DbSet<Schedule> Schedules { get; set; }
