@@ -22,11 +22,6 @@ jobs:
           dotnet-version: '7.x'
           include-prerelease: true
 
-      - name: Connection string
-        uses: actions/checkout@v3
-        env: 
-            AZURE_SQL_CONNECTIONSTRING: ${{ secrets.AZURE_SQL_CONNECTIONSTRING }} 
-
       - name: Build with dotnet
         run: dotnet build --configuration Release
 
