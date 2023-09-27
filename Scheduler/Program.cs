@@ -1,5 +1,4 @@
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
 using Roster.Data;
 using Scheduler.Data.Models;
 using Scheduler.Data.Services;
