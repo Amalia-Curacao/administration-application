@@ -9,7 +9,7 @@ using Scheduler.Data.Validators.Abstract;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddUserSecrets<Program>();
+builder.Configuration.AddUserSecrets<Program>(optional: false);
 var connectionString = builder.Configuration["AZURE_SQL_CONNECTIONSTRING"] 
     ?? throw new ArgumentNullException("Connection string not found. Please add to local Secrets.json file under \"AZURE-SQL-CONNECTIONSTRING\".");
 builder.Services.AddDbContext<ScheduleDb>(_ => new ScheduleDb(connectionString));
