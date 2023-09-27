@@ -8,18 +8,15 @@ using Scheduler.Data.Validators.Abstract;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = "";
-if (!builder.Environment.IsDevelopment())
-{
-    connectionString = Environment.GetEnvironmentVariable("AZURE_SQL_CONNECTIONSTRING");
-}
-else
-{
-    builder.Configuration.AddUserSecrets<Program>(optional: false);
-    connectionString = builder.Configuration["AZURE_SQL_CONNECTIONSTRING"];
-}
+builder.Configuration.AddUserSecrets<Program>();
 
-if(string.IsNullOrEmpty(connectionString))
+var connectionString = !builder.Environment.IsDevelopment() ?
+    Environment.GetEnvironmentVariable("AZURE_SQL_CONNECTIONSTRING")
+    : builder.Configuration["AZURE_SQL_CONNECTIONSTRING"];
+
+Console.WriteLine($"Connection string: {connectionString}");
+
+if (string.IsNullOrEmpty(connectionString))
 {
     throw new Exception("Connection string is null or empty");
 }
