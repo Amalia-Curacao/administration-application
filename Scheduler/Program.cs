@@ -14,11 +14,9 @@ var connectionString = !builder.Environment.IsDevelopment() ?
     Environment.GetEnvironmentVariable("AZURE_SQL_CONNECTIONSTRING")
     : builder.Configuration["AZURE_SQL_CONNECTIONSTRING"];
 
-Console.WriteLine($"Connection string: {connectionString}");
-
 if (string.IsNullOrEmpty(connectionString))
 {
-    throw new Exception("Connection string is null or empty");
+    throw new Exception($"Connection string {connectionString} is null or empty");
 }
 
 builder.Services.AddDbContext<ScheduleDb>(_ => new ScheduleDb(connectionString));
