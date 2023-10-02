@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Creative.Api.Implementations.Entity_Framework;
+using Creative.Api.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using Roster.Data;
 using Scheduler.Data.Models;
-using Scheduler.Data.Services.Interfaces;
 
 namespace Scheduler.Controllers;
 
@@ -8,9 +10,9 @@ public class SchedulesController : Controller
 {
     private readonly ICrud<Schedule> _crud;
 
-    public SchedulesController(ICrud<Schedule> scheduleService)
+    public SchedulesController(ScheduleDb db)
     {
-        _crud = scheduleService;
+        _crud = new Crud<Schedule>(db);
     }
 
     // GET: Schedules

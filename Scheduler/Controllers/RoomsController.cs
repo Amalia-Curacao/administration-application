@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Creative.Api.Implementations.Entity_Framework;
+using Creative.Api.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using Roster.Data;
 using Scheduler.Data.Extensions;
 using Scheduler.Data.Models;
-using Scheduler.Data.Services.Interfaces;
 
 namespace Scheduler.Controllers;
 
@@ -9,9 +11,9 @@ public sealed class RoomsController : Controller
 {
     private readonly ICrud<Room> _crud;
 
-    public RoomsController(ICrud<Room> crud)
+    public RoomsController(ScheduleDb db)
     {
-        _crud = crud;
+        _crud = new Crud<Room>(db);
     }
 
     // GET: Rooms
@@ -22,7 +24,8 @@ public sealed class RoomsController : Controller
         var schedule = TempData.Peek<Schedule>("Schedule");
         if (schedule is not null)
         {
-            return View((await _crud.GetAll()).Where(r => r.ScheduleId == schedule.Id));
+            var rooms = (await _crud.GetAll()).Where(r => r.ScheduleId == schedule.Id);
+            return View(rooms);
         }
         return RedirectToAction(controllerName: "Schedules", actionName: "Index");
     }
@@ -39,7 +42,7 @@ public sealed class RoomsController : Controller
         var schedule = TempData.Peek<Schedule>("Schedule");
         if (schedule is null) return RedirectToAction(controllerName: "Schedules", actionName: "Index");
 
-        room.ScheduleId = schedule.Id;
+        room.ScheduleId = (int)schedule.Id!;
         await _crud.Add(room);
 
         return RedirectToAction(controllerName: "Rooms", actionName: "Index");

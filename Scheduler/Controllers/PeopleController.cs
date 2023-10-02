@@ -1,8 +1,10 @@
-﻿using FluentValidation;
+﻿using Creative.Api.Implementations.Entity_Framework;
+using Creative.Api.Interfaces;
+using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
+using Roster.Data;
 using Scheduler.Data.Models;
-using Scheduler.Data.Services.Interfaces;
 
 namespace Scheduler.Controllers
 {
@@ -11,9 +13,9 @@ namespace Scheduler.Controllers
         private readonly ICrud<Person> _crud;
         private readonly IValidator<Person> _validator;
 
-		public PeopleController(ICrud<Person> crud, IValidator<Person> validator)
+		public PeopleController(ScheduleDb db, IValidator<Person> validator)
         {
-            _crud = crud;
+            _crud = new Crud<Person>(db);
             _validator = validator;
         }
 

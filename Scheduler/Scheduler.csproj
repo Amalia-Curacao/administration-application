@@ -20,11 +20,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Creative.Api\Creative.Api.csproj" />
     <ProjectReference Include="..\Creative.Database\Creative.Database.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Migrations\" />
     <Folder Include="wwwroot\js\" />
   </ItemGroup>
 

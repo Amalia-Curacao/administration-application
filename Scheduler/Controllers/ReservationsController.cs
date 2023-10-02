@@ -1,8 +1,10 @@
-﻿using FluentValidation;
+﻿using Creative.Api.Implementations.Entity_Framework;
+using Creative.Api.Interfaces;
+using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
+using Roster.Data;
 using Scheduler.Data.Models;
-using Scheduler.Data.Services.Interfaces;
 using Scheduler.Data.Validators.Abstract;
 
 namespace Scheduler.Controllers;
@@ -13,9 +15,9 @@ public class ReservationsController : Controller
     private readonly IValidator<Reservation> _validator;
     private readonly RelationshipValidator<Reservation> _relationshipValidator;
 
-    public ReservationsController(ICrud<Reservation> crud, IValidator<Reservation> validator, RelationshipValidator<Reservation> relationshipValidator)
+    public ReservationsController(ScheduleDb db, IValidator<Reservation> validator, RelationshipValidator<Reservation> relationshipValidator)
     {
-        _crud = crud;
+        _crud = new Crud<Reservation>(db);
         _validator = validator;
         _relationshipValidator = relationshipValidator;
     }

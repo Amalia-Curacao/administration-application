@@ -1,12 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 public static class TempDataExtensions
 {
+    private static readonly JsonSerializerOptions NonCycleJsonSerializationOptions = new() { ReferenceHandler = ReferenceHandler.IgnoreCycles };
+
     /// <summary> This method is used to store complex data in the TempData.</summary>
     public static void Put<T>(this ITempDataDictionary tempData, string key, T value)
     {
-        var data = JsonSerializer.Serialize(value, typeof(T));
+        var data = JsonSerializer.Serialize(value, typeof(T), NonCycleJsonSerializationOptions);
         tempData[key] = data;
     }
 
@@ -17,7 +20,7 @@ public static class TempDataExtensions
         object? o = null;
         tempData.TryGetValue(key, out o);
         if(o is null) return default;
-        var result = JsonSerializer.Deserialize<T>((string)o);
+        var result = JsonSerializer.Deserialize<T>((string)o, NonCycleJsonSerializationOptions);
         return result;
     }
 
@@ -26,7 +29,7 @@ public static class TempDataExtensions
     {
         object? o = tempData.Peek(key);
         if(o is null) return default;
-        var result = JsonSerializer.Deserialize<T>((string)o);
+        var result = JsonSerializer.Deserialize<T>((string)o, NonCycleJsonSerializationOptions);
         return result;
     }
 

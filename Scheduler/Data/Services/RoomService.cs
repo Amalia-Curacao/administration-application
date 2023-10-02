@@ -1,8 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Creative.Api.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Roster.Data;
 using Scheduler.Data.Models;
-using Scheduler.Data.Services.Interfaces;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace Scheduler.Data.Services;
