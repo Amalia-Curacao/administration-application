@@ -7,8 +7,8 @@ public interface IRead<T>
     /// <summary> Gets all <see cref="T"/> entities from the database. </summary>
     Task<IEnumerable<T>> GetAll();
 
-    /// <summary> Gets all <see cref="T"/> entities from the database, without relationships that cycle. </summary>
-    IAsyncEnumerable<T> GetAllNoCycle();
+	/// <summary> Gets all <see cref="T"/> entities from the database, without relationships that cycle. </summary>
+	Task<IEnumerable<T>> GetAllNoCycle();
 
     /// <summary> Gets specific <see cref="T"/> entity based on primary key. </summary>
     Task<T> Get(IDictionary<string, object> id);

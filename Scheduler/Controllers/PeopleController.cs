@@ -21,17 +21,16 @@ namespace Scheduler.Controllers
 
         // GET: People/Create
         public IActionResult Create()
-        {
-            if (TempData.Peek<Reservation>("Reservation") is null) return RedirectToAction(controllerName: "Reservations", actionName: "Create");
-            return View();
-        }
+            => TempData.IsNull(nameof(Reservation)) 
+            ? RedirectToAction(controllerName: "Reservations", actionName: "Create") 
+            : View();
 
         // POST: People/Create
         [HttpPost]
         public async Task<IActionResult> Create(Person person)
         {
-            var reservation = TempData.Peek<Reservation>("Reservation");
-            if (reservation is null) return RedirectToAction(controllerName: "Rooms", actionName: "Index");
+            if(TempData.IsNull(nameof(Reservation))) return RedirectToAction(controllerName: "Rooms", actionName: "Index");
+			var reservation = TempData.Peek<Reservation>(nameof(Reservation))!;
 
             person.ReservationId = reservation.Id;
 
@@ -42,19 +41,18 @@ namespace Scheduler.Controllers
 				return View(person);
 			}
 
-            await _crud.Add(person);
-
-            if (TempData["Number of People"] is not null)
+			ViewData["CreationSuccessful"] = await _crud.Add(person);
+            if ((bool)ViewData["CreationSuccessful"]!)
             {
-                if ((int)TempData["Number of People"]! == 1)
+                var numberOfPeople = reservation.People!.Count + 1;
+                TempData["Number of People"] = numberOfPeople;
+                if (numberOfPeople >= 2)
                 {
                     TempData.Remove("Number of People");
 					return RedirectToAction(controllerName: "Rooms", actionName: "Index");
-                }
-            }
+				}
+			}
 
-            ViewData["CreationSuccessful"] = true;
-            TempData["Number of People"] = reservation.People!.Count() + 1;
             return View(person);
         }
 
@@ -62,17 +60,16 @@ namespace Scheduler.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             var person = await _crud.GetNoCycle(new Dictionary<string, object> { { nameof(Schedule.Id), id! } });
-            if (person is null) return RedirectToAction(controllerName: "Reservations", actionName: "Edit");
-            TempData.Put("Person", person);
+            TempData.Put(nameof(Person), person);
             return View(person);
         }
 
         // POST: People/Edit/5
         [HttpPost]
         public async Task<IActionResult> Edit(Person person)
-        {
-            var oldPerson = TempData.Get<Person>("Person");
-            if (oldPerson is null) return RedirectToAction(controllerName: "Reservations", actionName: "Edit");
+		{
+			if (TempData.IsNull(nameof(Person))) return RedirectToAction(controllerName: "Reservations", actionName: "Edit");
+			var oldPerson = TempData.Get<Person>(nameof(Person))!;
 
             oldPerson.FirstName = person.FirstName;
             oldPerson.LastName = person.LastName;

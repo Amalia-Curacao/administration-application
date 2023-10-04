@@ -18,6 +18,7 @@
 		let year = 0;
 
 		$(document).ready(function () {
+			console.log(rooms);
 			$("main").append(monthSelector());
 			loadTables(rooms).forEach(table => { $("main").append(table) });
 		});
@@ -233,38 +234,52 @@
 			let lastOccupied = null;
 			for (let i = 1; i <= days; i++) {
 				let currentDate = new Date(getMonthYear().year, getMonthYear().month - 1, i);
+
 				let checkInReservation = getCheckIn(reservations, currentDate);
 				let checkOutReservation = getCheckOut(reservations, currentDate);
 				let occupiedReservation = getOccupied(reservations, currentDate);
+
 				let padding = document.createElement("td");
 				padding.classList.add("cell");
+
 				let fullCell = document.createElement("div");
 				fullCell.classList.add("cell-inner", "text-center");
 
-				if (checkInReservation !== null && checkOutReservation !== null) {
+				if (checkInReservation !== null && checkOutReservation !== null) 
+				{
 					addCellCheckInCheckOut(checkInReservation, checkOutReservation).forEach(cell => fullCell.appendChild(cell));
 				}
-				else if (checkOutReservation !== null && checkInReservation === null) {
+				else if (checkOutReservation !== null && checkInReservation === null) 
+				{
 					addCellCheckOut(checkOutReservation, room, currentDate).forEach(cell => fullCell.appendChild(cell));
 				}
-				else if (checkInReservation !== null && checkOutReservation === null) {
+				else if (checkInReservation !== null && checkOutReservation === null) 
+				{
 					addCellCheckIn(checkInReservation, room, currentDate).forEach(cell => fullCell.appendChild(cell));
 				}
-				else if (occupiedReservation !== null) {
+				else if (occupiedReservation !== null) 
+				{
 					let occupiedCell = addCellOccupied(occupiedReservation);
 					fullCell.appendChild(occupiedCell);
-					if (lastOccupied === null || occupiedReservation !== lastOccupied) {
+
+					if (lastOccupied === null || occupiedReservation !== lastOccupied) 
+					{
 						lastOccupied = occupiedReservation;
-						console.log("Reservation: " + JSON.stringify(occupiedReservation));
+
 						let nameElement = getReservationEditLink(occupiedReservation);
 						nameElement.classList.add("name", "text-nowrap");
-						if(occupiedReservation.People[0] !== undefined)
+
+						console.log(occupiedReservation.People[0]);
+						if (occupiedReservation.People[0] !== undefined) 
+						{
                             nameElement.innerHTML = occupiedReservation.People[0].LastName;
+						}
 						occupiedCell.appendChild(nameElement);
 					}
 
 				}
-				else if (occupiedReservation === null) {
+				else if (occupiedReservation === null) 
+				{
 					fullCell.appendChild(addCellEmpty(room, currentDate));
 				}
 				padding.appendChild(fullCell);

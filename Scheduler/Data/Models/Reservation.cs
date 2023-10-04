@@ -119,5 +119,8 @@ public sealed class Reservation : IModel
     }
 
     public static IQueryable<T> IncludeAll<T>(DbSet<T> values) where T : class 
-        => values.Include(nameof(Room)).Include(nameof(Schedule)).Include(nameof(People));
+        => values
+        .Include(nameof(Room))
+        .Include(nameof(Schedule))
+        .Include(nameof(People));
 }

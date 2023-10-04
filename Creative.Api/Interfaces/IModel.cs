@@ -16,6 +16,6 @@ public interface IModel
     /// <remarks> Set all auto-increment primary-keys to null here. </remarks>
     public void AutoIncrementPrimaryKey();
 
-    /// <summary> Includes all object relations in query. </summary>
+    /// <summary> Includes all object relations in query even multiple layers deep. </summary>
     public static abstract IQueryable<T> IncludeAll<T>(DbSet<T> values) where T : class;
 }

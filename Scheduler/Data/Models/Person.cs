@@ -39,5 +39,9 @@ public sealed class Person : IModel
         Id = primaryKey[nameof(Id)] as int?;
     }
 
-    public static IQueryable<T> IncludeAll<T>(DbSet<T> values) where T : class => values.Include(nameof(Reservation));
+    public static IQueryable<T> IncludeAll<T>(DbSet<T> values) where T : class
+        => values
+        .Include(nameof(Reservation))
+        .Include($"{nameof(Reservation)}.{nameof(Reservation.Room)}")
+        .Include($"{nameof(Reservation)}.{nameof(Reservation.Schedule)}");
 }

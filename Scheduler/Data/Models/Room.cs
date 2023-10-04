@@ -74,5 +74,9 @@ public sealed class Room : IModel
 
     public void AutoIncrementPrimaryKey() { }
 
-    public static IQueryable<T> IncludeAll<T>(DbSet<T> values) where T : class => values.Include(nameof(Schedule)).Include(nameof(Reservations));
+    public static IQueryable<T> IncludeAll<T>(DbSet<T> values) where T : class 
+        => values
+        .Include(nameof(Schedule))
+        .Include(nameof(Reservations))
+        .Include($"{nameof(Reservations)}.{nameof(Reservation.People)}");
 }

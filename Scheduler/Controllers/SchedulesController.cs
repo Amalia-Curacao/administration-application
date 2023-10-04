@@ -25,7 +25,7 @@ public class SchedulesController : Controller
     // GET: Schedules/Details/{id?}
     public async Task<IActionResult> Details(int id)
     {
-        TempData.Put("Schedule", await _crud.GetLazy(new Dictionary<string, object> { { nameof(Schedule.Id), id! } }));
+        TempData.Put(nameof(Schedule), await _crud.Get(new Dictionary<string, object> { { nameof(Schedule.Id), id! } }));
         return RedirectToAction(controllerName: "Rooms", actionName: "Index");
     }
 

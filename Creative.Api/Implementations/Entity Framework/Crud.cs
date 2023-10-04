@@ -22,35 +22,30 @@ public class Crud<T> : ICrud<T> where T : class, IModel
         return true;
     }
 
-    public async Task<IEnumerable<T>> GetAll() => await T.IncludeAll(DbContext.Set<T>()).ToListAsync();
+    public async Task<IEnumerable<T>> GetAll() 
+        => await T.IncludeAll(DbContext.Set<T>()).ToListAsync();
 
-    public async IAsyncEnumerable<T> GetAllNoCycle()
-    {
-        foreach(var obj in await GetAll())
-        {
-            var serialized = JsonSerializer.Serialize(obj, NonCycleJsonSerializationOptions);
-            yield return JsonSerializer.Deserialize<T>(serialized, NonCycleJsonSerializationOptions)!;
-        }
-    }
-
+    public async Task<IEnumerable<T>> GetAllNoCycle()
+        => (await GetAll()).Select(obj => 
+        JsonSerializer.Deserialize<T>(
+            JsonSerializer.Serialize(obj, NonCycleJsonSerializationOptions), 
+            NonCycleJsonSerializationOptions)!);
+    
     public async Task<T> Get(IDictionary<string,object> id)
-    {
-        var all = await GetAll();
-        var obj = all.FirstOrDefault(e => IDictionaryExtensions.Equals(e.GetPrimaryKey(), id));
-        return obj ?? throw new Exception("No object found.");
-    } 
+        => (await GetAll()).FirstOrDefault(e => IDictionaryExtensions.Equals(e.GetPrimaryKey(), id)) 
+        ?? throw new Exception("No object found.");
+    
 
     public async Task<T> GetLazy(IDictionary<string, object> id) 
-        => await DbContext.Set<T>().FindAsync(id.Select(i => i.Value).ToArray()) ?? throw new Exception("No object found.");
+        => await DbContext.Set<T>().FindAsync(id.Select(i => i.Value).ToArray()) 
+        ?? throw new Exception("No object found.");
 
     public async Task<T> GetNoCycle(IDictionary<string, object> id)
-    {
-        var obj = await Get(id);
-        var json = JsonSerializer.Serialize(obj, NonCycleJsonSerializationOptions);
-        return JsonSerializer.Deserialize<T>(json, NonCycleJsonSerializationOptions)!;
-    }
+        => JsonSerializer.Deserialize<T>(
+            JsonSerializer.Serialize(await Get(id), NonCycleJsonSerializationOptions), 
+            NonCycleJsonSerializationOptions)!;
 
-    public async Task<T> Update(T obj)
+	public async Task<T> Update(T obj)
     {
         UpdateProperties(obj);
         await DbContext.SaveChangesAsync();
@@ -71,15 +66,7 @@ public class Crud<T> : ICrud<T> where T : class, IModel
 
     public async void Delete(IDictionary<string, object> id)
     {
-        var obj = await Get(id) ?? throw new Exception("No object found.");
-        DbContext.Set<T>().Remove(obj);
+        DbContext.Set<T>().Remove(await Get(id));
         await DbContext.SaveChangesAsync();
     }
-
-    /// <summary> Gets all objects in the database. </summary>
-    public T[]? Read() => DbContext.Set<T>().ToArray();
-
-    /// <summary> Gets object from primary key. </summary>
-    /// <param name="keys">Primary key(s) for object to get.</param>
-    public T?[]? Read(params int[] keys) => keys.Select(key => DbContext.Find<T>(key)).ToArray();
 }
