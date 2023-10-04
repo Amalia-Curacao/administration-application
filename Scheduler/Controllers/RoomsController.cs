@@ -1,70 +1,83 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Scheduler.Data.Extensions;
+﻿using Creative.Api.Implementations.Entity_Framework;
+using Creative.Api.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using Roster.Data;
 using Scheduler.Data.Models;
 
 namespace Scheduler.Controllers;
 
 public sealed class RoomsController : Controller
 {
-    private readonly ICrud<Room> _crud;
+	private readonly ICrud<Room> _crud;
 
-    public RoomsController(ICrud<Room> crud)
-    {
-        _crud = crud;
-    }
+	public RoomsController(ScheduleDb db)
+	{
+		_crud = new Crud<Room>(db);
+	}
 
-    // GET: Rooms
-    public async Task<IActionResult> Index()
-    {
-        TempData.Remove("Room");
-        TempData.Remove("Rooms");
-        var schedule = TempData.Peek<Schedule>("Schedule");
-        if (schedule is not null)
-        {
-            return View((await _crud.GetAll()).Where(r => r.ScheduleId == schedule.Id));
-        }
-        return RedirectToAction(controllerName: "Schedules", actionName: "Index");
-    }
+	// GET: Rooms
+	public async Task<IActionResult> Index()
+	{
+		TempData.Remove(nameof(Room));
+		TempData.Remove($"{nameof(Room)}s");
 
-    // GET: Rooms/Create
-    public IActionResult Create() => View();
+		if (TempData.IsNull(nameof(Schedule)))
+		{
+			return RedirectToAction(controllerName: "Schedules", actionName: "Index");
+		}
 
-    // POST: Rooms/Create
-    [HttpPost]
-    public async Task<IActionResult> Create(Room room)
-    {
-        if (!ModelState.IsValid) return View(room);
+		var all = await _crud.GetAll();
+		var fromSchedule = all.Where(r => r.ScheduleId == TempData.Peek<Schedule>(nameof(Schedule))!.Id);
+		var rooms = (await _crud.GetAll()).Where(r => r.ScheduleId == TempData.Peek<Schedule>(nameof(Schedule))!.Id);
+		return View(rooms);
 
-        var schedule = TempData.Peek<Schedule>("Schedule");
-        if (schedule is null) return RedirectToAction(controllerName: "Schedules", actionName: "Index");
+	}
 
-        room.ScheduleId = schedule.Id;
-        await _crud.Add(room);
+	// GET: Rooms/Create
+	public IActionResult Create() => View();
 
-        return RedirectToAction(controllerName: "Rooms", actionName: "Index");
-    }
+	// POST: Rooms/Create
+	[HttpPost]
+	public async Task<IActionResult> Create(Room room)
+	{
+		if (!ModelState.IsValid) return View(room);
+
+		if (TempData.IsNull(nameof(Schedule))) return RedirectToAction(controllerName: "Schedules", actionName: "Index");
+
+		var schedule = TempData.Peek<Schedule>(nameof(Schedule))!;
+		room.ScheduleId = (int)schedule.Id!;
+		await _crud.Add(room);
+
+		return RedirectToAction(controllerName: "Rooms", actionName: "Index");
+	}
 
 
 	[HttpGet("[controller]/[action]/{id}/{checkIn}")]
-	public async Task<IActionResult> AddReservation([FromRoute]int id, [FromRoute]DateOnly checkIn) 
-    {
-        var schedule = TempData.Peek<Schedule>("Schedule");
-        if (schedule is null) return RedirectToAction(controllerName: "Schedules", actionName: "Index");
-        var room = await _crud.GetNoCycle((id, schedule.Id));
-        if (room is null) return RedirectToAction(actionName: "Index");
+	public async Task<IActionResult> AddReservation([FromRoute] int id, [FromRoute] DateOnly checkIn)
+	{
+		if (TempData.IsNull(nameof(Schedule)))
+		{
+			return RedirectToAction(controllerName: "Schedules", actionName: "Index");
+		}
 
-		TempData.Put("Rooms", await _crud.GetAllNoCycle().ToListAsync());
-        TempData.Put("Room", room);
-        TempData.Put("CheckIn", checkIn);
-        return RedirectToAction(controllerName: "Reservations", actionName: "Create");
-    }
+		var schedule = TempData.Peek<Schedule>(nameof(Schedule))!;
+		var roomPrimaryKey = new Dictionary<string, object> { { nameof(Room.Number), id }, { nameof(Room.ScheduleId), schedule.Id! } };
+		var room = await _crud.GetNoCycle(roomPrimaryKey);
+
+		TempData.Put($"{nameof(Room)}s", await _crud.GetAllNoCycle());
+		TempData.Put(nameof(Room), room);
+		TempData.Put($"{nameof(Reservation.CheckIn)}", checkIn);
+
+		return RedirectToAction(controllerName: "Reservations", actionName: "Create");
+	}
 
 	// GET: Rooms/Delete/5
 	public IActionResult Delete(int id)
-    {
-        var schedule = TempData.Peek<Schedule>(nameof(Schedule));
-        if (schedule is null) return RedirectToAction(controllerName: "Schedules", actionName: "Index");
-        _crud.Delete((id, schedule.Id));
-        return RedirectToAction(nameof(Index));
-    }
+	{
+		var schedule = TempData.Peek<Schedule>(nameof(Schedule));
+		if (schedule is null) return RedirectToAction(controllerName: "Schedules", actionName: "Index");
+		var roomPrimaryKey = new Dictionary<string, object> { { nameof(Room.Number), id }, { nameof(Room.ScheduleId), schedule.Id! } };
+		_crud.Delete(roomPrimaryKey);
+		return RedirectToAction(nameof(Index));
+	}
 }
