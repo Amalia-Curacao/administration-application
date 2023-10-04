@@ -62,7 +62,7 @@ public sealed class RoomsController : Controller
 	// GET: Rooms/Delete/5
 	public IActionResult Delete(int id)
     {
-        var schedule = TempData.Peek<Schedule>("Schedule");
+        var schedule = TempData.Peek<Schedule>(nameof(Schedule));
         if (schedule is null) return RedirectToAction(controllerName: "Schedules", actionName: "Index");
         _crud.Delete((id, schedule.Id));
         return RedirectToAction(nameof(Index));

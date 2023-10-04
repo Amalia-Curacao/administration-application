@@ -11,7 +11,6 @@ var connectionString = builder.Configuration.GetConnectionString("AZURE-SQL-CONN
 var options = new SqlServerOptions() { ConnectionString = connectionString };
 builder.Services.AddDbContext<ScheduleDb>(_ => ScheduleDb.Create(options));
 
-
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
