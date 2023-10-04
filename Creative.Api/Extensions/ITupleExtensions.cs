@@ -31,4 +31,30 @@ public static partial class ITupleExtensions
             yield return tuple[i]!;
         }
     }
+
+    /// <summary> Checks if <paramref name="other"/> equals <paramref name="tuple"/>. </summary>
+    public static bool Equals(this ITuple tuple, object? other) => other is ITuple otherTuple && tuple.Equals(otherTuple);
+
+
+    // TODO: Field comparison not working
+    /// <summary> Checks if <paramref name="otherTuple"/> equals <paramref name="tuple"/>. </summary>
+    public static bool Equals(this ITuple tuple, ITuple otherTuple)
+    {
+        if (tuple.Length != otherTuple.Length) return false;
+        if(tuple.Length == 1)
+        {
+            var tupleValue = tuple[0];
+            var otherTupleValue = otherTuple[0];
+            if (tupleValue is null && otherTupleValue is null) return true;
+            return tupleValue.Equals(otherTupleValue);
+        }
+        foreach(var field in tuple.GetType().GetFields())
+        {
+            if(tuple.Get(field.Name) != otherTuple.Get(field.Name))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
 }

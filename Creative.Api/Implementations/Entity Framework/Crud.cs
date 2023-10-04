@@ -1,5 +1,4 @@
 ﻿using Creative.Api.Interfaces;
-using Creative.Api.Internal.Json;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Runtime.CompilerServices;
@@ -13,7 +12,6 @@ namespace Creative.Api.Implementations.Entity_Framework;
 public class Crud<T> : ICrud<T> where T : class, IModel 
 {
     private static readonly JsonSerializerOptions NonCycleJsonSerializationOptions = new() { ReferenceHandler = ReferenceHandler.IgnoreCycles };
-    private static readonly JsonSerializerOptions NoRelationJsonSerializationOptions = new() { ReferenceHandler = new NoReferenceHandler() };
     public Crud(DbContext dbContext) { DbContext = dbContext; }
     private DbContext DbContext { get; init; }
 
@@ -36,18 +34,18 @@ public class Crud<T> : ICrud<T> where T : class, IModel
         }
     }
 
-    public async Task<T> Get(ITuple id) => await DbContext.Set<T>().FindAsync(id.ToArray()) ?? throw new Exception("No object found.");
-
-    public async Task<T> GetLazy(ITuple id)
+    public async Task<T> Get(ITuple id)
     {
-        var obj = await DbContext.Set<T>().FindAsync(id.ToArray());
-        var json = JsonSerializer.Serialize(obj, NoRelationJsonSerializationOptions);
-        return JsonSerializer.Deserialize<T>(json, NoRelationJsonSerializationOptions)!;
-    }
+        var all = await GetAll();
+        T? obj = all.FirstOrDefault(e => ITupleExtensions.Equals(e.GetPrimaryKey(), id));
+        return obj ?? throw new Exception("No object found.");
+    } 
+
+    public async Task<T> GetLazy(ITuple id) => await DbContext.Set<T>().FindAsync(id.ToArray()) ?? throw new Exception("No object found.");
 
     public async Task<T> GetNoCycle(ITuple id)
     {
-        var obj = await DbContext.Set<T>().FindAsync(id.ToArray());
+        var obj = await Get(id);
         var json = JsonSerializer.Serialize(obj, NonCycleJsonSerializationOptions);
         return JsonSerializer.Deserialize<T>(json, NonCycleJsonSerializationOptions)!;
     }
@@ -60,13 +58,13 @@ public class Crud<T> : ICrud<T> where T : class, IModel
     }
 
     /// <summary> Updates the properties of the object in the database with the new values. </summary>
-    private void UpdateProperties(IModel obj)
+    private async void UpdateProperties(IModel obj)
     {
-        var oldObject = Get(obj.GetPrimaryKey())!;
+        var oldObject = await Get(obj.GetPrimaryKey())!;
         foreach (var property in obj.GetType().GetProperties())
         {
+            if (!property.PropertyType.IsValueType) continue;
             var value = property.GetValue(obj);
-            if (value is null) continue;
             DbContext.Entry(oldObject).Property(property.Name).CurrentValue = value;
         }
     }

@@ -40,7 +40,7 @@ public sealed class Reservation : IModel
 
     [Display(Name = "Room type")]
     [EnumDataType(typeof(RoomType))]
-    public RoomType? RoomType => Room?.Type;
+    public RoomType? RoomType { get; set; }
 
     [Display(Name = "Flight arrival #")]
     public string? FlightArrivalNumber { get; set; }
@@ -107,7 +107,7 @@ public sealed class Reservation : IModel
 		return this;
 	}
 
-    public ITuple GetPrimaryKey() => Tuple.Create(Id);
+    public ITuple GetPrimaryKey() => (Id : Id, ScheduleId: ScheduleId);
 
     public void SetPrimaryKey(ITuple primaryKey)
     {

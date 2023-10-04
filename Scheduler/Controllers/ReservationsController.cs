@@ -49,6 +49,7 @@ public class ReservationsController : Controller
         reservation.RoomScheduleId = room.ScheduleId;
         reservation.ScheduleId = room.ScheduleId;
         reservation.RoomNumber = room.Number;
+        reservation.RoomType = room.Type;
 
         var result = _validator.Validate(reservation);
 		if (!result.IsValid)
@@ -69,10 +70,11 @@ public class ReservationsController : Controller
         return RedirectToAction(controllerName: "People", actionName: "Create");
     }
 
-    // GET: Reservations/Edit/5
-    public async Task<IActionResult> Edit(int id)
+    // GET: Reservations/Edit/1/5
+    [HttpGet("[controller]/[action]/{scheduleId}/{id}")]
+    public async Task<IActionResult> Edit(int id, int scheduleId)
     {
-        var reservation = await _crud.GetNoCycle(Tuple.Create(id));
+        var reservation = await _crud.GetNoCycle((Id: id, ScheduleId: scheduleId));
         if (reservation is null) return RedirectToAction(controllerName: "Reservations", actionName: "Create");
         TempData.Put("Reservation", reservation);
         return View(reservation);

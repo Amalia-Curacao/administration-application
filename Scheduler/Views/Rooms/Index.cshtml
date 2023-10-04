@@ -273,10 +273,10 @@
 			return row;
 		}
 
-		function getReservationEditLink(reservarion) {
+		function getReservationEditLink(reservation) {
 			let link = document.createElement("a");
 			link.classList = "fill-cell";
-			link.href = "/Reservations/Edit/" + reservarion.Id;
+			link.href = "/Reservations/Edit/" + reservation.ScheduleId + "/" + reservation.Id;
 			return link;
 		}
 

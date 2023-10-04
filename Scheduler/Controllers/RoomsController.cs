@@ -54,11 +54,13 @@ public sealed class RoomsController : Controller
     {
         var schedule = TempData.Peek<Schedule>("Schedule");
         if (schedule is null) return RedirectToAction(controllerName: "Schedules", actionName: "Index");
-        var room = await _crud.GetNoCycle((id, schedule.Id));
+        var room = await _crud.GetNoCycle((Id: id, ScheduleId: schedule.Id));
         if (room is null) return RedirectToAction(actionName: "Index");
 
 		TempData.Put("Rooms", await _crud.GetAllNoCycle().ToListAsync());
+		TempData.Put("ViewRooms", await _crud.GetAllNoCycle().ToListAsync());
         TempData.Put("Room", room);
+        TempData.Put("ViewRoom", room);
         TempData.Put("CheckIn", checkIn);
         return RedirectToAction(controllerName: "Reservations", actionName: "Create");
     }
