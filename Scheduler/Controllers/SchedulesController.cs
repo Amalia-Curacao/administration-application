@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Creative.Api.Implementations.Entity_Framework;
+using Creative.Api.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using Roster.Data;
 using Scheduler.Data.Models;
-using Scheduler.Data.Services.Interfaces;
 
 namespace Scheduler.Controllers;
 
@@ -8,9 +10,9 @@ public class SchedulesController : Controller
 {
     private readonly ICrud<Schedule> _crud;
 
-    public SchedulesController(ICrud<Schedule> scheduleService)
+    public SchedulesController(ScheduleDb db)
     {
-        _crud = scheduleService;
+        _crud = new Crud<Schedule>(db);
     }
 
     // GET: Schedules
@@ -23,7 +25,7 @@ public class SchedulesController : Controller
     // GET: Schedules/Details/{id?}
     public async Task<IActionResult> Details(int id)
     {
-        TempData.Put("Schedule", await _crud.GetLazy(Tuple.Create(id)));
+        TempData.Put(nameof(Schedule), await _crud.Get(new Dictionary<string, object> { { nameof(Schedule.Id), id! } }));
         return RedirectToAction(controllerName: "Rooms", actionName: "Index");
     }
 
@@ -37,7 +39,7 @@ public class SchedulesController : Controller
     // GET: Schedules/Delete/5
     public IActionResult Delete(int id)
     {
-        _crud.Delete(Tuple.Create(id));
+        _crud.Delete(new Dictionary<string, object> { { nameof(Schedule.Id), id! } });
         return RedirectToAction(nameof(Index));
     }
 }
