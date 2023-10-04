@@ -1,5 +1,3 @@
-using Creative.Api.Implementations.Entity_Framework;
-using Creative.Api.Interfaces;
 using Creative.Database.Data;
 using FluentValidation;
 using Roster.Data;
@@ -9,17 +7,10 @@ using Scheduler.Data.Validators.Abstract;
 
 var builder = WebApplication.CreateBuilder(args);
 
-if (builder.Environment.IsProduction())
-{
-    var connectionString = builder.Configuration.GetConnectionString("AZURE-SQL-CONNECTIONSTRING");
-    var options = new SqlServerOptions() { ConnectionString = connectionString };
-    builder.Services.AddDbContext<ScheduleDb>(_ => ScheduleDb.Create(options));
-}
-else
-{
-    var options = new SqliteOptions() { DbName = "ScheduleDb" };
-    builder.Services.AddDbContext<ScheduleDb>(_ => ScheduleDb.Create(options));
-}
+var connectionString = builder.Configuration.GetConnectionString("AZURE-SQL-CONNECTIONSTRING");
+var options = new SqlServerOptions() { ConnectionString = connectionString };
+builder.Services.AddDbContext<ScheduleDb>(_ => ScheduleDb.Create(options));
+
 
 
 // Add services to the container.

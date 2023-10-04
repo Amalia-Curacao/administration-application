@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace Creative.Api.Interfaces;
+﻿namespace Creative.Api.Interfaces;
 
 public interface IRead<T>
 {

@@ -74,7 +74,7 @@ public sealed class RoomsController : Controller
 	// GET: Rooms/Delete/5
 	public IActionResult Delete(int id)
     {
-        var schedule = TempData.Peek<Schedule>("Schedule");
+        var schedule = TempData.Peek<Schedule>(nameof(Schedule));
         if (schedule is null) return RedirectToAction(controllerName: "Schedules", actionName: "Index");
         var roomPrimaryKey = new Dictionary<string, object> { { nameof(Room.Number), id }, { nameof(Room.ScheduleId), schedule.Id! } };
         _crud.Delete(roomPrimaryKey);
