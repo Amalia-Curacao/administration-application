@@ -85,5 +85,9 @@ public class ScheduleDb : DatabaseContext
             .WithOne(p => p.Reservation)
             .HasForeignKey(p => p.ReservationId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Reservation>().Property(e => e.Id).ValueGeneratedOnAdd();
+        modelBuilder.Entity<Person>().Property(e => e.Id).ValueGeneratedOnAdd();
+        modelBuilder.Entity<Schedule>().Property(e => e.Id).ValueGeneratedOnAdd();
     }
 }

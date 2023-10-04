@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Creative.Api.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Scheduler.Data.Extensions;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -6,9 +7,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Scheduler.Data.Models;
 
 [PrimaryKey(nameof(Id))]
-public sealed class Reservation
+public sealed class Reservation : IModel
 {
-    public int Id { get; set; }
+    public int? Id { get; set; }
 
     [Display(Name = "Guest(s)")]
     [InverseProperty(nameof(Person.Reservation))]
@@ -38,7 +39,7 @@ public sealed class Reservation
 
     [Display(Name = "Room type")]
     [EnumDataType(typeof(RoomType))]
-    public RoomType? RoomType => Room?.Type;
+    public RoomType? RoomType { get; set; }
 
     [Display(Name = "Flight arrival #")]
     public string? FlightArrivalNumber { get; set; }
@@ -104,4 +105,22 @@ public sealed class Reservation
 		}
 		return this;
 	}
+
+    public IDictionary<string, object> GetPrimaryKey() => new Dictionary<string, object>() { { nameof(Id), Id! } };
+
+    public void SetPrimaryKey(IDictionary<string, object> primaryKey)
+    {
+        Id = primaryKey[nameof(Id)] as int?;
+    }
+
+    public void AutoIncrementPrimaryKey()
+    {
+        Id = null;
+    }
+
+    public static IQueryable<T> IncludeAll<T>(DbSet<T> values) where T : class 
+        => values
+        .Include(nameof(Room))
+        .Include(nameof(Schedule))
+        .Include(nameof(People));
 }

@@ -1,8 +1,10 @@
-﻿using FluentValidation;
+﻿using Creative.Api.Implementations.Entity_Framework;
+using Creative.Api.Interfaces;
+using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
+using Roster.Data;
 using Scheduler.Data.Models;
-using Scheduler.Data.Services.Interfaces;
 using Scheduler.Data.Validators.Abstract;
 
 namespace Scheduler.Controllers;
@@ -13,9 +15,9 @@ public class ReservationsController : Controller
     private readonly IValidator<Reservation> _validator;
     private readonly RelationshipValidator<Reservation> _relationshipValidator;
 
-    public ReservationsController(ICrud<Reservation> crud, IValidator<Reservation> validator, RelationshipValidator<Reservation> relationshipValidator)
+    public ReservationsController(ScheduleDb db, IValidator<Reservation> validator, RelationshipValidator<Reservation> relationshipValidator)
     {
-        _crud = crud;
+        _crud = new Crud<Reservation>(db);
         _validator = validator;
         _relationshipValidator = relationshipValidator;
     }
@@ -23,30 +25,31 @@ public class ReservationsController : Controller
     // GET: Reservations/Create
     public IActionResult Create()
     {
-        if (TempData.IsNull("Rooms") || TempData.IsNull("Room") || TempData.IsNull("CheckIn")) 
+        if (TempData.IsNull($"{nameof(Room)}s") || TempData.IsNull(nameof(Room)) || TempData.IsNull($"{nameof(Reservation.CheckIn)}")) 
             return RedirectToAction(controllerName: "Rooms", actionName: "Index");
-        TempData.Put("ViewRoom", TempData.Peek<Room>("Room")!.RemoveRelations());
-        TempData.Put("ViewRooms", GetRooms(TempData.Peek<Room>("Room")!.Type!.Value).Select(r => r.RemoveRelations()));
+
+        var room = TempData.Peek<Room>(nameof(Room))!;
+        ViewData[nameof(Room)] = room;
+        ViewData[$"{nameof(Room)}s"] = TempData.Peek<Room[]>($"{nameof(Room)}s")!.Where(r => r.Type == room.Type).Select(r => r.RemoveRelations()).ToArray();
+
         return View();
     }
-
-    private Room[] GetRooms(RoomType type)
-        => TempData.Peek<Room[]>("Rooms")!.Where(r => r.Type.Equals(type)).ToArray();
 
     // POST: Reservations/Create
     [HttpPost]
     public async Task<IActionResult> Create(Reservation reservation)
     {
-        var rooms = TempData.Peek<Room[]>("Rooms");
+        var rooms = TempData.Peek<Room[]>($"{nameof(Room)}s");
         if (rooms is null) return RedirectToAction(controllerName: "Rooms", actionName: "Index");
 
         var room = rooms.FirstOrDefault(r => r.Number.Equals(reservation.RoomNumber));
         if (room is null) return RedirectToAction(controllerName: "Rooms", actionName: "Index");
-        TempData.Put("Room", room);
+        TempData.Put(nameof(Room), room);
 
         reservation.RoomScheduleId = room.ScheduleId;
         reservation.ScheduleId = room.ScheduleId;
         reservation.RoomNumber = room.Number;
+        reservation.RoomType = room.Type;
 
         var result = _validator.Validate(reservation);
 		if (!result.IsValid)
@@ -63,16 +66,18 @@ public class ReservationsController : Controller
 			return View(reservation);
 		}
         
-        TempData.Put("Reservation", reservation.RemoveRelations());
+        TempData.Put(nameof(Reservation), reservation.RemoveRelations());
         return RedirectToAction(controllerName: "People", actionName: "Create");
     }
 
-    // GET: Reservations/Edit/5
+    // GET: Reservations/Edit/1/5
+    [HttpGet("[controller]/[action]/{id}")]
     public async Task<IActionResult> Edit(int id)
     {
-        var reservation = await _crud.GetNoCycle(Tuple.Create(id));
+        var key = new Dictionary<string, object> { { nameof(Reservation.Id), id } };    
+        var reservation = await _crud.GetNoCycle(key);
         if (reservation is null) return RedirectToAction(controllerName: "Reservations", actionName: "Create");
-        TempData.Put("Reservation", reservation);
+        TempData.Put(nameof(Reservation), reservation);
         return View(reservation);
     }
 
@@ -80,9 +85,10 @@ public class ReservationsController : Controller
     [HttpPost]
     public async Task<IActionResult> Edit(Reservation reservation)
     {
-        var oldReservation = TempData.Peek<Reservation>("Reservation");
-        if(oldReservation is null) return RedirectToAction(controllerName: "Reservations", actionName: "Create");
-        reservation.BookingSource = oldReservation.BookingSource;
+        if(TempData.IsNull(nameof(Reservation))) return RedirectToAction(controllerName: "Reservations", actionName: "Create");
+		var oldReservation = TempData.Peek<Reservation>(nameof(Reservation))!;
+
+		reservation.BookingSource = oldReservation.BookingSource;
         reservation.CheckIn ??= oldReservation.CheckIn;
         reservation.CheckOut ??= oldReservation.CheckOut;
         reservation.FlightArrivalTime ??= oldReservation.FlightArrivalTime;
@@ -108,7 +114,7 @@ public class ReservationsController : Controller
     // GET: Reservations/Delete/5
     public IActionResult Delete(int id)
     {
-        _crud.Delete(Tuple.Create(id));
+        _crud.Delete(new Dictionary<string, object> { { nameof(Reservation.Id), id! } });
         return RedirectToAction(controllerName: "Rooms", actionName: "Index");
     }
 }

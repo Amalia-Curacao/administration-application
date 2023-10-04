@@ -1,11 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Creative.Api.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.CompilerServices;
 
 namespace Scheduler.Data.Models;
 
 [PrimaryKey(nameof(Number), nameof(ScheduleId))]
-public sealed class Room
+public sealed class Room : IModel
 {
     [Display(Name = "Room number")]
     [Required(ErrorMessage = "Room number is required.")]
@@ -61,4 +63,20 @@ public sealed class Room
         Schedule = null;
         return this;
     }
+
+    public IDictionary<string, object> GetPrimaryKey() => new Dictionary<string, object> { { nameof(Number), Number }, { nameof(ScheduleId), ScheduleId } };
+
+    public void SetPrimaryKey(IDictionary<string, object> key)
+    {
+        Number = key[nameof(Number)] as int?;
+        ScheduleId = (int)(key[nameof(ScheduleId)] as int?)!;
+    }
+
+    public void AutoIncrementPrimaryKey() { }
+
+    public static IQueryable<T> IncludeAll<T>(DbSet<T> values) where T : class 
+        => values
+        .Include(nameof(Schedule))
+        .Include(nameof(Reservations))
+        .Include($"{nameof(Reservations)}.{nameof(Reservation.People)}");
 }
