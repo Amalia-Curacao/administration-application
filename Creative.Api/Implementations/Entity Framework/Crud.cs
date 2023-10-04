@@ -1,7 +1,6 @@
 ﻿using Creative.Api.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -34,16 +33,17 @@ public class Crud<T> : ICrud<T> where T : class, IModel
         }
     }
 
-    public async Task<T> Get(ITuple id)
+    public async Task<T> Get(IDictionary<string,object> id)
     {
         var all = await GetAll();
-        T? obj = all.FirstOrDefault(e => ITupleExtensions.Equals(e.GetPrimaryKey(), id));
+        var obj = all.FirstOrDefault(e => IDictionaryExtensions.Equals(e.GetPrimaryKey(), id));
         return obj ?? throw new Exception("No object found.");
     } 
 
-    public async Task<T> GetLazy(ITuple id) => await DbContext.Set<T>().FindAsync(id.ToArray()) ?? throw new Exception("No object found.");
+    public async Task<T> GetLazy(IDictionary<string, object> id) 
+        => await DbContext.Set<T>().FindAsync(id.Select(i => i.Value).ToArray()) ?? throw new Exception("No object found.");
 
-    public async Task<T> GetNoCycle(ITuple id)
+    public async Task<T> GetNoCycle(IDictionary<string, object> id)
     {
         var obj = await Get(id);
         var json = JsonSerializer.Serialize(obj, NonCycleJsonSerializationOptions);
@@ -69,7 +69,7 @@ public class Crud<T> : ICrud<T> where T : class, IModel
         }
     }
 
-    public async void Delete(ITuple id)
+    public async void Delete(IDictionary<string, object> id)
     {
         var obj = await Get(id) ?? throw new Exception("No object found.");
         DbContext.Set<T>().Remove(obj);
@@ -82,28 +82,4 @@ public class Crud<T> : ICrud<T> where T : class, IModel
     /// <summary> Gets object from primary key. </summary>
     /// <param name="keys">Primary key(s) for object to get.</param>
     public T?[]? Read(params int[] keys) => keys.Select(key => DbContext.Find<T>(key)).ToArray();
-
-    /// <summary> Update object(s) in database with new values. </summary>
-    /// <param name="toUpdate"> Object(s) to update in the database. (Primary key, object with desired). </param>
-    public async void Update(params (int, T)[] toUpdate)
-    {
-        foreach (var (key, newValues) in toUpdate)
-        {
-            var oldObject = Read(key)!.SingleOrDefault() ?? throw new Exception();
-            DbContext.Entry(oldObject).CurrentValues.SetValues(newValues);
-        }
-        await DbContext.SaveChangesAsync();
-    }
-
-    /// <summary> Delete objects in database. </summary>
-    /// <param name="keys">Primary keys of objects to delete. </param>
-    /// <remarks> Will not delete any object if one of the keys cannot be found. </remarks>
-    public async void Delete(params int[] keys)
-    {
-        var toDelete = Read(keys);
-        if (toDelete is null) throw new Exception("No object found.");
-        if (toDelete.Any(obj => obj is null)) throw new Exception("Contains key with no object.");
-        else DbContext.Set<T>().RemoveRange(toDelete as T[]);
-        await DbContext.SaveChangesAsync();
-    }
 }

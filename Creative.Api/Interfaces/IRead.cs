@@ -11,11 +11,11 @@ public interface IRead<T>
     IAsyncEnumerable<T> GetAllNoCycle();
 
     /// <summary> Gets specific <see cref="T"/> entity based on primary key. </summary>
-    Task<T> Get(ITuple id);
+    Task<T> Get(IDictionary<string, object> id);
 
     /// <summary> Gets specific <see cref="T"/> entity based on primary key, without relationships. </summary>
-    Task<T> GetLazy(ITuple id);
+    Task<T> GetLazy(IDictionary<string, object> id);
 
     /// <summary> Gets specific <see cref="T"/> entity based on primary key, without relationships that cycle. </summary>
-    Task<T> GetNoCycle(ITuple id);
+    Task<T> GetNoCycle(IDictionary<string, object> id);
 }

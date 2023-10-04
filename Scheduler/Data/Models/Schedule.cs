@@ -20,7 +20,7 @@ public sealed class Schedule : IModel
 
     public void AutoIncrementPrimaryKey() => Id = null;
 
-    public ITuple GetPrimaryKey() => Tuple.Create(Id);
+    public IDictionary<string, object> GetPrimaryKey() => new Dictionary<string, object> { { nameof(Id), Id! } };
 
-    public void SetPrimaryKey(ITuple primaryKey) => Id = primaryKey.Get<int>("Id");
+    public void SetPrimaryKey(IDictionary<string, object> primaryKey) => Id = primaryKey[nameof(Id)] as int?;
 }

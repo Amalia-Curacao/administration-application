@@ -48,7 +48,8 @@ namespace Scheduler.Controllers
             {
                 if ((int)TempData["Number of People"]! == 1)
                 {
-                    return RedirectToAction(controllerName: "Rooms", actionName: "Index");
+                    TempData.Remove("Number of People");
+					return RedirectToAction(controllerName: "Rooms", actionName: "Index");
                 }
             }
 
@@ -60,7 +61,7 @@ namespace Scheduler.Controllers
         // GET: People/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            var person = await _crud.GetNoCycle(Tuple.Create(id));
+            var person = await _crud.GetNoCycle(new Dictionary<string, object> { { nameof(Schedule.Id), id! } });
             if (person is null) return RedirectToAction(controllerName: "Reservations", actionName: "Edit");
             TempData.Put("Person", person);
             return View(person);
@@ -86,8 +87,8 @@ namespace Scheduler.Controllers
         // GET: People/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            var reservationId = (await _crud.GetLazy(Tuple.Create(id))).ReservationId;
-            _crud.Delete(Tuple.Create(id));
+            var reservationId = (await _crud.GetLazy(new Dictionary<string, object> { { nameof(Person.Id), id! } })).ReservationId;
+            _crud.Delete(new Dictionary<string, object> { { nameof(Person.Id), id! } });
             return RedirectToAction("Edit", "Reservations", new {id = reservationId});
         }
     }

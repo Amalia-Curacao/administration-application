@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Scheduler.Data.Extensions;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Runtime.CompilerServices;
 
 namespace Scheduler.Data.Models;
 
@@ -107,11 +106,11 @@ public sealed class Reservation : IModel
 		return this;
 	}
 
-    public ITuple GetPrimaryKey() => (Id : Id, ScheduleId: ScheduleId);
+    public IDictionary<string, object> GetPrimaryKey() => new Dictionary<string, object>() { { nameof(Id), Id! } };
 
-    public void SetPrimaryKey(ITuple primaryKey)
+    public void SetPrimaryKey(IDictionary<string, object> primaryKey)
     {
-        Id = primaryKey.Get<int>("Id");
+        Id = primaryKey[nameof(Id)] as int?;
     }
 
     public void AutoIncrementPrimaryKey()
@@ -119,5 +118,6 @@ public sealed class Reservation : IModel
         Id = null;
     }
 
-    public static IQueryable<T> IncludeAll<T>(DbSet<T> values) where T : class => values.Include(nameof(Room)).Include(nameof(Schedule)).Include(nameof(People));
+    public static IQueryable<T> IncludeAll<T>(DbSet<T> values) where T : class 
+        => values.Include(nameof(Room)).Include(nameof(Schedule)).Include(nameof(People));
 }

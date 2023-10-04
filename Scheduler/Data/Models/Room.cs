@@ -64,12 +64,12 @@ public sealed class Room : IModel
         return this;
     }
 
-    public ITuple GetPrimaryKey() => Tuple.Create(Number, ScheduleId);
+    public IDictionary<string, object> GetPrimaryKey() => new Dictionary<string, object> { { nameof(Number), Number }, { nameof(ScheduleId), ScheduleId } };
 
-    public void SetPrimaryKey(ITuple key)
+    public void SetPrimaryKey(IDictionary<string, object> key)
     {
-        Number = key.Get<int>("Number");
-        ScheduleId = key.Get<int>("ScheduleId");
+        Number = key[nameof(Number)] as int?;
+        ScheduleId = (int)(key[nameof(ScheduleId)] as int?)!;
     }
 
     public void AutoIncrementPrimaryKey() { }

@@ -71,10 +71,11 @@ public class ReservationsController : Controller
     }
 
     // GET: Reservations/Edit/1/5
-    [HttpGet("[controller]/[action]/{scheduleId}/{id}")]
-    public async Task<IActionResult> Edit(int id, int scheduleId)
+    [HttpGet("[controller]/[action]/{id}")]
+    public async Task<IActionResult> Edit(int id)
     {
-        var reservation = await _crud.GetNoCycle((Id: id, ScheduleId: scheduleId));
+        var key = new Dictionary<string, object> { { nameof(Reservation.Id), id } };    
+        var reservation = await _crud.GetNoCycle(key);
         if (reservation is null) return RedirectToAction(controllerName: "Reservations", actionName: "Create");
         TempData.Put("Reservation", reservation);
         return View(reservation);
@@ -112,7 +113,7 @@ public class ReservationsController : Controller
     // GET: Reservations/Delete/5
     public IActionResult Delete(int id)
     {
-        _crud.Delete(Tuple.Create(id));
+        _crud.Delete(new Dictionary<string, object> { { nameof(Reservation.Id), id! } });
         return RedirectToAction(controllerName: "Rooms", actionName: "Index");
     }
 }

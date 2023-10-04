@@ -25,7 +25,7 @@ public class SchedulesController : Controller
     // GET: Schedules/Details/{id?}
     public async Task<IActionResult> Details(int id)
     {
-        TempData.Put("Schedule", await _crud.GetLazy(Tuple.Create(id)));
+        TempData.Put("Schedule", await _crud.GetLazy(new Dictionary<string, object> { { nameof(Schedule.Id), id! } }));
         return RedirectToAction(controllerName: "Rooms", actionName: "Index");
     }
 
@@ -39,7 +39,7 @@ public class SchedulesController : Controller
     // GET: Schedules/Delete/5
     public IActionResult Delete(int id)
     {
-        _crud.Delete(Tuple.Create(id));
+        _crud.Delete(new Dictionary<string, object> { { nameof(Schedule.Id), id! } });
         return RedirectToAction(nameof(Index));
     }
 }

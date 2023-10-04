@@ -26,7 +26,7 @@ public sealed class Person : IModel
     public PersonPrefix? Prefix { get; set; } = PersonPrefix.Unknown;
 
     /// <inheritdoc/>
-    public ITuple GetPrimaryKey() => Tuple.Create(Id);
+    public IDictionary<string, object> GetPrimaryKey() => new Dictionary<string, object>() { { nameof(Id), Id! } };
 
     public void AutoIncrementPrimaryKey()
     {
@@ -34,9 +34,9 @@ public sealed class Person : IModel
     }
 
     /// <inheritdoc/>
-    public void SetPrimaryKey(ITuple primaryKey)
+    public void SetPrimaryKey(IDictionary<string, object> primaryKey)
     {
-        Id = primaryKey.Get<int>("Id");
+        Id = primaryKey[nameof(Id)] as int?;
     }
 
     public static IQueryable<T> IncludeAll<T>(DbSet<T> values) where T : class => values.Include(nameof(Reservation));

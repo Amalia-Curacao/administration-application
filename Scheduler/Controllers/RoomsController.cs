@@ -54,7 +54,8 @@ public sealed class RoomsController : Controller
     {
         var schedule = TempData.Peek<Schedule>("Schedule");
         if (schedule is null) return RedirectToAction(controllerName: "Schedules", actionName: "Index");
-        var room = await _crud.GetNoCycle((Id: id, ScheduleId: schedule.Id));
+        var roomPrimaryKey = new Dictionary<string, object> { { nameof(Room.Number), id }, { nameof(Room.ScheduleId), schedule.Id! } };
+        var room = await _crud.GetNoCycle(roomPrimaryKey);
         if (room is null) return RedirectToAction(actionName: "Index");
 
 		TempData.Put("Rooms", await _crud.GetAllNoCycle().ToListAsync());
@@ -70,7 +71,8 @@ public sealed class RoomsController : Controller
     {
         var schedule = TempData.Peek<Schedule>("Schedule");
         if (schedule is null) return RedirectToAction(controllerName: "Schedules", actionName: "Index");
-        _crud.Delete((id, schedule.Id));
+        var roomPrimaryKey = new Dictionary<string, object> { { nameof(Room.Number), id }, { nameof(Room.ScheduleId), schedule.Id! } };
+        _crud.Delete(roomPrimaryKey);
         return RedirectToAction(nameof(Index));
     }
 }
