@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>4117bbeb-368a-40c5-aced-0e26eb13fb23</UserSecretsId>
+    <LangVersion>preview</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Creative.Api\Creative.Api.csproj" />
     <ProjectReference Include="..\Creative.Database\Creative.Database.csproj" />
   </ItemGroup>
 

@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Scheduler.Data.Models;
-using Scheduler.Data.Services.Interfaces;
 
 namespace Scheduler.Controllers;
 

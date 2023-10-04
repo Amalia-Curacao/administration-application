@@ -1,8 +1,7 @@
-﻿namespace CreativeApi.Interfaces;
+﻿namespace Creative.Api.Interfaces;
 
 public interface ICreate<in T>
 {
-    /// <summary> Creates object. </summary>
-    /// <param name="toCreate"> Object to create. </param>
-    public void Create(params T[] toCreate);
+    /// <summary> Adds object to the database. </summary>
+    Task<bool> Add(T obj);
 }

@@ -2,8 +2,6 @@ using Creative.Database.Data;
 using FluentValidation;
 using Roster.Data;
 using Scheduler.Data.Models;
-using Scheduler.Data.Services;
-using Scheduler.Data.Services.Interfaces;
 using Scheduler.Data.Validators;
 using Scheduler.Data.Validators.Abstract;
 
@@ -16,13 +14,10 @@ builder.Services.AddDbContext<ScheduleDb>(_ => ScheduleDb.Create(options));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddScoped<ICrud<Schedule>, ScheduleService>();
-builder.Services.AddScoped<ICrud<Room>, RoomService>();
-builder.Services.AddScoped<IRead<Room>, RoomService>();
-builder.Services.AddScoped<ICrud<Reservation>, ReservationService>();
-builder.Services.AddScoped<ICrud<Person>, PersonService>();
 
 builder.Services.AddMvc();
+
+// Register validators
 builder.Services.AddScoped<IValidator<Person>, PersonValidator>();
 builder.Services.AddScoped<IValidator<Reservation>, ReservationValidator>();
 builder.Services.AddScoped<IValidator<Room>, RoomValidator>();  
