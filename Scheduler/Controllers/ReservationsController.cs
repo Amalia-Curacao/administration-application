@@ -72,10 +72,10 @@ public class ReservationsController : Controller
 
 	// GET: Reservations/Edit/1/5
 	[HttpGet("[controller]/[action]/{id}")]
-	public async Task<IActionResult> Edit(int id)
+	public IActionResult Edit(int id)
 	{
 		var key = new Dictionary<string, object> { { nameof(Reservation.Id), id } };
-		var reservation = await _crud.GetNoCycle(key);
+		var reservation = _crud.GetNoCycle(key);
 		if (reservation is null) return RedirectToAction(controllerName: "Reservations", actionName: "Create");
 		TempData.Put(nameof(Reservation), reservation);
 		return View(reservation);
@@ -112,9 +112,14 @@ public class ReservationsController : Controller
 	}
 
 	// GET: Reservations/Delete/5
-	public IActionResult Delete(int id)
+	[HttpDelete("[controller]/[action]")]
+	public async Task<IActionResult> Delete(Reservation reservation)
 	{
-		_crud.Delete(new Dictionary<string, object> { { nameof(Reservation.Id), id! } });
+		await _crud.Delete(reservation);
 		return RedirectToAction(controllerName: "Rooms", actionName: "Index");
 	}
+
+	[HttpDelete("[controller]/[action]/{id}")]
+	public async Task<IActionResult> Delete(int id)
+		=> await Delete(new Reservation() { Id = id, CheckIn = null, CheckOut = null });
 }

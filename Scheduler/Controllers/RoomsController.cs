@@ -1,6 +1,7 @@
 ﻿using Creative.Api.Implementations.Entity_Framework;
 using Creative.Api.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using Roster.Data;
 using Scheduler.Data.Models;
 
@@ -15,23 +16,10 @@ public sealed class RoomsController : Controller
 		_crud = new Crud<Room>(db);
 	}
 
-	// GET: Rooms
-	public async Task<IActionResult> Index()
-	{
-		TempData.Remove(nameof(Room));
-		TempData.Remove($"{nameof(Room)}s");
-
-		if (TempData.IsNull(nameof(Schedule)))
-		{
-			return RedirectToAction(controllerName: "Schedules", actionName: "Index");
-		}
-
-		var all = await _crud.GetAll();
-		var fromSchedule = all.Where(r => r.ScheduleId == TempData.Peek<Schedule>(nameof(Schedule))!.Id);
-		var rooms = (await _crud.GetAll()).Where(r => r.ScheduleId == TempData.Peek<Schedule>(nameof(Schedule))!.Id);
-		return View(rooms);
-
-	}
+	// TODO: test
+	[HttpPost($"[controller]/[action]")]
+	public async Task<IActionResult> Index(Schedule schedule)
+		=> View((await _crud.GetAll()).Where(room => room.ScheduleId == schedule.Id));
 
 	// GET: Rooms/Create
 	public IActionResult Create() => View();
@@ -52,17 +40,13 @@ public sealed class RoomsController : Controller
 	}
 
 
-	[HttpGet("[controller]/[action]/{id}/{checkIn}")]
-	public async Task<IActionResult> AddReservation([FromRoute] int id, [FromRoute] DateOnly checkIn)
+	[HttpPost("[controller]/[action]")]
+	public async Task<IActionResult> AddReservation([FromBody] JObject data)
 	{
-		if (TempData.IsNull(nameof(Schedule)))
-		{
-			return RedirectToAction(controllerName: "Schedules", actionName: "Index");
-		}
+		if(data["room"] is null) return RedirectToAction(controllerName: "Rooms", actionName: "Index");
 
-		var schedule = TempData.Peek<Schedule>(nameof(Schedule))!;
-		var roomPrimaryKey = new Dictionary<string, object> { { nameof(Room.Number), id }, { nameof(Room.ScheduleId), schedule.Id! } };
-		var room = await _crud.GetNoCycle(roomPrimaryKey);
+		var room = data["room"]!.ToObject<Room>();
+		DateOnly? checkIn = data["checkIn"] is null ? null : data["checkIn"]!.ToObject<DateOnly>();
 
 		TempData.Put($"{nameof(Room)}s", await _crud.GetAllNoCycle());
 		TempData.Put(nameof(Room), room);
@@ -71,13 +55,14 @@ public sealed class RoomsController : Controller
 		return RedirectToAction(controllerName: "Reservations", actionName: "Create");
 	}
 
-	// GET: Rooms/Delete/5
-	public IActionResult Delete(int id)
+	[HttpDelete("[controller]/[action]/{scheduleId}/{number}")]
+	public IActionResult Delete(int scheduleId, int number)
+		=> Delete(new Room() { Number = number, ScheduleId = scheduleId, Floor = null, Type = null });
+
+	[HttpDelete("[controller]/[action]")]
+	public IActionResult Delete(Room room)
 	{
-		var schedule = TempData.Peek<Schedule>(nameof(Schedule));
-		if (schedule is null) return RedirectToAction(controllerName: "Schedules", actionName: "Index");
-		var roomPrimaryKey = new Dictionary<string, object> { { nameof(Room.Number), id }, { nameof(Room.ScheduleId), schedule.Id! } };
-		_crud.Delete(roomPrimaryKey);
-		return RedirectToAction(nameof(Index));
+		_crud.Delete(room);
+		return RedirectToAction(controllerName: "Rooms", actionName: "Index");
 	}
 }

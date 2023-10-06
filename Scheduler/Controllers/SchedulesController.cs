@@ -15,32 +15,34 @@ public class SchedulesController : Controller
 		_crud = new Crud<Schedule>(db);
 	}
 
-	// GET: Schedules
-	public async Task<IActionResult> Index()
-	{
-		TempData.Clear();
-		return View(await _crud.GetAll());
-	}
+	// Tested
+	[HttpGet("[controller]/[action]")]
+	public async Task<IActionResult> Index() 
+		=> View(await _crud.GetAll());
 
-	// GET: Schedules/Details/{id?}
+	// TODO: Test
+	[HttpGet($"[controller]/[action]/{{{nameof(Schedule.Id)}}}")]
 	public async Task<IActionResult> Details(int id)
-	{
-		if((await _crud.GetAll()).Count() == 0) return RedirectToAction(nameof(Index));
-		TempData.Put(nameof(Schedule), await _crud.Get(new Dictionary<string, object> { { nameof(Schedule.Id), id! } }));
-		return RedirectToAction(controllerName: "Rooms", actionName: "Index");
-	}
+		=> View(await _crud.Get(new Dictionary<string, object>() { { "Id", id } }));
 
-	// GET: Schedules/Create
-	public async Task<IActionResult> Create()
+	// Tested
+	// TODO: Create View
+	[HttpGet($"[controller]/[action]/{{{nameof(Schedule.Name)}}}")]
+	public async Task<IActionResult> Create(string name)
 	{
-		await _crud.Add(new Schedule());
+		await _crud.Add(new Schedule() { Name = name });
 		return RedirectToAction(nameof(Index));
 	}
 
-	// GET: Schedules/Delete/5
-	public IActionResult Delete(int id)
+	// TODO: Does not work
+	[HttpDelete($"[controller]/[action]/{{{nameof(Schedule.Id)}}}")]
+	public async Task<IActionResult> Delete(int id)
+		=> await Delete(new Schedule() { Id = id});
+
+	[HttpDelete("[controller]/[action]")]
+	public async Task<IActionResult> Delete(Schedule schedule)
 	{
-		_crud.Delete(new Dictionary<string, object> { { nameof(Schedule.Id), id! } });
-		return RedirectToAction(nameof(Index));
+        await _crud.Delete(schedule);
+		return View(nameof(Index), await _crud.GetAll());
 	}
 }

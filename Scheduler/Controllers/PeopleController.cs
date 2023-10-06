@@ -10,7 +10,7 @@ namespace Scheduler.Controllers
 {
 	public class PeopleController : Controller
 	{
-		private readonly ICrud<Person> _crud;
+		/*private readonly ICrud<Person> _crud;
 		private readonly IValidator<Person> _validator;
 
 		public PeopleController(ScheduleDb db, IValidator<Person> validator)
@@ -57,9 +57,9 @@ namespace Scheduler.Controllers
 		}
 
 		// GET: People/Edit/5
-		public async Task<IActionResult> Edit(int? id)
+		public IActionResult Edit(int? id)
 		{
-			var person = await _crud.GetNoCycle(new Dictionary<string, object> { { nameof(Schedule.Id), id! } });
+			var person = _crud.GetNoCycle(new Dictionary<string, object> { { nameof(Schedule.Id), id! } });
 			TempData.Put(nameof(Person), person);
 			return View(person);
 		}
@@ -82,11 +82,12 @@ namespace Scheduler.Controllers
 		}
 
 		// GET: People/Delete/5
+		[HttpDelete("")]
 		public async Task<IActionResult> Delete(int? id)
 		{
 			var reservationId = (await _crud.GetLazy(new Dictionary<string, object> { { nameof(Person.Id), id! } })).ReservationId;
-			_crud.Delete(new Dictionary<string, object> { { nameof(Person.Id), id! } });
+			_crud.Delete();
 			return RedirectToAction("Edit", "Reservations", new { id = reservationId });
-		}
+		}*/
 	}
 }

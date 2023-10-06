@@ -40,10 +40,10 @@ public class Crud<T> : ICrud<T> where T : class, IModel
         => await DbContext.Set<T>().FindAsync(id.Select(i => i.Value).ToArray()) 
         ?? throw new Exception("No object found.");
 
-    public async Task<T> GetNoCycle(IDictionary<string, object> id)
-        => JsonSerializer.Deserialize<T>(
-            JsonSerializer.Serialize(await Get(id), NonCycleJsonSerializationOptions), 
-            NonCycleJsonSerializationOptions)!;
+	public async Task<T> GetNoCycle(IDictionary<string, object> id)
+		=> JsonSerializer.Deserialize<T>(
+			JsonSerializer.Serialize(await Get(id), NonCycleJsonSerializationOptions),
+			NonCycleJsonSerializationOptions)!;
 
 	public async Task<T> Update(T obj)
     {
@@ -52,21 +52,22 @@ public class Crud<T> : ICrud<T> where T : class, IModel
         return obj;
     }
 
-    /// <summary> Updates the properties of the object in the database with the new values. </summary>
-    private async void UpdateProperties(IModel obj)
-    {
-        var oldObject = await Get(obj.GetPrimaryKey())!;
-        foreach (var property in obj.GetType().GetProperties())
-        {
-            if (!property.PropertyType.IsValueType) continue;
-            var value = property.GetValue(obj);
-            DbContext.Entry(oldObject).Property(property.Name).CurrentValue = value;
-        }
-    }
+	/// <summary> Updates the properties of the object in the database with the new values. </summary>
+	private void UpdateProperties(IModel obj)
+	{
+		var oldObject = Get(obj.GetPrimaryKey())!;
+		foreach (var property in obj.GetType().GetProperties())
+		{
+			if (!property.PropertyType.IsValueType) continue;
+			var value = property.GetValue(obj);
+			DbContext.Entry(oldObject).Property(property.Name).CurrentValue = value;
+		}
+	}
 
-    public async void Delete(IDictionary<string, object> id)
+	public async Task Delete(T obj)
     {
-        DbContext.Set<T>().Remove(await Get(id));
+        
+        DbContext.Set<T>().Remove(obj);
         await DbContext.SaveChangesAsync();
     }
 }

@@ -1,7 +1,7 @@
 ﻿using Creative.Api.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Runtime.CompilerServices;
 
 namespace Scheduler.Data.Models;
 
@@ -15,6 +15,9 @@ public sealed class Schedule : IModel
 
     [InverseProperty(nameof(Room.Schedule))]
     public ICollection<Room>? Rooms { get; set; } = new HashSet<Room>();
+
+    [Display(Name = "Name")]
+    public string? Name { get; set; }
 
     public static IQueryable<T> IncludeAll<T>(DbSet<T> values) where T : class 
         => values
