@@ -7,7 +7,7 @@ namespace Creative.Database;
 /// <summary> Has some helper functions for creating a <see cref="DbContext"/>. </summary>
 public abstract class DatabaseContext : DbContext
 {
-    protected DatabaseContext(DatabaseContextOptions options) : base(options.DbOptions)
+    protected DatabaseContext(DatabaseContextOptions options) : base(options.DbOptions!)
     {
         Options = options;
     }

@@ -30,9 +30,9 @@
 						<label asp-for="RoomNumber" class="control-label">@selectedRoom!.Type!.Value.ToString() number:</label>
 						<br />	
 						<span asp-validation-for="RoomNumber" class="text-danger"></span>
-						<select 
+						<select  
 							asp-for="RoomNumber" 
-							asp-items="@roomNumbers.Select(rn => new SelectListItem(rn.ToString(), rn.ToString(), rn!.Value == selectedRoom!.Number))" 
+							asp-items="@roomNumbers.Select(rn => new SelectListItem(rn.ToString(), rn.ToString(), rn! == selectedRoom!.Number))" 
 							class="form-control"></select>
 					</div>
 				</div>

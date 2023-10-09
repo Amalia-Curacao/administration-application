@@ -13,7 +13,7 @@ public sealed class Room : IModel
     [Required(ErrorMessage = "Room number is required.")]
     [Range(0, int.MaxValue, ErrorMessage = "Room number must be a positive number.")]
 
-    public required int? Number { get; set; }
+    public required int Number { get; set; }
     [ForeignKey(nameof(Models.Schedule.Id))]
     [Required(ErrorMessage = "Schedule is required.")]
     public int ScheduleId { get; set; }
@@ -68,8 +68,8 @@ public sealed class Room : IModel
 
     public void SetPrimaryKey(IDictionary<string, object> key)
     {
-        Number = key[nameof(Number)] as int?;
-        ScheduleId = (int)(key[nameof(ScheduleId)] as int?)!;
+        Number = (int)key[nameof(Number)];
+        ScheduleId = (int)key[nameof(ScheduleId)];
     }
 
     public void AutoIncrementPrimaryKey() { }
