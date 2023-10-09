@@ -16,14 +16,16 @@ public class SchedulesController : Controller
 	}
 
 	// Tested
-	[HttpGet("[controller]/[action]")]
 	public async Task<IActionResult> Index() 
-		=> View(await _crud.GetAll());
+		=> View(await _crud.GetAllNoCycle());
 
 	// TODO: Test
 	[HttpGet($"[controller]/[action]/{{{nameof(Schedule.Id)}}}")]
 	public async Task<IActionResult> Details(int id)
-		=> View(await _crud.Get(new Dictionary<string, object>() { { "Id", id } }));
+	{
+		var schedule = await _crud.Get(new Dictionary<string, object>() { { "Id", id } });
+		return View(schedule);
+	}
 
 	// Tested
 	// TODO: Create View

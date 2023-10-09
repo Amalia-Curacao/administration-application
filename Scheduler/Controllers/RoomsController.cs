@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using Roster.Data;
 using Scheduler.Data.Models;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Scheduler.Controllers;
 
@@ -21,21 +23,16 @@ public sealed class RoomsController : Controller
 	public async Task<IActionResult> Index(Schedule schedule)
 		=> View((await _crud.GetAll()).Where(room => room.ScheduleId == schedule.Id));
 
-	// GET: Rooms/Create
-	public IActionResult Create() => View();
+	// TODO: test
+	[HttpGet("[controller]/[action]/{scheduleId}")]
+	public IActionResult Create(int scheduleId) => View(new Room() { Floor = null, Number = null, Type = null, ScheduleId = scheduleId });
 
-	// POST: Rooms/Create
-	[HttpPost]
+	// TODO: test
+	[HttpPost("[controller]/[action]")]
 	public async Task<IActionResult> Create(Room room)
 	{
 		if (!ModelState.IsValid) return View(room);
-
-		if (TempData.IsNull(nameof(Schedule))) return RedirectToAction(controllerName: "Schedules", actionName: "Index");
-
-		var schedule = TempData.Peek<Schedule>(nameof(Schedule))!;
-		room.ScheduleId = (int)schedule.Id!;
 		await _crud.Add(room);
-
 		return RedirectToAction(controllerName: "Rooms", actionName: "Index");
 	}
 

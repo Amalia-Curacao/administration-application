@@ -41,11 +41,7 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Schedules}/{action=Details}/{id=2}"
-	);
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller}/{action}",
-    defaults: new { controller = "Schedules", action = "Index" });
+    pattern: "{controller=Schedules}/{action=Index}"
+    );
 
 app.Run();
