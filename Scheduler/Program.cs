@@ -14,7 +14,7 @@ builder.Services.AddDbContext<ScheduleDb>(_ => ScheduleDb.Create(options));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddRazorPages();
 builder.Services.AddMvc();
 
 // Register validators

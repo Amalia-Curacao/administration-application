@@ -19,8 +19,8 @@ public class SchedulesController : Controller
 	public async Task<IActionResult> Index() 
 		=> View(await _crud.GetAllNoCycle());
 
-	// TODO: Test
-	[HttpGet($"[controller]/[action]/{{{nameof(Schedule.Id)}}}")]
+	// Tested
+	[HttpGet($"[controller]/Page/[action]/{{{nameof(Schedule.Id)}}}")]
 	public async Task<IActionResult> Details(int id)
 	{
 		var schedule = await _crud.Get(new Dictionary<string, object>() { { "Id", id } });
@@ -28,7 +28,6 @@ public class SchedulesController : Controller
 	}
 
 	// Tested
-	// TODO: Create View
 	[HttpGet($"[controller]/[action]/{{{nameof(Schedule.Name)}}}")]
 	public async Task<IActionResult> Create(string name)
 	{
@@ -36,12 +35,13 @@ public class SchedulesController : Controller
 		return RedirectToAction(nameof(Index));
 	}
 
-	// TODO: Does not work
-	[HttpDelete($"[controller]/[action]/{{{nameof(Schedule.Id)}}}")]
+    // Tested
+    [HttpDelete($"[controller]/[action]/{{{nameof(Schedule.Id)}}}")]
 	public async Task<IActionResult> Delete(int id)
 		=> await Delete(new Schedule() { Id = id});
 
-	[HttpDelete("[controller]/[action]")]
+    // Tested
+    [HttpDelete("[controller]/[action]")]
 	public async Task<IActionResult> Delete(Schedule schedule)
 	{
         await _crud.Delete(schedule);

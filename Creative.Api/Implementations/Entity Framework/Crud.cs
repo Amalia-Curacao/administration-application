@@ -49,7 +49,7 @@ public class Crud<T> : ICrud<T> where T : class, IModel
     {
         UpdateProperties(obj);
         await DbContext.SaveChangesAsync();
-        return obj;
+        return await Get(obj.GetPrimaryKey());
     }
 
 	/// <summary> Updates the properties of the object in the database with the new values. </summary>

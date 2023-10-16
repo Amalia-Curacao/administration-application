@@ -61,10 +61,12 @@ public sealed class Reservation : IModel
     public string? Remarks { get; set; }
 
     [Display(Name = "Total nights")]
-    public int? TotalNights() => CheckOut!.Value.DaysDifference(CheckIn!.Value);
+    public int? TotalNights() 
+        => CheckIn is null || CheckOut is null ? null : CheckOut!.Value.DaysDifference(CheckIn!.Value);
 
     [Display(Name = "Guests amount")]
-    public int GuestsAmount() => People?.Count ?? 0;
+    public int GuestsAmount() 
+        => People?.Count ?? 0;
 
     /// <summary> Checks if the reservation's check-in and check out overlap with the given date as if the date was a check-in. </summary>
     /// <returns> Returns true if they overlap. </returns>

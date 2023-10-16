@@ -1,5 +1,6 @@
 ﻿using Creative.Api.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Scheduler.Data.Extensions;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.CompilerServices;
@@ -13,7 +14,7 @@ public sealed class Room : IModel
     [Required(ErrorMessage = "Room number is required.")]
     [Range(0, int.MaxValue, ErrorMessage = "Room number must be a positive number.")]
 
-    public required int Number { get; set; }
+    public required int? Number { get; set; }
     [ForeignKey(nameof(Models.Schedule.Id))]
     [Required(ErrorMessage = "Schedule is required.")]
     public int ScheduleId { get; set; }
@@ -36,20 +37,9 @@ public sealed class Room : IModel
 
     /// <summary> Checks if the room can fit the reservation. </summary>
     /// <returns> Returns true if the room can fit the reservation. </returns>
+    /// <remarks> Will not detect reservations with the same primary key as overlapping. </remarks>
     public bool CanFit(Reservation reservation)
-        => Reservations!.All(r => !r.Overlap(reservation));
-
-    /// <summary> Adds reservations to the room with out overlap. </summary>
-    /// <param name="forceAdd"> If true, the reservation will be added even if it overlaps with another reservation. </param>
-    /// <returns> Returns true if reservations has been successfully added to room. </returns>
-    public bool AddReservation(Reservation reservation, bool forceAdd = false)
-    {
-        if (CanFit(reservation) && !forceAdd)
-            return false;
-
-        Reservations!.Add(reservation);
-        return true;
-    }
+        => Reservations!.All(r => !r.Overlap(reservation) || reservation.GetPrimaryKey().ContentEquals(r.GetPrimaryKey()));
 
     /// <inheritdoc cref="ICollection{T}.Remove(T)"/>
     public bool RemoveReservation(Reservation reservation)
@@ -64,7 +54,8 @@ public sealed class Room : IModel
         return this;
     }
 
-    public IDictionary<string, object> GetPrimaryKey() => new Dictionary<string, object> { { nameof(Number), Number }, { nameof(ScheduleId), ScheduleId } };
+    public IDictionary<string, object> GetPrimaryKey() 
+        => new Dictionary<string, object> { { nameof(Number), Number }, { nameof(ScheduleId), ScheduleId } };
 
     public void SetPrimaryKey(IDictionary<string, object> key)
     {

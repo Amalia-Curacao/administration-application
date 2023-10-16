@@ -5,13 +5,17 @@ using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Roster.Data;
 using Scheduler.Data.Models;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Scheduler.Controllers
 {
 	public class PeopleController : Controller
 	{
-		/*private readonly ICrud<Person> _crud;
+		private readonly ICrud<Person> _crud;
 		private readonly IValidator<Person> _validator;
+		private readonly JsonSerializerOptions SerialaztionOptions = new() { ReferenceHandler = ReferenceHandler.IgnoreCycles };
+		private readonly ValidationException PersonNotFound = new ValidationException($"{nameof(Person)} not found in the database.");
 
 		public PeopleController(ScheduleDb db, IValidator<Person> validator)
 		{
@@ -19,75 +23,88 @@ namespace Scheduler.Controllers
 			_validator = validator;
 		}
 
-		// GET: People/Create
-		public IActionResult Create()
-			=> TempData.IsNull(nameof(Reservation))
-			? RedirectToAction(controllerName: "Reservations", actionName: "Create")
-			: View();
+		// TODO: test
+		[HttpPost("[controller]/Page/[action]")]
+		public IActionResult Create(Person person, ValidationResult? validationResult)
+		{
+			validationResult?.AddToModelState(ModelState);
+            return View(person);
+        }
 
-		// POST: People/Create
-		[HttpPost]
+		// TODO: test
+		[HttpPost("[controller]/[action]")]
 		public async Task<IActionResult> Create(Person person)
 		{
-			if (TempData.IsNull(nameof(Reservation))) return RedirectToAction(controllerName: "Rooms", actionName: "Index");
-			var reservation = TempData.Peek<Reservation>(nameof(Reservation))!;
-
-			person.ReservationId = reservation.Id;
-
-			var result = _validator.Validate(person);
-			if (!result.IsValid)
+			var results = _validator.Validate(person);
+			if (!results.IsValid)
 			{
-				result.AddToModelState(ModelState);
+				return BadRequest(results);
+			}
+
+			await _crud.Add(person);
+
+			person = await _crud.Get(person.GetPrimaryKey());
+
+			return Ok(JsonSerializer.Serialize(person, SerialaztionOptions));
+		}
+
+		// TODO: test
+		[HttpPut($"[controller]/Page/{nameof(Edit)}")]
+		public async Task<IActionResult> PageEdit(Person person, ValidationResult? validationResult)
+		{
+			if(validationResult is null)
+			{
+				var primaryKey = person.GetPrimaryKey();
+				try
+				{
+					person = await _crud.Get(primaryKey);
+
+                }
+				catch (Exception)
+				{
+					return BadRequest(PersonNotFound);
+				}
+                return View(person);
+            }
+			else
+			{
+				validationResult.AddToModelState(ModelState);
 				return View(person);
 			}
-
-			ViewData["CreationSuccessful"] = await _crud.Add(person);
-			if ((bool)ViewData["CreationSuccessful"]!)
-			{
-				var numberOfPeople = reservation.People!.Count + 1;
-				TempData["Number of People"] = numberOfPeople;
-				if (numberOfPeople >= 2)
-				{
-					TempData.Remove("Number of People");
-					return RedirectToAction(controllerName: "Rooms", actionName: "Index");
-				}
-			}
-
-			return View(person);
 		}
 
-		// GET: People/Edit/5
-		public IActionResult Edit(int? id)
-		{
-			var person = _crud.GetNoCycle(new Dictionary<string, object> { { nameof(Schedule.Id), id! } });
-			TempData.Put(nameof(Person), person);
-			return View(person);
-		}
-
-		// POST: People/Edit/5
-		[HttpPost]
+		// TODO: test
+		[HttpPut("[controller]/[action]")]
 		public async Task<IActionResult> Edit(Person person)
 		{
-			if (TempData.IsNull(nameof(Person))) return RedirectToAction(controllerName: "Reservations", actionName: "Edit");
-			var oldPerson = TempData.Get<Person>(nameof(Person))!;
+			try
+			{
+                _ = await _crud.Get(person.GetPrimaryKey());
+            }
+			catch (Exception)
+			{
+				return BadRequest(PersonNotFound);
+			}
+			 
+			// Validates properties.
+			var results = _validator.Validate(person);
+			if (!results.IsValid)
+			{
+				return BadRequest(results);
+			}
 
-			oldPerson.FirstName = person.FirstName;
-			oldPerson.LastName = person.LastName;
-			oldPerson.Age = person.Age;
-			oldPerson.Note = person.Note;
-			oldPerson.Prefix = person.Prefix;
+			person = await _crud.Update(person);
 
-			await _crud.Update(oldPerson);
-			return RedirectToAction(controllerName: "Reservations", actionName: "Edit", routeValues: new { id = oldPerson.ReservationId });
+			return Ok(JsonSerializer.Serialize(person, SerialaztionOptions));
 		}
 
-		// GET: People/Delete/5
-		[HttpDelete("")]
-		public async Task<IActionResult> Delete(int? id)
+		// TODO: test
+		[HttpDelete("[controller]/[action]")]
+		public async Task<IActionResult> Delete(Person person)
 		{
-			var reservationId = (await _crud.GetLazy(new Dictionary<string, object> { { nameof(Person.Id), id! } })).ReservationId;
-			_crud.Delete();
-			return RedirectToAction("Edit", "Reservations", new { id = reservationId });
-		}*/
+			person = await _crud.Get(person.GetPrimaryKey());
+			await _crud.Delete(person);
+			return RedirectToAction(nameof(ReservationsController.Edit), "Reservations", person.Reservation);
+		}
 	}
 }

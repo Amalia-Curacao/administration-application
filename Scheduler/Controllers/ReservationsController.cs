@@ -5,7 +5,8 @@ using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Roster.Data;
 using Scheduler.Data.Models;
-using Scheduler.Data.Validators.Abstract;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Scheduler.Controllers;
 
@@ -13,113 +14,150 @@ public class ReservationsController : Controller
 {
 	private readonly ICrud<Reservation> _crud;
 	private readonly IValidator<Reservation> _validator;
-	private readonly RelationshipValidator<Reservation> _relationshipValidator;
 
-	public ReservationsController(ScheduleDb db, IValidator<Reservation> validator, RelationshipValidator<Reservation> relationshipValidator)
+	private static readonly ValidationFailure RoomFull = new ValidationFailure(nameof(Reservation.RoomNumber), "Reservation could not be added, because it was overlapping with an existing reservation.");
+	private static readonly ValidationException ReservationNotFound = new ValidationException("Reservation could not be found");
+	public ReservationsController(ScheduleDb db, IValidator<Reservation> validator)
 	{
 		_crud = new Crud<Reservation>(db);
 		_validator = validator;
-		_relationshipValidator = relationshipValidator;
 	}
 
-	// GET: Reservations/Create
-	public IActionResult Create()
+	/// <summary> Api endpoint to retrieve the view for creating new reservations. </summary>
+	/// <returns> 
+	/// An HTTP Status: 400 (Bad request) with error message, when the parameters do not meet expectations.
+	/// A new View with validation error, for fields that do not comply with the validation rules.
+	/// </returns>
+	[HttpPost($"[controller]/Page/{nameof(Create)}")]
+	public IActionResult PageCreate(Schedule schedule, Room room, DateOnly? checkIn, ValidationResult? validationResult)
 	{
-		if (TempData.IsNull($"{nameof(Room)}s") || TempData.IsNull(nameof(Room)) || TempData.IsNull($"{nameof(Reservation.CheckIn)}"))
-			return RedirectToAction(controllerName: "Rooms", actionName: "Index");
 
-		var room = TempData.Peek<Room>(nameof(Room))!;
-		ViewData[nameof(Room)] = room;
-		ViewData[$"{nameof(Room)}s"] = TempData.Peek<Room[]>($"{nameof(Room)}s")!.Where(r => r.Type == room.Type).Select(r => r.RemoveRelations()).ToArray();
+		if (schedule is null || !schedule.Rooms.Any())
+		{
+			return BadRequest("The schedule object seems to be incomplete");
+		}
+		if (room.Number is null)
+		{
+			return BadRequest("The room number can not be null.");
+		}
+		validationResult?.AddToModelState(ModelState);
 
-		return View();
+		ViewData["Schedule"] = schedule;
+
+		return View($"{nameof(Create)}", new Reservation()
+		{
+			ScheduleId = schedule.Id,
+			RoomType = room.Type ?? RoomType.None,
+			RoomNumber = room.Number,
+			CheckOut = null,
+			CheckIn = checkIn ?? null,
+			RoomScheduleId = room.ScheduleId
+		});
 	}
 
-	// POST: Reservations/Create
-	[HttpPost]
+	/// <summary> Api endpoint for creating reservations in the database. </summary>
+	/// <returns> 
+	/// An HTTP Status: 200 (OK) with the new reservation, when the reservation has been added.
+	/// An HTTP Status: 400 (Bad request) with error message, when the reservation overlaps another.
+	/// A new View with validation error, for fields that do not comply with the validation rules.
+	/// </returns>
+	[HttpPost("[controller]/[action]")]
 	public async Task<IActionResult> Create(Reservation reservation)
 	{
-		var rooms = TempData.Peek<Room[]>($"{nameof(Room)}s");
-		if (rooms is null) return RedirectToAction(controllerName: "Rooms", actionName: "Index");
-
-		var room = rooms.FirstOrDefault(r => r.Number.Equals(reservation.RoomNumber));
-		if (room is null) return RedirectToAction(controllerName: "Rooms", actionName: "Index");
-		TempData.Put(nameof(Room), room);
-
-		reservation.RoomScheduleId = room.ScheduleId;
-		reservation.ScheduleId = room.ScheduleId;
-		reservation.RoomNumber = room.Number;
-		reservation.RoomType = room.Type;
-
+		// Validates properties
 		var result = _validator.Validate(reservation);
 		if (!result.IsValid)
 		{
 			result.AddToModelState(ModelState);
-			return View(reservation);
+			return BadRequest(result);
 		}
 
-		var successfullyAdded = await _crud.Add(reservation);
+		// Adds reservation to databases
+		await _crud.Add(reservation);
 
-		if (!successfullyAdded)
+		// Checks if reservation fits in the room, if not delete it from database.
+		reservation = await _crud.Get(reservation.GetPrimaryKey());
+		if (!reservation.Room!.CanFit(reservation))
 		{
-			ModelState.AddModelError(nameof(Reservation.RoomNumber), "Reservation already exists.");
-			return View(reservation);
+			await _crud.Delete(reservation);
+			// Add error that shows room in not available.
+			result.Errors.Add(RoomFull);
+			return BadRequest(result);
 		}
-
-		TempData.Put(nameof(Reservation), reservation.RemoveRelations());
-		return RedirectToAction(controllerName: "People", actionName: "Create");
+		var serializationOptions = new JsonSerializerOptions() { ReferenceHandler = ReferenceHandler.IgnoreCycles };
+		var json = JsonSerializer.Serialize(reservation, serializationOptions);
+		return Ok(JsonSerializer.Deserialize<Reservation>(json, serializationOptions));
 	}
 
-	// GET: Reservations/Edit/1/5
-	[HttpGet("[controller]/[action]/{id}")]
-	public IActionResult Edit(int id)
+	// TODO: test, when validation fails on the page.
+	[HttpPut($"[controller]/Page/{nameof(Edit)}")]
+	public async Task<IActionResult> PageEdit(Reservation reservation, ValidationResult? validationResult)
 	{
-		var key = new Dictionary<string, object> { { nameof(Reservation.Id), id } };
-		var reservation = _crud.GetNoCycle(key);
-		if (reservation is null) return RedirectToAction(controllerName: "Reservations", actionName: "Create");
-		TempData.Put(nameof(Reservation), reservation);
-		return View(reservation);
-	}
+		if(validationResult is null)
+		{
+			var primaryKey = reservation.GetPrimaryKey();
+			try
+			{
+				reservation = await _crud.Get(primaryKey);
+			}
+			catch (Exception)
+			{
+				return BadRequest(ReservationNotFound);
+			}
+            return View(nameof(Edit), reservation);
+        }
+		else
+		{
+            validationResult?.AddToModelState(ModelState);
+			return View(nameof(Edit), reservation);
+        }
+    }
 
-	// POST: Reservations/Edit/5
-	[HttpPost]
+
+	// TODO: test
+	[HttpPut("[controller]/[action]")]
 	public async Task<IActionResult> Edit(Reservation reservation)
 	{
-		if (TempData.IsNull(nameof(Reservation))) return RedirectToAction(controllerName: "Reservations", actionName: "Create");
-		var oldReservation = TempData.Peek<Reservation>(nameof(Reservation))!;
+		try
+		{
+			await _crud.Get(reservation.GetPrimaryKey());
+        }
+		catch (Exception)
+		{
+			return BadRequest(ReservationNotFound);
+		}
 
-		reservation.BookingSource = oldReservation.BookingSource;
-		reservation.CheckIn ??= oldReservation.CheckIn;
-		reservation.CheckOut ??= oldReservation.CheckOut;
-		reservation.FlightArrivalTime ??= oldReservation.FlightArrivalTime;
-		reservation.FlightDepartureTime ??= oldReservation.FlightDepartureTime;
-		reservation.FlightArrivalNumber = oldReservation.FlightArrivalNumber;
-		reservation.FlightArrivalNumber = oldReservation.FlightDepartureNumber;
-		reservation.Id = oldReservation.Id;
-		reservation.RoomNumber ??= oldReservation.RoomNumber;
-		reservation.RoomScheduleId = oldReservation.RoomScheduleId;
-		reservation.ScheduleId = oldReservation.ScheduleId;
-		reservation.People = oldReservation.People;
-
+		// Validates properties.
 		var result = _validator.Validate(reservation);
 		if (!result.IsValid)
 		{
-			result.AddToModelState(ModelState);
-			return View(reservation);
+			return BadRequest(result);
 		}
-		await _crud.Update(reservation);
-		return RedirectToAction(controllerName: "Rooms", actionName: "Index");
+
+		reservation = await _crud.Update(reservation);
+		if (!reservation.Room!.CanFit(reservation))
+		{
+			await _crud.Delete(reservation);
+            result.Errors.Add(RoomFull);
+            return BadRequest(result);
+		}
+
+		return Ok(reservation);
 	}
 
-	// GET: Reservations/Delete/5
 	[HttpDelete("[controller]/[action]")]
 	public async Task<IActionResult> Delete(Reservation reservation)
 	{
-		await _crud.Delete(reservation);
-		return RedirectToAction(controllerName: "Rooms", actionName: "Index");
+		try
+		{
+            reservation = await _crud.Get(reservation.GetPrimaryKey());
+            await _crud.Delete(reservation);
+            return Ok();
+        }
+		catch (Exception e)
+		{
+			return BadRequest(e);
+		}
 	}
-
-	[HttpDelete("[controller]/[action]/{id}")]
-	public async Task<IActionResult> Delete(int id)
-		=> await Delete(new Reservation() { Id = id, CheckIn = null, CheckOut = null });
 }
+ 
