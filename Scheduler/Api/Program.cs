@@ -1,47 +1,44 @@
-using Creative.Database.Data;
-using FluentValidation;
-using Roster.Data;
-using Scheduler.Data.Models;
-using Scheduler.Data.Validators;
-using Scheduler.Data.Validators.Abstract;
-
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("AZURE_SQL_CONNECTIONSTRING")
-    ?? throw new NullReferenceException($"The azure connection string cannot be null.");
-var options = new SqlServerOptions() { ConnectionString = connectionString };
-builder.Services.AddDbContext<ScheduleDb>(_ => ScheduleDb.Create(options));
-
 // Add services to the container.
-builder.Services.AddControllersWithViews();
-builder.Services.AddRazorPages();
-builder.Services.AddMvc();
-
-// Register validators
-builder.Services.AddScoped<IValidator<Person>, PersonValidator>();
-builder.Services.AddScoped<IValidator<Reservation>, ReservationValidator>();
-builder.Services.AddScoped<IValidator<Room>, RoomValidator>();  
-builder.Services.AddScoped<RelationshipValidator<Reservation>, ReservationRelationshipValidator>();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
 
-app.UseRouting();
+var summaries = new[]
+{
+    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+};
 
-app.UseAuthorization();
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Schedules}/{action=Index}"
-    );
+app.MapGet("/weatherforecast", () =>
+{
+    var forecast =  Enumerable.Range(1, 5).Select(index =>
+        new WeatherForecast
+        (
+            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
+            Random.Shared.Next(-20, 55),
+            summaries[Random.Shared.Next(summaries.Length)]
+        ))
+        .ToArray();
+    return forecast;
+})
+.WithName("GetWeatherForecast")
+.WithOpenApi();
 
 app.Run();
+
+record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+{
+    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+}
