@@ -1,7 +1,7 @@
 ﻿using Creative.Api.Implementations.Entity_Framework;
 using Creative.Api.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Roster.Data;
+using Scheduler.Api.Data;
 using Scheduler.Api.Data.Models;
 
 namespace Scheduler.Api.Controllers;
@@ -34,11 +34,6 @@ public class SchedulesController : Controller
 		await _crud.Add(new Schedule() { Name = name });
 		return RedirectToAction(nameof(Index));
 	}
-
-    // Tested
-    [HttpDelete($"[controller]/[action]/{{{nameof(Schedule.Id)}}}")]
-	public async Task<IActionResult> Delete(int id)
-		=> await Delete(new Schedule() { Id = id});
 
     // Tested
     [HttpDelete("[controller]/[action]")]

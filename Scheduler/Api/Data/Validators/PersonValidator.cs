@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
-using Scheduler.Data.Models;
+using Scheduler.Api.Data.Models;
 
-namespace Scheduler.Data.Validators;
+namespace Scheduler.Api.Data.Validators;
 
 public class PersonValidator : AbstractValidator<Person>
 {

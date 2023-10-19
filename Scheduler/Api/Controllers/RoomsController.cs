@@ -1,7 +1,7 @@
 ﻿using Creative.Api.Implementations.Entity_Framework;
 using Creative.Api.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Roster.Data;
+using Scheduler.Api.Data;
 using Scheduler.Api.Data.Models;
 
 namespace Scheduler.Api.Controllers;
@@ -19,11 +19,6 @@ public sealed class RoomsController : Controller
 	[HttpPost($"[controller]/[action]")]
 	public async Task<IActionResult> Index(Schedule schedule)
 		=> View((await _crud.GetAll()).Where(room => room.ScheduleId == schedule.Id));
-
-	// TODO: test
-	[HttpPost("[controller]/[action]")]
-	public IActionResult Create(Schedule schedule) 
-		=> View(new Room() { Floor = null, Number = null, Type = null, ScheduleId = (int)schedule.Id! });
 
 	// TODO: test
 	[HttpPost("[controller]/[action]")]

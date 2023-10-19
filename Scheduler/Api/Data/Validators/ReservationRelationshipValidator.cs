@@ -1,8 +1,8 @@
 ﻿using FluentValidation;
-using Scheduler.Data.Models;
-using Scheduler.Data.Validators.Abstract;
+using Scheduler.Api.Data.Models;
+using Scheduler.Api.Data.Validators.Abstract;
 
-namespace Scheduler.Data.Validators;
+namespace Scheduler.Api.Data.Validators;
 
 internal class ReservationRelationshipValidator : RelationshipValidator<Reservation>
 {

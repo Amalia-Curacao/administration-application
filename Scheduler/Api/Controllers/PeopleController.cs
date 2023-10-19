@@ -3,7 +3,7 @@ using Creative.Api.Interfaces;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
-using Roster.Data;
+using Scheduler.Api.Data;
 using Scheduler.Api.Data.Models;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -24,14 +24,6 @@ namespace Scheduler.Api.Controllers
 		}
 
 		// TODO: test
-		[HttpPost("[controller]/Page/[action]")]
-		public IActionResult Create(Person person, ValidationResult? validationResult)
-		{
-			validationResult?.AddToModelState(ModelState);
-            return View(person);
-        }
-
-		// TODO: test
 		[HttpPost("[controller]/[action]")]
 		public async Task<IActionResult> Create(Person person)
 		{
@@ -49,43 +41,18 @@ namespace Scheduler.Api.Controllers
 		}
 
 		// TODO: test
-		[HttpPut($"[controller]/Page/{nameof(Edit)}")]
-		public async Task<IActionResult> PageEdit(Person person, ValidationResult? validationResult)
-		{
-			if(validationResult is null)
-			{
-				var primaryKey = person.GetPrimaryKey();
-				try
-				{
-					person = await _crud.Get(primaryKey);
-
-                }
-				catch (Exception)
-				{
-					return BadRequest(PersonNotFound);
-				}
-                return View(person);
-            }
-			else
-			{
-				validationResult.AddToModelState(ModelState);
-				return View(person);
-			}
-		}
-
-		// TODO: test
 		[HttpPut("[controller]/[action]")]
 		public async Task<IActionResult> Edit(Person person)
 		{
 			try
 			{
-                _ = await _crud.Get(person.GetPrimaryKey());
-            }
+				_ = await _crud.Get(person.GetPrimaryKey());
+			}
 			catch (Exception)
 			{
 				return BadRequest(PersonNotFound);
 			}
-			 
+
 			// Validates properties.
 			var results = _validator.Validate(person);
 			if (!results.IsValid)

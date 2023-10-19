@@ -1,9 +1,9 @@
 ﻿using Creative.Database;
 using Creative.Database.Data;
 using Microsoft.EntityFrameworkCore;
-using Scheduler.Data.Models;
+using Scheduler.Api.Data.Models;
 
-namespace Roster.Data;
+namespace Scheduler.Api.Data;
 
 public class ScheduleDb : DatabaseContext
 {

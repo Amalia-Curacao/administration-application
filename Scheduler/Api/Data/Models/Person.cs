@@ -11,7 +11,7 @@ public sealed class Person : IModel
 {
     public int? Id { get; set; }
 
-    [ForeignKey(nameof(Reservation.Id))]
+    [ForeignKey(nameof(Models.Reservation.Id))]
     public int? ReservationId { get; set; }
     public Reservation? Reservation { get; set; }
 
@@ -41,6 +41,6 @@ public sealed class Person : IModel
     public static IQueryable<T> IncludeAll<T>(DbSet<T> values) where T : class
         => values
         .Include(nameof(Reservation))
-        .Include($"{nameof(Reservation)}.{nameof(Reservation.Room)}")
-        .Include($"{nameof(Reservation)}.{nameof(Reservation.Schedule)}");
+        .Include($"{nameof(Reservation)}.{nameof(Models.Reservation.Room)}")
+        .Include($"{nameof(Reservation)}.{nameof(Models.Reservation.Schedule)}");
 }

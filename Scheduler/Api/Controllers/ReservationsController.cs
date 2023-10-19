@@ -3,7 +3,7 @@ using Creative.Api.Interfaces;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
-using Roster.Data;
+using Scheduler.Api.Data;
 using Scheduler.Api.Data.Models;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -21,38 +21,6 @@ public class ReservationsController : Controller
 	{
 		_crud = new Crud<Reservation>(db);
 		_validator = validator;
-	}
-
-	/// <summary> Api endpoint to retrieve the view for creating new reservations. </summary>
-	/// <returns> 
-	/// An HTTP Status: 400 (Bad request) with error message, when the parameters do not meet expectations.
-	/// A new View with validation error, for fields that do not comply with the validation rules.
-	/// </returns>
-	[HttpPost($"[controller]/Page/{nameof(Create)}")]
-	public IActionResult PageCreate(Schedule schedule, Room room, DateOnly? checkIn, ValidationResult? validationResult)
-	{
-
-		if (schedule is null || schedule.Rooms is null || !schedule.Rooms.Any())
-		{
-			return BadRequest("The schedule object seems to be incomplete");
-		}
-		if (room.Number is null)
-		{
-			return BadRequest("The room number can not be null.");
-		}
-		validationResult?.AddToModelState(ModelState);
-
-		ViewData["Schedule"] = schedule;
-
-		return View($"{nameof(Create)}", new Reservation()
-		{
-			ScheduleId = schedule.Id,
-			RoomType = room.Type ?? RoomType.None,
-			RoomNumber = room.Number,
-			CheckOut = null,
-			CheckIn = checkIn ?? null,
-			RoomScheduleId = room.ScheduleId
-		});
 	}
 
 	/// <summary> Api endpoint for creating reservations in the database. </summary>
@@ -88,30 +56,6 @@ public class ReservationsController : Controller
 		var json = JsonSerializer.Serialize(reservation, serializationOptions);
 		return Ok(JsonSerializer.Deserialize<Reservation>(json, serializationOptions));
 	}
-
-	// TODO: test, when validation fails on the page.
-	[HttpPut($"[controller]/Page/{nameof(Edit)}")]
-	public async Task<IActionResult> PageEdit(Reservation reservation, ValidationResult? validationResult)
-	{
-		if(validationResult is null)
-		{
-			var primaryKey = reservation.GetPrimaryKey();
-			try
-			{
-				reservation = await _crud.Get(primaryKey);
-			}
-			catch (Exception)
-			{
-				return BadRequest(ReservationNotFound);
-			}
-            return View(nameof(Edit), reservation);
-        }
-		else
-		{
-            validationResult?.AddToModelState(ModelState);
-			return View(nameof(Edit), reservation);
-        }
-    }
 
 
 	// TODO: test
