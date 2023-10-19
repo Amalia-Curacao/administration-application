@@ -1,0 +1,130 @@
+﻿@using Scheduler.Api.Data.Models;
+@model Reservation
+
+@{
+	Layout = "~/Views/Shared/_Layout.cshtml";
+	var checkInDate = TempData.Peek<DateOnly>($"{nameof(Reservation.CheckIn)}");
+	var roomNumbers = ((IEnumerable<Room>?)ViewData[$"{nameof(Room)}s"])!.Select(r => r.Number);
+	var selectedRoom = ((Room?)ViewData[$"{nameof(Room)}"])!;
+}
+
+<div class="row div-centered">
+	<div class="col-xs-8 w-50">
+		<p>
+			<h1>Reservation</h1>
+			<h4>Add</h4>
+		</p>
+		<div class="row">
+			<form asp-action="Create" asp-controller="Reservations">
+				<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+				<div class="row">
+					<div class="w-auto">
+						<label asp-for="BookingSource" class="control-label">Source</label>
+						<br />
+						<span asp-validation-for="BookingSource" class="text-danger"></span>
+						<select asp-for="BookingSource"
+								asp-items="@Html.GetEnumSelectList<BookingSource>().Where(e => e.Text != BookingSource.None.ToString())"
+								class="form-control"></select>
+					</div>
+					<div class="w-auto float-end">
+						<label asp-for="RoomNumber" class="control-label">@selectedRoom!.Type!.Value.ToString() number:</label>
+						<br />	
+						<span asp-validation-for="RoomNumber" class="text-danger"></span>
+						<select  
+							asp-for="RoomNumber" 
+							asp-items="@roomNumbers.Select(rn => new SelectListItem(rn.ToString(), rn.ToString(), rn! == selectedRoom!.Number))" 
+							class="form-control"></select>
+					</div>
+				</div>
+				<div class="row">
+					<div class="form-group w-50 float-start">
+						<label asp-for="CheckIn" class="control-label"></label>
+						<br />
+						<span asp-validation-for="CheckIn" class="text-danger"></span>
+						<input id="CheckIn" type="date" asp-for="CheckIn" class="form-control" />
+					</div>
+					<div class="w-50 float-end">
+						<div class= "w-50 float-start pe-2 ">
+							<label asp-for="FlightArrivalNumber" class="control-label text-nowrap"></label>
+							<br />
+							<span asp-validation-for="FlightArrivalNumber" class="text-danger text-nowrap"></span>
+							<input type="text" asp-for="FlightArrivalNumber" class="form-control" />
+						</div>
+						<div class="w-50 float-end ps-2">
+							<label asp-for="FlightArrivalTime" class="control-label text-nowrap"></label>
+							<br />
+							<span asp-validation-for="FlightArrivalTime" class="text-danger text-nowrap"></span>
+							<input type="time" asp-for="FlightArrivalTime" class="form-control" />
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="form-group w-50 float-start">
+						<label asp-for="CheckOut" class="control-label text-nowrap"></label>
+						<br />
+						<span asp-validation-for="CheckOut" class="text-danger text-nowrap"></span>
+						<input type="date" asp-for="CheckOut" class="form-control" />
+					</div>
+					<div class="w-50 float-end">
+						<div class="w-50 float-start pe-2">
+							<label asp-for="FlightDepartureNumber" class="control-label text-nowrap"></label>
+							<br />
+							<span asp-validation-for="FlightDepartureNumber" class="text-danger text-nowrap"></span>
+							<input type="text" asp-for="FlightDepartureNumber" class="form-control" />
+						</div>
+						<div class="w-50 float-end ps-2">
+							<label asp-for="FlightDepartureTime" class="control-label text-nowrap"></label>
+							<br />
+							<span asp-validation-for="FlightDepartureTime" class="text-danger text-nowrap"></span>
+							<input type="time" asp-for="FlightDepartureTime" class="form-control" />
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="form-group">
+						<label asp-for="Remarks" class="control-label"></label>
+						<br/>
+						<span asp-validation-for="Remarks" class="text-danger"></span>
+						<textarea asp-for="Remarks" class="form-control" placeholder="Remarks..."></textarea>
+					</div>
+				</div>
+				<div class="form-group form-btn-group">
+					<div class="btn-group">
+						<input type="submit" value="Add Guest(s)" class="btn btn-outline-success float-right" />
+					</div>
+					<div class="btn-group">
+						<a class="btn btn-danger" asp-controller="Rooms" asp-action="Index" asp-route-scheduleId="@TempData.Peek("scheduleId")">Back</a>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+@section Scripts {
+	<script type="text/javascript">
+		$(document).ready(function () {
+			var date = new Date(@checkInDate.Year, @checkInDate.Month - 1, @checkInDate.Day);
+			$("#CheckIn").val(dateOnlyToString(date));
+        });
+
+		// follows ISO 8601 standard for formatting dates to strings.
+		function dateOnlyToString(date) {
+			let dateString = "" + date.getFullYear();
+
+			if (date.getMonth() + 1 < 10) {
+				dateString += "-0" + (date.getMonth() + 1);
+			}
+			else {
+				dateString += "-" + (date.getMonth() + 1);
+			}
+			if (date.getDate() < 10) {
+				dateString += "-0" + date.getDate();
+			}
+			else {
+				dateString += "-" + date.getDate();
+			}
+			return dateString;
+		}
+	</script>
+}
