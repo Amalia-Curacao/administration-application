@@ -1,4 +1,5 @@
-﻿using Creative.Api.Interfaces;
+﻿using Creative.Api.Data;
+using Creative.Api.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -25,7 +26,7 @@ public sealed class Person : IModel
     public PersonPrefix? Prefix { get; set; } = PersonPrefix.Unknown;
 
     /// <inheritdoc/>
-    public IDictionary<string, object> GetPrimaryKey() => new Dictionary<string, object>() { { nameof(Id), Id! } };
+    public HashSet<Key> GetPrimaryKey() => new HashSet<Key>() { new Key(nameof(Id), Id!)};
 
     public void AutoIncrementPrimaryKey()
     {
@@ -33,9 +34,9 @@ public sealed class Person : IModel
     }
 
     /// <inheritdoc/>
-    public void SetPrimaryKey(IDictionary<string, object> primaryKey)
+    public void SetPrimaryKey(HashSet<Key> keys)
     {
-        Id = primaryKey[nameof(Id)] as int?;
+        Id = keys.Single(key => key.Name == nameof(Id)).Value as int?;
     }
 
     public static IQueryable<T> IncludeAll<T>(DbSet<T> values) where T : class

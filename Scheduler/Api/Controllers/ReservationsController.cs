@@ -1,5 +1,4 @@
-﻿using Creative.Api.Implementations.Entity_Framework;
-using Creative.Api.Interfaces;
+﻿using Creative.Api.Interfaces;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;

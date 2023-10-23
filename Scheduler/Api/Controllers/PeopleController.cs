@@ -1,7 +1,6 @@
-﻿using Creative.Api.Implementations.Entity_Framework;
+﻿using Creative.Api.Data;
 using Creative.Api.Interfaces;
 using FluentValidation;
-using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Scheduler.Api.Data;
 using Scheduler.Api.Data.Models;
@@ -23,6 +22,18 @@ namespace Scheduler.Api.Controllers
 			_validator = validator;
 		}
 
+		[HttpGet("[controller]/[action]/{id}")]
+		public IActionResult Get(int id)
+		{
+			var person = _crud.Get(new HashSet<Key> { new Key(nameof(Person.Id), id) });
+			if (person == null)
+			{
+				return BadRequest(PersonNotFound);
+			}
+
+			return Ok(JsonSerializer.Serialize(person, SerialaztionOptions));
+		}
+
 		// TODO: test
 		[HttpPost("[controller]/[action]")]
 		public async Task<IActionResult> Create(Person person)
@@ -35,7 +46,7 @@ namespace Scheduler.Api.Controllers
 
 			await _crud.Add(person);
 
-			person = await _crud.Get(person.GetPrimaryKey());
+			person = _crud.Get(person.GetPrimaryKey());
 
 			return Ok(JsonSerializer.Serialize(person, SerialaztionOptions));
 		}

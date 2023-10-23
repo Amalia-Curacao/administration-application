@@ -16,6 +16,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Creative.Api", "Creative\Ap
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scheduler.Api", "Scheduler\Api\Scheduler.Api.csproj", "{E90DC7C7-5EA3-4890-A2A6-A11DF3683999}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Creative.Specs", "Creative\Specs\Creative.Specs.csproj", "{99A7E8EC-E218-422A-B1AF-B5BC42D045AC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,10 +44,10 @@ Global
 		{E90DC7C7-5EA3-4890-A2A6-A11DF3683999}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E90DC7C7-5EA3-4890-A2A6-A11DF3683999}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E90DC7C7-5EA3-4890-A2A6-A11DF3683999}.Release|Any CPU.Build.0 = Release|Any CPU
-		{449382A1-FFA0-4242-BBA2-EC635B6A4791}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{449382A1-FFA0-4242-BBA2-EC635B6A4791}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{449382A1-FFA0-4242-BBA2-EC635B6A4791}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{449382A1-FFA0-4242-BBA2-EC635B6A4791}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99A7E8EC-E218-422A-B1AF-B5BC42D045AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99A7E8EC-E218-422A-B1AF-B5BC42D045AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99A7E8EC-E218-422A-B1AF-B5BC42D045AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99A7E8EC-E218-422A-B1AF-B5BC42D045AC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

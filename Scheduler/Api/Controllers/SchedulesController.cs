@@ -1,5 +1,4 @@
-﻿using Creative.Api.Implementations.Entity_Framework;
-using Creative.Api.Interfaces;
+﻿using Creative.Api.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Scheduler.Api.Data;
 using Scheduler.Api.Data.Models;
