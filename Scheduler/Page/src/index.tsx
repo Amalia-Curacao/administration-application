@@ -1,24 +1,32 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
+import 'bootstrap/dist/css/bootstrap.css';
 import reportWebVitals from './reportWebVitals';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import App from './App';
+import ScheduleIndex, { link as ScheduleIndexLink} from './pages/schedule';
+import Layout from './layout';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
+// First link is the default page
 const router = createBrowserRouter([
   {
-      path: '/',
-      element: <App />
+    path: '/',
+    element: <ScheduleIndex/>
+  },
+  {
+    path: ScheduleIndexLink,
+    element: <ScheduleIndex/>
   },
 ]);
 
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router}/>
+    <Layout>
+      <RouterProvider router={router}/>
+    </Layout>
   </React.StrictMode>
 );
 
