@@ -1,6 +1,9 @@
-export const link: string = "/schedule"; 
+import { ReactElement } from "react";
+import PageLink from "../../types/PageLink";
 
-export default function ScheduleIndex(): JSX.Element{
+export const link: PageLink = {name: "Schedule Index", path: "/schedule", element: <ScheduleIndex/>};
+
+export default function ScheduleIndex(): ReactElement{
     return (
         <>
             <Header/>
@@ -9,7 +12,7 @@ export default function ScheduleIndex(): JSX.Element{
     )
 }
 
-function Header(): JSX.Element{
+function Header(): ReactElement{
     return (
         <header>
             <h1>Schedule</h1>
@@ -17,7 +20,7 @@ function Header(): JSX.Element{
     )
 }
 
-function Index() : JSX.Element{
+function Index() : ReactElement{
     return (
         <section>
         </section>
