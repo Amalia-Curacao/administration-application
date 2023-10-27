@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Creative.Database.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Creative.Database;
 
@@ -6,13 +7,14 @@ namespace Creative.Database;
 public static class SqliteContextTool
 {   
     /// <summary> Initialize <see cref="DbContextOptions{TContext}"/> for <see cref="SqliteContext"/>. </summary>
-    public static DbContextOptions<TContext> InitDbContextOptions<TContext>(string path) where TContext : DbContext
-        => new DbContextOptionsBuilder<TContext>()
-           .UseSqlite(path)
-           .Options;
+    public static DbContextOptions<TContext> InitDbContextOptions<TContext>(SqliteOptions options) where TContext : DbContext
+    => new DbContextOptionsBuilder<TContext>()
+        .UseSqlite(options.Path)
+        .Options;
 
     /// <summary> Sets the configuration of the context to use SQLite. </summary>
     /// <param name="path"> The path to the SQLite database. </param>
-    public static void OnConfiguring(DbContextOptionsBuilder options, string path)
-        => options.UseSqlite($"Data source={path}");
+    public static void OnConfiguring(DbContextOptionsBuilder builder, SqliteOptions options)
+    => builder
+        .UseSqlite($"Data source={options.Path}");
 }

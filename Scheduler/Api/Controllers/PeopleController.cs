@@ -1,4 +1,5 @@
 ﻿using Creative.Api.Data;
+using Creative.Api.Implementations.EntityFrameworkCore;
 using Creative.Api.Interfaces;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
@@ -44,9 +45,9 @@ namespace Scheduler.Api.Controllers
 				return BadRequest(results);
 			}
 
-			await _crud.Add(person);
+			await _crud.Add(objs: person);
 
-			person = _crud.Get(person.GetPrimaryKey());
+			person = await _crud.Get(person.GetPrimaryKey());
 
 			return Ok(JsonSerializer.Serialize(person, SerialaztionOptions));
 		}
@@ -80,8 +81,7 @@ namespace Scheduler.Api.Controllers
 		[HttpDelete("[controller]/[action]")]
 		public async Task<IActionResult> Delete(Person person)
 		{
-			person = await _crud.Get(person.GetPrimaryKey());
-			await _crud.Delete(person);
+			await _crud.Delete(person.GetPrimaryKey());
 			return RedirectToAction(nameof(ReservationsController.Edit), "Reservations", person.Reservation);
 		}
 	}
