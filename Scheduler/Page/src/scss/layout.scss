@@ -1,0 +1,17 @@
+
+$primary: #048BA8;
+$secondary: #efeeee;
+$info: #efeeee;
+$success: #26C485;
+$warning: #F18F01;
+$danger: #F71735;
+
+// Dark mode
+$primary-dark: #2E4057;
+$secondary-dark: #545c63;
+
+a{
+    color: inherit !important;
+}
+
+@import "node_modules/bootstrap/scss/bootstrap";

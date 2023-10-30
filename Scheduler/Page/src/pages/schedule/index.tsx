@@ -1,22 +1,21 @@
 import { ReactElement } from "react";
 import PageLink from "../../types/PageLink";
+import { GrSchedules } from "react-icons/gr";
 
-export const link: PageLink = {name: "Schedule Index", path: "/schedule", element: <ScheduleIndex/>};
+export const link: PageLink = {name: "Schedule Index", path: "/schedule", element: <ScheduleIndex/>, icon: <GrSchedules/>};
 
 export default function ScheduleIndex(): ReactElement{
     return (
         <>
-            <Header/>
+            <PageTitle/>
             <Index/>
         </>
     )
 }
 
-function Header(): ReactElement{
+function PageTitle(): ReactElement{
     return (
-        <header>
-            <h1>Schedule</h1>
-        </header>
+        <h1>Schedule</h1>
     )
 }
 
