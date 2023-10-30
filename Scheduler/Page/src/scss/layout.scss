@@ -14,4 +14,36 @@ a{
     color: inherit !important;
 }
 
+a.btn-outline-success:hover{
+    color: $secondary !important;
+}
+
+a.btn-outline-success{
+    color: $success !important;
+}
+
+a.btn-outline-warning{
+    color: $warning !important;
+}
+
+a.btn-outline-warning:hover{
+    color: $secondary !important;
+}
+
+a.btn-outline-danger{
+    color: $danger !important;
+}
+
+a.btn-outline-danger:hover{
+    color: $secondary !important;
+}
+
+path{
+    stroke: currentColor;
+}
+
+a{
+    text-decoration: none;
+}
+
 @import "node_modules/bootstrap/scss/bootstrap";
