@@ -1,0 +1,23 @@
+
+$primary: #048BA8;
+$secondary: #efeeee;
+$info: #efeeee;
+$success: #26C485;
+$warning: #F18F01;
+$danger: #F71735;
+
+// Dark mode
+$primary-dark: #2E4057;
+$secondary-dark: #545c63;
+
+:export {
+    primary: $primary;
+    secondary: $secondary;
+    info: $info;
+    success: $success;
+    warning: $warning;
+    danger: $danger;
+
+    primary-dark: $primary-dark;
+    secondary-dark: $secondary-dark;
+}
