@@ -1,37 +1,25 @@
-import { forwardRef, useImperativeHandle } from "react";
-import PageLink from "../../types/PageLink";
-import { GrTableAdd } from "react-icons/gr";
+import { ReactElement, createRef } from "react";
+import Schedule from "../../models/Schedule";
 
-const save = () => {
-    console.log("save");
-};
+// TODO Remove
+let id = 4;
 
-export interface handleSave {
-    save: VoidFunction;
+
+const refNameInput = createRef<HTMLInputElement>();
+// TODO | when the create action is called from the api show the error given by the api on screen as a tooltip on the input field with a red border, also return false.
+// in the case that it is successfully added return true;
+function Action() : Schedule | null {
+    return({id: id++, name: refNameInput.current?.value ?? "", reservations: [], rooms: []});
 }
 
-const ScheduleCreate = forwardRef<handleSave, {}>((props, ref) => {
-    useImperativeHandle(ref, () => ({
-        save
-    }));
-    
+function Body(): ReactElement {
     return(<>
-        <table className="table table-hover table-secondary table-borderless mb-0">
-            <tbody className="bg-secondary">
-                <tr className="bg-secondary">
-                    <td className="bg-secondary p-0">
-                        <input type="text" className="form-control bg-secondary border-primary"/>
-                    </td>
-                    
-                        { props === undefined 
-                        ?   <td className="bg-secondary">
-                                <a onClick={save} className="btn btn-outline-success" href="#">Save</a> 
-                            </td>
-                        : <></> }
-                </tr>
-            </tbody>
-        </table>    
+        <div className="bg-secondary p-0">
+            <input ref={refNameInput} placeholder="Name" type="text" className="form-control bg-secondary border-primary"/>
+        </div>
     </>);
-});;
-export const link: PageLink = { name: "Schedule create", path: "/schedule/create", element: <></>, icon: <GrTableAdd/> };
-export default ScheduleCreate;
+}
+
+export default function ScheduleCreate(): {body: ReactElement, action: () => Schedule | null} {
+    return({body: <Body/>, action: Action});
+}
