@@ -25,13 +25,12 @@ let _state: State = State.Default;
 // Elements are written in PascalCasing and are always functions.
 
 function ScheduleMain(): ReactElement {    
-    return(<>
-        <div className="p-3 pe-3 d-flex flex-column flex-fill">
-            <PageTitle/>
-            <Table/>
-        </div>
-    </>);
-}
+    
+    const testSchedules: Schedule[] = [
+        {id: 1, name: "test1", reservations: [], rooms: []}, 
+        {id: 2, name: "test2", reservations: [], rooms: []}, 
+        {id: 3, name: "test3", reservations: [], rooms: []}];
+    const [schedules, setSchedules] = useState<Schedule[]>(testSchedules);
 
 function PageTitle(): ReactElement { 
     return(
@@ -43,11 +42,6 @@ function PageTitle(): ReactElement {
     
 function Table(): ReactElement {
     const [creating, setCreating] = useState<boolean>(false);
-    const testSchedules: Schedule[] = [
-        {id: 1, name: "test1", reservations: [], rooms: []}, 
-        {id: 2, name: "test2", reservations: [], rooms: []}, 
-        {id: 3, name: "test3", reservations: [], rooms: []}];
-    const [schedules, setSchedules] = useState<Schedule[]>(testSchedules);
 
     function onEdit(toEdit: Schedule) {
         setSchedules(schedules.map(s => s.id === toEdit.id ? toEdit : s));
@@ -218,6 +212,13 @@ function SaveButton({onSave, onReturn, onFailure}: {onSave: () => Schedule | nul
                 Save
             </button>
         </div>);
+}
+return(<>
+    <div className="p-3 pe-3 d-flex flex-column flex-fill">
+        <PageTitle/>
+        <Table/>
+    </div>
+</>);
 }
 // #endregion
 
