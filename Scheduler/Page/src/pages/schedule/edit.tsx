@@ -1,4 +1,4 @@
-import { ReactElement, RefObject, createRef, useState } from "react";
+import { ReactElement, RefObject, createRef } from "react";
 import Schedule from "../../models/Schedule";
 
 let refIdField: RefObject<HTMLInputElement> = createRef() ;
@@ -6,7 +6,6 @@ let refNameField: RefObject<HTMLInputElement> = createRef();
 
 function EditSchedule({schedule} : {schedule: Schedule}) : ReactElement {
     const { id, name } = schedule;
-    const [stateName, setStateName] = useState(name === null ? "" : name);
 
     return(<>
         <td colSpan={1} className="bg-secondary">
@@ -15,13 +14,18 @@ function EditSchedule({schedule} : {schedule: Schedule}) : ReactElement {
             </span>
         </td>
         <td colSpan={1} className="bg-secondary">
-            <input ref={refNameField} onChange={e => setStateName(e.target.value)} value={stateName} type="text" className="form-control bg-secondary border-primary"/>
+            <input ref={refNameField} defaultValue={name ?? ""} type="text" className="form-control bg-secondary border-primary"/>
         </td>
     </>);
 }
 
 function Action() : Schedule | null {
-    return { id: Number(refIdField.current?.innerText) ?? -1, name: refNameField.current?.value ?? null, rooms: [], reservations: [] };
+    return { 
+        id: Number(refIdField.current?.innerText) ?? -1, 
+        name: refNameField.current?.value ?? "", 
+        rooms: [], 
+        reservations: [] 
+    };
 }
 
 export default function ScheduleEdit(schedule: Schedule) : {body: ReactElement, action: () => Schedule | null} {
