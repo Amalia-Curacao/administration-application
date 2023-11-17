@@ -36,18 +36,7 @@ function ScheduleMain(): ReactElement {
         </div>
     </>);
     
-    function onEdit(toEdit: Schedule) {
-        setSchedules(schedules.map(s => s.id === toEdit.id ? toEdit : s));
-    }
-
-    function onDelete(toDelete: Schedule) {
-        setSchedules(schedules.filter(s => s.id !== toDelete.id));
-    }
-
-    function onAdd(schedule: Schedule) {
-        setSchedules([...schedules, schedule]);
-    }
-
+    
     // #region Elements
     // Elements are written in PascalCasing and are always functions.
     function PageTitle(): ReactElement { 
@@ -66,6 +55,20 @@ function ScheduleMain(): ReactElement {
             _state = State.Create;
             setCreating(true);
         }
+
+        // #region Actions
+        function onEdit(toEdit: Schedule) {
+            setSchedules(schedules.map(s => s.id === toEdit.id ? toEdit : s));
+        }
+
+        function onDelete(toDelete: Schedule) {
+            setSchedules(schedules.filter(s => s.id !== toDelete.id));
+        }
+
+        function onAdd(schedule: Schedule) {
+            setSchedules([...schedules, schedule]);
+        }
+        // #endregion
 
         return(<>
             <table className="table table-hover table-secondary">
@@ -93,7 +96,7 @@ function ScheduleMain(): ReactElement {
                         <ScheduleRowCreate addSchedule={onAdd} onReturn={() => {_state = State.Default; setCreating(false)}}/>
                     </tr>
 
-                    {schedules.map(schedule => <ScheduleRow key={schedule.id} schedule={schedule}/>)}
+                    {schedules.map(schedule => <ScheduleRow key={schedule.id} schedule={schedule} onEdit={onEdit} onDelete={onDelete}/>)}
 
                     <tr hidden={creating}>
                         <td colSpan={3} className="bg-secondary rounded-0">
@@ -128,7 +131,7 @@ function ScheduleMain(): ReactElement {
         )
     }
 
-    function ScheduleRow({schedule}: {schedule: Schedule}): ReactElement {    
+    function ScheduleRow({schedule, onDelete, onEdit}: {schedule: Schedule, onEdit: (schedule: Schedule) => void, onDelete: (schedule: Schedule) => void}): ReactElement {    
         
         const scheduleRowIndex = <ScheduleRowIndex 
             schedule={schedule} 
