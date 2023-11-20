@@ -4,7 +4,6 @@ import Schedule from "../../models/Schedule";
 // TODO Remove
 let id = 4;
 
-
 const refNameInput = createRef<HTMLInputElement>();
 // TODO | when the create action is called from the api show the error given by the api on screen as a tooltip on the input field with a red border, also return false.
 // in the case that it is successfully added return true;

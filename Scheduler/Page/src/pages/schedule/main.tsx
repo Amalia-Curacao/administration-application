@@ -7,7 +7,9 @@ import PageLink from "../../types/PageLink";
 import { PageState as State } from "../../types/PageState";
 import CreateSchedule from "./create";
 import ScheduleRow from "./row";
+import PageTitle from "./title";
 
+const _info = {name: "Schedules", icon: <GrSchedules/>};
 function ScheduleMain(): ReactElement {    
 
     // #region Variables
@@ -22,21 +24,10 @@ function ScheduleMain(): ReactElement {
 
     return(<>
         <div className="p-3 pe-3 d-flex flex-column flex-fill">
-            <PageTitle/>
+            <PageTitle name={_info.name} icon={_info.icon}/>
             <Table/>
         </div>
     </>);
-    
-    
-    // #region Elements
-    // Elements are written in PascalCasing and are always functions.
-    function PageTitle(): ReactElement { 
-        return(
-        <div className="d-flex justify-content-between">
-            <h1>Schedules</h1>
-            <div className="h1">{link.icon}</div>
-        </div>);
-    }
         
     function Table(): ReactElement {
         const [creating, setCreating] = useState<boolean>(false);
@@ -130,4 +121,4 @@ function ScheduleMain(): ReactElement {
 }
 
 export default ScheduleMain;
-export const link: PageLink = {name: "Schedules", path: "/schedule", element: <ScheduleMain/>, icon: <GrSchedules/>};
+export const link: PageLink = {name: _info.name, path: "/schedule", element: <ScheduleMain/>, icon: _info.icon};
