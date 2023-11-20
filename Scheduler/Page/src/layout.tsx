@@ -5,9 +5,9 @@ import './scss/layout.scss';
 
 export default function Layout({children}: {children: ReactElement}): ReactElement{
     return (
-    <div className="d-flex">
+    <div className="d-flex flex-fill">
         <Sidebar links={routes}/>
-        <main className="d-flex bg-secondary vw-100">
+        <main className="bg-secondary w-100">
             {children}
         </main>
     </div>

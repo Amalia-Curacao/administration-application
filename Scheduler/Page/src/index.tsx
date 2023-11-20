@@ -5,11 +5,9 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Layout from './layout';
 import RouteObjects from './routes';
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
 
-root.render(
+
+ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <Layout>
       <RouterProvider router={createBrowserRouter(RouteObjects())} />
