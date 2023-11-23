@@ -10,7 +10,7 @@ export default function Sidebar({links} : {links: PageLink[]}): ReactElement{
         <Link icon={<FaSmileBeam />} path="#"/>
     </div>
     <div className={baseClass + ' ' + fixedPosition}>
-        {links.map(link => <Link key={link.path} icon={link.icon} path={link.path}/>)}
+        {links.map(link => <Link key={link.route} icon={link.icon} path={link.route}/>)}
     </div>
     </>);
 }

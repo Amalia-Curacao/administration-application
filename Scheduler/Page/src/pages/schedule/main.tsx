@@ -4,44 +4,33 @@ import SaveButton from "../../components/saveButton";
 import "../../extensions/HTMLElement";
 import Schedule from "../../models/Schedule";
 import PageLink from "../../types/PageLink";
-import { PageState as State } from "../../types/PageState";
+import PageState from "../../types/PageState";
 import CreateSchedule from "./create";
 import ScheduleRow from "./row";
-import PageTitle from "./title";
+import PageTitle from "../../components/pageTitle";
 
 const _info = {name: "Schedules", icon: <GrSchedules/>};
-function ScheduleMain(): ReactElement {    
-
-    // #region Variables
-    // Variables are written are camelCasing and start with an underscore.
-    let _state: State = State.Default;
+function ScheduleMain(): ReactElement {   
+    let _state: PageState = PageState.Default;
     const testSchedules: Schedule[] = [
         {id: 1, name: "test1", reservations: [], rooms: []}, 
         {id: 2, name: "test2", reservations: [], rooms: []}, 
         {id: 3, name: "test3", reservations: [], rooms: []}];
     const [schedules, setSchedules] = useState<Schedule[]>(testSchedules);
-    // #endregion
-
-    return(<>
-        <div className="p-3 pe-3 d-flex flex-column flex-fill">
-            <PageTitle name={_info.name} icon={_info.icon}/>
-            <Table/>
-        </div>
-    </>);
         
     function Table(): ReactElement {
         const [creating, setCreating] = useState<boolean>(false);
         
+        // #region Actions
         function createState(){
-            if(_state !== State.Default) return;
-            _state = State.Create;
+            if(_state !== PageState.Default) return;
+            _state = PageState.Create;
             setCreating(true);
         }
 
-        // #region Actions
         function onEdit(toEdit: Schedule) {
-            if(_state !== State.Default) return;
-            _state = State.Edit;
+            if(_state !== PageState.Default) return;
+            _state = PageState.Edit;
             setSchedules(schedules.map(s => s.id === toEdit.id ? toEdit : s));
         }
 
@@ -54,7 +43,7 @@ function ScheduleMain(): ReactElement {
         }
 
         function onReturn() {
-            _state = State.Default; 
+            _state = PageState.Default; 
             setCreating(false);
         }
         // #endregion
@@ -91,7 +80,15 @@ function ScheduleMain(): ReactElement {
         </>);
     }
 
-    function ScheduleRowCreate({onReturn, addSchedule}: {onReturn: VoidFunction, addSchedule: (schedule: Schedule) => void}): ReactElement {
+    return(<>
+        <div className="p-3 pe-3 d-flex flex-column flex-fill">
+            <PageTitle name={_info.name} icon={_info.icon}/>
+            <Table/>
+        </div>
+    </>);
+}
+
+function ScheduleRowCreate({onReturn, addSchedule}: {onReturn: VoidFunction, addSchedule: (schedule: Schedule) => void}): ReactElement {
         function onSave(): Schedule | null{
             const schedule = CreateSchedule().action();
             if(schedule === null) return null;
@@ -116,9 +113,5 @@ function ScheduleMain(): ReactElement {
         )
     }
 
-    
-    // #endregion
-}
-
 export default ScheduleMain;
-export const link: PageLink = {name: _info.name, path: "/schedule", element: <ScheduleMain/>, icon: _info.icon};
+export const link: PageLink = {route: "/schedule", element: <ScheduleMain/>, icon: _info.icon};

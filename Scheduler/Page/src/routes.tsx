@@ -1,27 +1,30 @@
 import PageLink from "./types/PageLink";
 import { link as SchedulesLink } from "./pages/schedule/main";
+import { link as RoomsLink } from "./pages/room/index";
 import { RouteObject } from "react-router-dom";
 import Logo from "./svgs/logo";
 import colors from "./scss/colors.module.scss";
 
-export default function RouteObjects(): RouteObject[] {
-    return (routes.map((route: PageLink) => {
-        return {
-            path: route.path,
-            element: route.element
-        }
-    }));
+export const defaultPage: PageLink = {
+    route: "/",
+    element: SchedulesLink.element,
+    params: SchedulesLink.params,
+    icon: <Logo primaryColor={colors.secondary} secondaryColor={colors.secondary} borderColor="none"/>
 }
 
-export const defaultPage: PageLink = {
-        path: "/",
-        name: SchedulesLink.name,
-        element: SchedulesLink.element,
-        icon: <Logo primaryColor={colors.secondary} secondaryColor={colors.secondary} borderColor="none"/>
-    }
 
+export const routes: { [id: string]: PageLink; } = {
+    "default": defaultPage,
+    "schedule index": SchedulesLink,
+    "room index": RoomsLink
+};
 
-export const routes: PageLink[] = [
-    defaultPage,
-    SchedulesLink,
-];
+export default function RouteObjects(): RouteObject[] {
+    return (Object.values(routes).map((route) => {
+        return {
+            path: route.route + (route.params ?? ""),
+            element: route.element,
+            replace: true,
+        };
+    }));
+}

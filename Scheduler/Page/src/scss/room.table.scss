@@ -1,0 +1,43 @@
+@import "./colors.module.scss";
+
+// colors
+$check-in: #AFE1AF;
+$check-out: #F7B4A6;
+$occupied: #F7F1A6;
+$cell-height: 40px;
+$cell-width: 34px;
+
+.check-in{
+    background-color: $check-in !important;
+    transform: skew(-45deg, 0deg);
+    height: $cell-height;
+}
+
+.check-out{
+    background-color: $check-out !important;
+    transform: skew(-45deg, 0deg);
+    height: $cell-height;
+}
+
+.occupied{
+    background-color: $occupied !important;
+    height: $cell-height;
+}
+
+table td, table th.flipped{
+    height: $cell-height;
+    width: $cell-width;
+    color: $primary-dark !important;
+    background-color: $secondary !important;
+}
+
+table th, table td.flipped{
+    height: $cell-height;
+    width: $cell-width;
+    color: $secondary !important;
+    background-color: $primary !important;
+}
+
+.darken-on-hover:hover{
+    filter:brightness(90%)
+}

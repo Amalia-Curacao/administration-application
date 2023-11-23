@@ -1,9 +1,13 @@
 import { ReactElement } from "react";
 import { IconType } from "react-icons";
 
-export default interface PageLink {
-    name: string;
-    path: string;
+interface PageLink {
+    route: string;
     element: ReactElement;
     icon: ReactElement<IconType>;
+    params?: string;
 }
+
+
+export default PageLink; 
+

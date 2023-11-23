@@ -4,13 +4,13 @@ import Schedule from "../../models/Schedule";
 import ScheduleEdit from "./edit";
 import ScheduleIndex from ".";
 import {PageState as State} from "../../types/PageState";
+import { routes } from "../../routes";
+import { useNavigate } from "react-router-dom";
 
 function ScheduleRow({schedule, onDelete, onEdit}: {schedule: Schedule, onEdit: (schedule: Schedule) => void, onDelete: (schedule: Schedule) => void}): ReactElement {    
-        
     const scheduleRowIndex = <ScheduleRowIndex 
         schedule={schedule} 
-        onDelete={onDelete} 
-        onDetails={() => console.log("details")} 
+        onDelete={onDelete}
         onEdit={() => {updateRow(State.Edit)}}/>;
 
     const scheduleRowEdit = <ScheduleRowEdit 
@@ -34,7 +34,7 @@ function ScheduleRow({schedule, onDelete, onEdit}: {schedule: Schedule, onEdit: 
     return row;
 }
 
-function ScheduleRowIndex({schedule, onEdit, onDelete, onDetails}: {schedule: Schedule, onEdit: VoidFunction, onDelete: (toDelete: Schedule) => void, onDetails: VoidFunction}): ReactElement {
+function ScheduleRowIndex({schedule, onEdit, onDelete}: {schedule: Schedule, onEdit: VoidFunction, onDelete: (toDelete: Schedule) => void}): ReactElement {
     
     function removeSchedule(toDelete: Schedule) {
         onDelete(toDelete);
@@ -44,7 +44,7 @@ function ScheduleRowIndex({schedule, onEdit, onDelete, onDetails}: {schedule: Sc
         {ScheduleIndex(schedule).body}
         <td colSpan={1} className="bg-secondary"> 
             <div className="btn-group float-end">
-                <ActionGroup onDelete={() => removeSchedule(schedule)} onDetails={onDetails} onEdit={onEdit}/>
+                <ActionGroup onDelete={() => removeSchedule(schedule)} schedule={schedule} onEdit={onEdit}/>
             </div>
         </td>
     </tr>);
@@ -69,10 +69,12 @@ function ScheduleRowEdit({schedule, onReturn, onFailure, onSuccess}: {schedule: 
 
 }
 
-function ActionGroup({onDetails, onDelete, onEdit}: {onDetails: VoidFunction, onDelete: VoidFunction, onEdit: VoidFunction}): ReactElement {
+function ActionGroup({schedule, onDelete, onEdit}: {schedule: Schedule, onDelete: VoidFunction, onEdit: VoidFunction}): ReactElement {
+    const navigate = useNavigate(); 
+
     return(
         <div className="btn-group">
-            <button onClick={onDetails} className="btn btn-outline-primary">Details</button>
+            <button onClick={() => navigate(routes["room index"].route + "/" + schedule.id, {replace: true})} className="btn btn-outline-primary">Details</button>
             <button onClick={onEdit} className="btn btn-outline-warning">Edit</button>
             <button onClick={onDelete} className="btn btn-outline-danger">Delete</button>
         </div>);
