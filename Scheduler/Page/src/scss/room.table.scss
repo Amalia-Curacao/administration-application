@@ -9,17 +9,36 @@ $cell-width: 34px;
 
 .check-in{
     background-color: $check-in !important;
-    transform: skew(-45deg, 0deg);
     height: $cell-height;
 }
 
 .check-out{
     background-color: $check-out !important;
-    transform: skew(-45deg, 0deg);
     height: $cell-height;
 }
 
-.occupied{
+.unoccupied{
+    background-color: $secondary !important;
+    height: $cell-height;
+}
+
+.right{
+    clip-path: polygon(100% 100%, 0% 100%, 100% 0);
+    margin-left: -50%;
+
+}
+
+.left{
+    clip-path: polygon(0 0, 0% 100%, 100% 0);
+    margin-right: -50%;
+}
+
+.unoccupied{
+    background-color: $primary !important;
+    height: $cell-height;
+}
+
+.occupied {
     background-color: $occupied !important;
     height: $cell-height;
 }

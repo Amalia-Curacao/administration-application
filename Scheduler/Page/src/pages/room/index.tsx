@@ -65,39 +65,44 @@ function RoomAvailibilty({monthYear, reservations}: {monthYear: Date, reservatio
         const date = new Date(monthYear.getFullYear(), monthYear.getMonth(), day);
         const checkIn: Reservation | undefined = reservations.find(r => isSameDay(date, r.checkIn!));
         const checkOut: Reservation | undefined = reservations.find(r => isSameDay(date, r.checkOut!));
-        const occupied: boolean = reservations.find(r => (r.checkIn! < date || isSameDay(r.checkIn!, date)) && r.checkOut! > date) !== undefined;
+        const occupied: boolean = undefined !== reservations.find(r =>
+            (r.checkIn! < date) &&
+            (r.checkOut! > date));
 
         function Cells(): ReactElement {
-            enum CellType {CheckIn, CheckOut, None}
+            enum CellType {Occupied, CheckIn, CheckOut, None}
             const {type1, type2} = getTypes();
 
             function getTypes(): {type1: CellType, type2: CellType} {
-                if(checkIn !== undefined && checkOut !== undefined) return({type1: CellType.CheckIn, type2: CellType.CheckOut});
                 let {type1, type2}: {type1: CellType, type2: CellType} = {type1: CellType.None, type2: CellType.None};
+                if(occupied) { type1 = CellType.Occupied; type2 = CellType.Occupied; }
                 if(checkIn !== undefined) type2 = CellType.CheckIn;
                 if(checkOut !== undefined) type1 = CellType.CheckOut;
                 return({type1: type1, type2: type2});
             }
 
-            function Cell({type}: {type: CellType}): ReactElement {
+            function Cell({type, left}: {type: CellType, left: boolean}): ReactElement {
                 
                 function getStyle(): string {
                     switch(type) {
                         case CellType.CheckIn: return("check-in");
                         case CellType.CheckOut: return("check-out");
+                        case CellType.Occupied: return("occupied");
                         case CellType.None: return("");
                     }
                 }
 
                 return(<>
-                    <div className={"d-flex flex-fill " + getStyle()}></div>
+                    <div className={"flex-fill " + getStyle() + (left ? " left " : " right ")}>
+                    
+                    </div>
                 </>);
             }
 
             return(<>
-                <td className={"p-0 flex-fill border-dark border-1" + (occupied ? " occupied" : "")}>
-                    <Cell type={type1}/>
-                    <Cell type={type2}/>
+                <td style={{overflow: "hidden"}} className={"p-0 d-flex flex-fill border-dark border-1"}>
+                    <Cell left={true} type={type1}/>
+                    <Cell left={false} type={type2}/>
                 </td>
             </>);
         }
@@ -121,9 +126,15 @@ function Dates({monthYear}: {monthYear: Date}): ReactElement {
     const date = new Date(monthYear.getFullYear(), monthYear.getMonth() + 1, 0).getDate();
 
     function Day({day}: {day: number}): ReactElement {
+        const date = new Date(monthYear.getFullYear(), monthYear.getMonth(), day);
         return(
-            <td className="d-flex flex-fill d-column justify-content-center bg-primary text-secondary darken-on-hover p-2">
-                {day}
+            <td className="d-flex flex-fill justify-content-center flex-column bg-primary text-secondary darken-on-hover p-2">
+                <div className="d-flex justify-content-center">
+                    {day}
+                </div>
+                <div style={{fontSize: "12px"}} className="d-flex justify-content-center">
+                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getDay()]}
+                </div>
             </td>
         );
     }
@@ -168,7 +179,25 @@ function getRooms(scheduleId: number): Room[] {
                 roomtype: RoomType.Room,
                 schedule: null,
                 scheduleId: 1,
-            }], 
+            },
+            {
+                id: 2,
+                checkOut: new Date(2023, 10, 15),
+                checkIn: new Date(2023, 10, 10),
+                bookingSource: null,
+                flightArrivalNumber: null,
+                flightArrivalTime: null,
+                flightDepartureNumber: null,
+                flightDepartureTime: null,
+                remarks: null,
+                room: null,
+                roomNumber: 1,
+                roomScheduleId: 1,
+                roomtype: RoomType.Room,
+                schedule: null,
+                scheduleId: 1,
+            },
+        ], 
         schedule: null, scheduleId: scheduleId, type: RoomType.Room},
         {number: 2, floor: 1, reservations: [], schedule: null, scheduleId: scheduleId, type: RoomType.Room},
         {number: 3, floor: 1, reservations: [], schedule: null, scheduleId: scheduleId, type: RoomType.Room},
