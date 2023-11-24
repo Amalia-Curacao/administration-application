@@ -17,25 +17,15 @@ $cell-width: 34px;
     height: $cell-height;
 }
 
-.unoccupied{
-    background-color: $secondary !important;
-    height: $cell-height;
-}
-
 .right{
-    clip-path: polygon(100% 100%, 0% 100%, 100% 0);
-    margin-left: -50%;
+    clip-path: polygon(100% calc(100% - 1.5px), 0% calc(100% - 1.5px), 100% 0); // the calc ensures that the polygon does not overlap the border
+    margin-left: -50%; // Ensures that two triangles can fit next to each other
 
 }
 
 .left{
-    clip-path: polygon(0 0, 0% 100%, 100% 0);
-    margin-right: -50%;
-}
-
-.unoccupied{
-    background-color: $primary !important;
-    height: $cell-height;
+    clip-path: polygon(0 0, 0% calc(100% - 1.5px), 100% 0); // the calc ensures that the polygon does not overlap the border
+    margin-right: -50%; // Ensures that two triangles can fit next to each other
 }
 
 .occupied {
