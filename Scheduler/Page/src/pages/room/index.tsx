@@ -8,7 +8,7 @@ import Room from "../../models/Room";
 import RoomType from "../../models/RoomType";
 import { useParams } from "react-router-dom";
 import Reservation from "../../models/Reservation";
-import { isSameDay } from "../../extensions/Date";
+import { isSameDay, oldest, youngest } from "../../extensions/Date";
 import { FaLongArrowAltLeft, FaLongArrowAltRight } from "react-icons/fa";
 
 const _info = {name: "Rooms", icon: <MdBedroomParent/>};
@@ -68,6 +68,105 @@ function Tables({rooms, monthYear, showDates}: {rooms: Room[], monthYear: Date, 
 
 function RoomAvailibilty({monthYear, reservations}: {monthYear: Date, reservations: Reservation[]}): ReactElement {
     const date = new Date(monthYear.getFullYear(), monthYear.getMonth() + 1, 0).getDate();
+    function Days({amount}: {amount: number}): ReactElement {
+        let days: ReactElement[] = [];
+        for(let day = 1; day <= amount; day++) {
+            const currentDate = new Date(monthYear.getFullYear(), monthYear.getMonth(), day);
+            const checkIn: Reservation | undefined = reservations.find(r => isSameDay(currentDate, r.checkIn!));
+            const checkOut: Reservation | undefined = reservations.find(r => isSameDay(currentDate, r.checkOut!));
+            const occupied: Reservation | undefined =  reservations.find(r => (r.checkIn! < currentDate) && (r.checkOut! > currentDate));
+            const element = (): ReactElement => {
+                switch(true) {
+                    case checkIn !== undefined && checkOut !== undefined: return(<>
+                        <div style={{marginRight: "-50%"}} className="flex-fill check-out"></div>
+                        <div style={{marginLeft: "-50%"}} className="flex-fill check-in"></div>
+                    </>);
+                    case checkIn !== undefined: return(
+                        <div className={"flex-fill check-in"}></div>
+                    );
+                    case checkOut !== undefined: return(
+                        <div className={"flex-fill check-out"}></div>
+                    );
+                    case occupied !== undefined: return(
+                        <div className={"flex-fill occupied"}>{GuestName(occupied!, currentDate)}</div>
+                    );
+                    // TODO add the add reservation button
+                    default: return(<></>);
+                }
+            }
+
+            days.push(<>
+            <td key={currentDate.toISOString()} className={"p-0 d-flex flex-fill cell" + darken(day)}>
+                {element()}
+            </td>
+            
+            </>);
+        }
+        return(<tr className="d-flex flex-fill bg-secondary p-0">
+            {days}
+        </tr>);
+
+        function GuestName(occupied: Reservation, currentDate: Date) : ReactElement {
+            if(!occupied) return(<></>);
+            const beginingOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            const dayAfterCheckIn = new Date(occupied.checkIn!.getFullYear(), occupied.checkIn!.getMonth(), occupied.checkIn!.getDate() + 1);
+            const dayToShow = oldest(beginingOfMonth, dayAfterCheckIn).getDate();
+            // TODO: change to occupied.guest?.name ?? ""
+            if(currentDate.getDate() === dayToShow) return(<span className="guest-name p-2">{"PETER van BLANKEN"}</span>);
+            return <></>;
+        }
+    }    
+
+    return(<>
+        <Days amount={date}/>
+    </>);
+}
+
+function Dates({monthYear}: {monthYear: Date}): ReactElement {
+    const date = new Date(monthYear.getFullYear(), monthYear.getMonth() + 1, 0).getDate();
+
+    function Day({day}: {day: number}): ReactElement {
+        const date = new Date(monthYear.getFullYear(), monthYear.getMonth(), day);
+        const cellClass = "d-flex flex-fill justify-content-center flex-column darken-on-hover p-2 bg-primary text-secondary";
+        const colorClass = isSameDay(date, new Date()) ? " " 
+        : date < new Date() ? " past" : " " ;
+        return(
+            <td className={cellClass + colorClass}>
+                <div className="d-flex justify-content-center">
+                    {day}
+                </div>
+                <div style={{fontSize: "12px"}} className="d-flex justify-content-center">
+                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getDay()]}
+                </div>
+            </td>
+        );
+    }
+        let days: ReactElement[] = [];
+        for(let i = 1; i <= date; i++) days.push(<Day key={i} day={i}/>);
+
+    return(<>
+        <tr className="d-flex p-0 bg-primary">
+            {days}
+        </tr>
+    </>);
+}
+
+function MonthYearSelector({monthYear, onChange}: {monthYear: Date, onChange: (monthYear: Date) => void}): ReactElement {
+    const arrowClass = "btn btn-secondary me-2 justify-content-center";
+    return(<>
+        <div className="d-flex flex-fill flex-row justify-content-center align-items-center">
+            <button className={arrowClass} onClick={() => onChange(new Date(monthYear.getFullYear(), monthYear.getMonth() - 1, 1))}>
+                <FaLongArrowAltLeft />
+            </button>
+            <h5 className="text-center text-secondary me-2 ms-2">{monthYear.toLocaleString('default', { month: 'long' }) + " " + monthYear.getFullYear()}</h5>
+            <button className={arrowClass} onClick={() => onChange(new Date(monthYear.getFullYear(), monthYear.getMonth() + 1, 1))}>
+                <FaLongArrowAltRight />
+            </button>
+        </div>
+    </>);
+}
+
+/*const date = new Date(monthYear.getFullYear(), monthYear.getMonth() + 1, 0).getDate();
     function Day({day}: {day: number}): ReactElement {
         const date = new Date(monthYear.getFullYear(), monthYear.getMonth(), day);
         const checkIn: Reservation | undefined = reservations.find(r => isSameDay(date, r.checkIn!));
@@ -121,50 +220,7 @@ function RoomAvailibilty({monthYear, reservations}: {monthYear: Date, reservatio
         <tr className="d-flex flex-fill bg-secondary p-0">
             {days}
         </tr>
-    </>);
-    
-}
-
-function Dates({monthYear}: {monthYear: Date}): ReactElement {
-    const date = new Date(monthYear.getFullYear(), monthYear.getMonth() + 1, 0).getDate();
-
-    function Day({day}: {day: number}): ReactElement {
-        const date = new Date(monthYear.getFullYear(), monthYear.getMonth(), day);
-        return(
-            <td className="d-flex flex-fill justify-content-center flex-column bg-primary text-secondary darken-on-hover p-2">
-                <div className="d-flex justify-content-center">
-                    {day}
-                </div>
-                <div style={{fontSize: "12px"}} className="d-flex justify-content-center">
-                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getDay()]}
-                </div>
-            </td>
-        );
-    }
-        let days: ReactElement[] = [];
-        for(let i = 1; i <= date; i++) days.push(<Day key={i} day={i}/>);
-
-    return(<>
-        <tr className="d-flex p-0">
-            {days}
-        </tr>
-    </>);
-}
-
-function MonthYearSelector({monthYear, onChange}: {monthYear: Date, onChange: (monthYear: Date) => void}): ReactElement {
-    const arrowClass = "btn btn-secondary me-2 justify-content-center";
-    return(<>
-        <div className="d-flex flex-fill flex-row justify-content-center align-items-center">
-            <button className={arrowClass} onClick={() => onChange(new Date(monthYear.getFullYear(), monthYear.getMonth() - 1, 1))}>
-                <FaLongArrowAltLeft />
-            </button>
-            <h5 className="text-center text-secondary me-2 ms-2">{monthYear.toLocaleString('default', { month: 'long' }) + " " + monthYear.getFullYear()}</h5>
-            <button className={arrowClass} onClick={() => onChange(new Date(monthYear.getFullYear(), monthYear.getMonth() + 1, 1))}>
-                <FaLongArrowAltRight />
-            </button>
-        </div>
-    </>);
-}
+    </>);*/
 
 // #endregion
 
@@ -237,6 +293,11 @@ function getRooms(scheduleId: number): Room[] {
     rooms.forEach(r => r.schedule = schedules.find(s => s.id === r.scheduleId) ?? null);
 
     return(schedules.find((s) => s.id === scheduleId)?.rooms ?? []);
+}
+
+function darken(day: number): string{
+    if(day % 2 === 0) return(" darken ");
+    return "";
 }
 
 export const link: PageLink = {
