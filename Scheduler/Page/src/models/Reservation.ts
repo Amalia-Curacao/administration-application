@@ -15,7 +15,7 @@ export default interface Reservation{
     remarks: string | null;
 
     roomNumber: number | null;
-    roomtype: RoomType | null;
+    roomType: RoomType | null;
     roomScheduleId: number | null;
     room: Room | null;
     scheduleId: number | null;

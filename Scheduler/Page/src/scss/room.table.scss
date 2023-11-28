@@ -4,8 +4,20 @@
 $check-in: #AFE1AF;
 $check-out: #F7B4A6;
 $occupied: #F7F1A6;
+$darken-percentage: 5%;
+$dark-check-in: darken($check-in, $darken-percentage);
+$dark-check-out: darken($check-out, $darken-percentage);
+$dark-secondary: darken($secondary, $darken-percentage);
+$dark-primary: darken($primary, $darken-percentage);
 $cell-height: 40px;
 $cell-width: 34px;
+
+.table-end{
+    background-color: $primary !important;
+    height: $cell-height;
+    display: flex;
+    color: $secondary !important;
+}
 
 .cell{
     height: $cell-height;
@@ -29,15 +41,16 @@ $cell-width: 34px;
     height: $cell-height;
 }
 
-.occupied:empty{
-    position: relative;
-    z-index: 1;
-}
-
 .guest-name {
     position: absolute;
     z-index: 2 !important;
     white-space: nowrap;
+}
+
+button.no-decoration{
+	border: none;
+	font: inherit;
+	cursor: pointer;
 }
 
 .past{
@@ -58,10 +71,33 @@ table th, table td.flipped{
     background-color: $primary !important;
 }
 
+.create-modal{
+    position: absolute;
+    border-radius: "5px";
+    max-width: auto ;
+    max-height: 200px;
+    overflow: auto;
+}
+
+// #region darken
+
 .darken-on-hover:hover{
     filter:brightness(95%);
 }
 
-.darken{
-    filter:brightness(95%);
+.darken > .occupied{
+    background-color: darken($occupied, $darken-percentage) !important;
 }
+
+.darken > .check-in{
+    background: darken($check-in, $darken-percentage) !important;
+}
+
+.darken > .check-out{
+    background: darken($check-out, $darken-percentage) !important;
+}
+
+.darken > button{
+    background-color: darken($secondary, $darken-percentage) !important;
+}
+// #endregion
