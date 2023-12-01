@@ -1,4 +1,4 @@
-import React, { ReactElement, createRef, useState } from "react";
+import React, { Fragment, ReactElement, createRef, useState } from "react";
 import "../../scss/room.table.scss";
 import { MdBedroomParent } from "react-icons/md";
 import Schedule from "../../models/Schedule";
@@ -13,6 +13,7 @@ import { FaLongArrowAltLeft, FaLongArrowAltRight } from "react-icons/fa";
 import { default as ReservationPage} from "../reservation/page";
 import Modal from "react-bootstrap/Modal";
 import BookingSource from "../../models/BookingSource";
+import Person from "../../models/Person";
 
 const _info = {name: "Rooms", icon: <MdBedroomParent/>};
 
@@ -22,26 +23,24 @@ function RoomIndexBody(): ReactElement {
     const [monthYear, setMonthYear] = useState(new Date()); // [1, 12]
     const [rooms, setRooms] = useState(getRooms(parseInt(id)));
     const [state, setState] = useState(PageState.Default);
-    const [createModal, setModal] = useState<ReactElement>(<></>);
+    const [reservationModal, setReservationModal] = useState<ReactElement>(<Fragment/>);
+    const [guestModal, setGuestModal] = useState<ReactElement>(<Fragment/>);
     let groupedRooms = groupByRoomType(rooms);
 
-    function onCreateReservation(element: ReactElement, handleSave: () => boolean){
+    function onReservationDetails(reservationPage: ReactElement, handleSave: () => boolean){
         if(state !== PageState.Default) return;  
-        setModal(<Modal onHide={handleClose} show={true}>
-            <Modal.Body className="bg-primary d-flex">
-                {element}
-            </Modal.Body>
-            <Modal.Footer className="bg-primary">
-                <button className="btn btn-secondary hover-danger" onClick={handleClose}>Cancel</button>
-                <button className="btn btn-secondary hover-success" onClick={() => {if(handleSave()) handleClose()}}>Save</button>
-            </Modal.Footer>
-        </Modal>);
+        setReservationModal(<ReservationModal reservationPage={reservationPage} onSave={handleSave} onClose={handleClose} onGuestDetails={onGuestDetails}/>);
         setState(PageState.Create);
 
         function handleClose(): void {
             setState(PageState.Default);
-            setModal(<></>);
+            setReservationModal(<Fragment/>);
         }
+    }
+
+    function onGuestDetails(guest: Person | undefined, handleSave: () => boolean){
+        if(state !== PageState.Create) return;
+        setGuestModal();
     }
 
     function onMonthYearSelected(monthYear: Date): void {
@@ -49,20 +48,35 @@ function RoomIndexBody(): ReactElement {
     }
 
     return(<>
-        {createModal}
+        {reservationModal}
         <div style={{borderRadius:"5px"}} className="p-3 m-3 mb-2 bg-primary d-flex flex-fill flex-row">
             <MonthYearSelector monthYear={monthYear} onChange={onMonthYearSelected}/>
         </div>
         <div className="p-3 pb-0 d-flex flex-column flex-fill">
             {Object.keys(groupedRooms).map((key, index) => 
                 <Tables key={index} monthYear={monthYear} showDates={index === 0} rooms={groupedRooms[parseInt(key)]} 
-                onCreateReservation={onCreateReservation}/>)}
+                onCreateReservation={onReservationDetails}/>)}
             <div className="table-end" style={{borderRadius:"0 0 5px 5px"}}></div>
         </div>
     </>);
 }
 
 // #region Elements
+
+function MonthYearSelector({monthYear, onChange}: {monthYear: Date, onChange: (monthYear: Date) => void}): ReactElement {
+    const arrowClass = "me-2 justify-content-center align-content-middle no-decoration bg-primary";
+    return(<>
+        <div className="d-flex flex-fill flex-row justify-content-center align-items-center">
+            <button className={arrowClass} onClick={() => onChange(new Date(monthYear.getFullYear(), monthYear.getMonth() - 1, 1))}>
+                <FaLongArrowAltLeft size={32} className="text-secondary"/>
+            </button>
+            <h5 className="text-center text-secondary me-2 ms-2">{monthYear.toLocaleString('default', { month: 'long' }) + " " + monthYear.getFullYear()}</h5>
+            <button className={arrowClass} onClick={() => onChange(new Date(monthYear.getFullYear(), monthYear.getMonth() + 1, 1))}>
+                <FaLongArrowAltRight size={32} className="text-secondary i-l"/>
+            </button>
+        </div>
+    </>);
+}
 
 function Tables({rooms, monthYear, showDates, onCreateReservation}: {rooms: Room[], monthYear: Date, showDates: boolean, onCreateReservation: (e :ReactElement, f: () => boolean) => void}): ReactElement{
     if(rooms.length === 0) return(<></>);
@@ -91,6 +105,34 @@ function Tables({rooms, monthYear, showDates, onCreateReservation}: {rooms: Room
             </tbody>
         </table>
     </>);
+}
+
+function Dates({monthYear}: {monthYear: Date}): ReactElement {
+    const totalAmountOfdays = new Date(monthYear.getFullYear(), monthYear.getMonth() + 1, 0).getDate();
+
+    
+
+    let days: ReactElement[] = [];
+    for(let i = 1; i <= totalAmountOfdays; i++) days.push(<Day key={i} day={i}/>);
+
+    return(<tr className="d-flex p-0">{days}</tr>);
+    function Day({day}: {day: number}): ReactElement {
+        const date = new Date(monthYear.getFullYear(), monthYear.getMonth(), day);
+        const cellClass = "d-flex flex-fill justify-content-center flex-column darken-on-hover p-2 bg-primary text-secondary";
+        const colorClass = isSameDay(date, new Date()) ? " " : (date < new Date() ? " past" : " ") ;
+        const borderRadius = totalAmountOfdays === day ? "0px 5px 0px 0px" : "0px";
+
+        return(
+            <td style={{borderRadius: borderRadius}} className={cellClass + colorClass}>
+                <div className="d-flex justify-content-center">
+                    {day}
+                </div>
+                <div style={{fontSize: "12px"}} className="d-flex justify-content-center">
+                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getDay()]}
+                </div>
+            </td>
+        );
+    }
 }
 
 function RoomAvailibilty({monthYear, reservations, room, onCreateReservation}: {monthYear: Date, reservations: Reservation[], room: Room, onCreateReservation: (e : ReactElement, f: () => boolean) => void}): ReactElement {
@@ -168,17 +210,19 @@ function EmptyCell({onClick, shape, room, currentDate}: {onClick: (e : ReactElem
         roomNumber: room.number,
         roomType: room.type,
         checkIn: currentDate,
-        id: null,
-        checkOut: null,
-        flightArrivalNumber: null,
-        flightDepartureNumber: null,
-        flightArrivalTime: null,
-        flightDepartureTime: null,
-        bookingSource: null,
-        remarks: null,
+        id: undefined,
+        checkOut: undefined,
+        flightArrivalNumber: undefined,
+        flightDepartureNumber: undefined,
+        flightArrivalTime: undefined,
+        flightDepartureTime: undefined,
+        bookingSource: undefined,
+        remarks: undefined,
         roomScheduleId: room.scheduleId,
-        room: null,
-        schedule: null
+        room: undefined,
+        schedule: undefined,
+        personIds: [],
+        persons: []
     });
     switch(shape){
         case "L":
@@ -193,49 +237,22 @@ function EmptyCell({onClick, shape, room, currentDate}: {onClick: (e : ReactElem
     }
 }
 
-function Dates({monthYear}: {monthYear: Date}): ReactElement {
-    const totalAmountOfdays = new Date(monthYear.getFullYear(), monthYear.getMonth() + 1, 0).getDate();
-
-    
-
-    let days: ReactElement[] = [];
-    for(let i = 1; i <= totalAmountOfdays; i++) days.push(<Day key={i} day={i}/>);
-
-    return(<tr className="d-flex p-0">{days}</tr>);
-    function Day({day}: {day: number}): ReactElement {
-        const date = new Date(monthYear.getFullYear(), monthYear.getMonth(), day);
-        const cellClass = "d-flex flex-fill justify-content-center flex-column darken-on-hover p-2 bg-primary text-secondary";
-        const colorClass = isSameDay(date, new Date()) ? " " : (date < new Date() ? " past" : " ") ;
-        const borderRadius = totalAmountOfdays === day ? "0px 5px 0px 0px" : "0px";
-
-        return(
-            <td style={{borderRadius: borderRadius}} className={cellClass + colorClass}>
-                <div className="d-flex justify-content-center">
-                    {day}
-                </div>
-                <div style={{fontSize: "12px"}} className="d-flex justify-content-center">
-                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getDay()]}
-                </div>
-            </td>
-        );
-    }
+function ReservationModal({reservationPage, onSave, onClose}: {reservationPage: ReactElement, onSave: () => boolean, onClose: VoidFunction}): ReactElement {
+    return(<Modal onHide={onClose} show={true}>
+        <Modal.Body className="bg-primary d-flex">
+            {reservationPage}
+        </Modal.Body>
+        <Modal.Footer className="bg-primary">
+            <button className="btn btn-secondary hover-danger" onClick={onClose}>Cancel</button>
+            <button className="btn btn-secondary hover-success" onClick={() => {if(onSave()) onClose()}}>Save</button>
+        </Modal.Footer>
+    </Modal>);
 }
 
-function MonthYearSelector({monthYear, onChange}: {monthYear: Date, onChange: (monthYear: Date) => void}): ReactElement {
-    const arrowClass = "me-2 justify-content-center align-content-middle no-decoration bg-primary";
-    return(<>
-        <div className="d-flex flex-fill flex-row justify-content-center align-items-center">
-            <button className={arrowClass} onClick={() => onChange(new Date(monthYear.getFullYear(), monthYear.getMonth() - 1, 1))}>
-                <FaLongArrowAltLeft size={32} className="text-secondary"/>
-            </button>
-            <h5 className="text-center text-secondary me-2 ms-2">{monthYear.toLocaleString('default', { month: 'long' }) + " " + monthYear.getFullYear()}</h5>
-            <button className={arrowClass} onClick={() => onChange(new Date(monthYear.getFullYear(), monthYear.getMonth() + 1, 1))}>
-                <FaLongArrowAltRight size={32} className="text-secondary i-l"/>
-            </button>
-        </div>
-    </>);
-}
+// #endregion
 
+
+// #region Functions
 function groupByRoomType(rooms: Room[]): {[type: number]: Room[]} {
     let groupedRooms: {[type: number]: Room[]} = [];
     rooms.forEach(r => {
@@ -253,48 +270,52 @@ function getRooms(scheduleId: number): Room[] {
                 id: 1,
                 checkOut: new Date(2023, 10, 10),
                 checkIn: new Date(2023, 10, 1),
-                bookingSource: null,
-                flightArrivalNumber: null,
-                flightArrivalTime: null,
-                flightDepartureNumber: null,
-                flightDepartureTime: null,
-                remarks: null,
-                room: null,
+                bookingSource: undefined,
+                flightArrivalNumber: undefined,
+                flightArrivalTime: undefined,
+                flightDepartureNumber: undefined,
+                flightDepartureTime: undefined,
+                remarks: undefined,
+                room: undefined,
                 roomNumber: 1,
                 roomScheduleId: 1,
                 roomType: RoomType.Room,
-                schedule: null,
+                schedule: undefined,
                 scheduleId: 1,
+                personIds: [],
+                persons: []
             },
             {
                 id: 2,
                 checkOut: new Date(2023, 10, 15),
                 checkIn: new Date(2023, 10, 10),
-                bookingSource: null,
-                flightArrivalNumber: null,
-                flightArrivalTime: null,
-                flightDepartureNumber: null,
-                flightDepartureTime: null,
-                remarks: null,
-                room: null,
+                bookingSource: undefined,
+                flightArrivalNumber: undefined,
+                flightArrivalTime: undefined,
+                flightDepartureNumber: undefined,
+                flightDepartureTime: undefined,
+                remarks: undefined,
+                room: undefined,
                 roomNumber: 1,
                 roomScheduleId: 1,
                 roomType: RoomType.Room,
-                schedule: null,
+                schedule: undefined,
                 scheduleId: 1,
+                personIds: [],
+                persons: []
             },
         ], 
-        schedule: null, scheduleId: scheduleId, type: RoomType.Room},
-        {number: 2, floor: 1, reservations: [], schedule: null, scheduleId: scheduleId, type: RoomType.Room},
-        {number: 3, floor: 1, reservations: [], schedule: null, scheduleId: scheduleId, type: RoomType.Room},
-        {number: 4, floor: 1, reservations: [], schedule: null, scheduleId: scheduleId, type: RoomType.Room},
-        {number: 5, floor: 1, reservations: [], schedule: null, scheduleId: scheduleId, type: RoomType.Room},
+        schedule: undefined, scheduleId: scheduleId, type: RoomType.Room},
+        {number: 2, floor: 1, reservations: [], schedule: undefined, scheduleId: scheduleId, type: RoomType.Room},
+        {number: 3, floor: 1, reservations: [], schedule: undefined, scheduleId: scheduleId, type: RoomType.Room},
+        {number: 4, floor: 1, reservations: [], schedule: undefined, scheduleId: scheduleId, type: RoomType.Room},
+        {number: 5, floor: 1, reservations: [], schedule: undefined, scheduleId: scheduleId, type: RoomType.Room},
         
-        {number: 11, floor: 1, reservations: [], schedule: null, scheduleId: scheduleId, type: RoomType.Apartment},
-        {number: 12, floor: 1, reservations: [], schedule: null, scheduleId: scheduleId, type: RoomType.Apartment},
-        {number: 13, floor: 1, reservations: [], schedule: null, scheduleId: scheduleId, type: RoomType.Apartment},
-        {number: 14, floor: 1, reservations: [], schedule: null, scheduleId: scheduleId, type: RoomType.Apartment},
-        {number: 15, floor: 1, reservations: [], schedule: null, scheduleId: scheduleId, type: RoomType.Apartment},
+        {number: 11, floor: 1, reservations: [], schedule: undefined, scheduleId: scheduleId, type: RoomType.Apartment},
+        {number: 12, floor: 1, reservations: [], schedule: undefined, scheduleId: scheduleId, type: RoomType.Apartment},
+        {number: 13, floor: 1, reservations: [], schedule: undefined, scheduleId: scheduleId, type: RoomType.Apartment},
+        {number: 14, floor: 1, reservations: [], schedule: undefined, scheduleId: scheduleId, type: RoomType.Apartment},
+        {number: 15, floor: 1, reservations: [], schedule: undefined, scheduleId: scheduleId, type: RoomType.Apartment},
     ];
 
     const schedules: Schedule[] = [
@@ -302,7 +323,7 @@ function getRooms(scheduleId: number): Room[] {
         {id: 2, name: "Schedule 2", reservations: [], rooms: []},
         {id: 3, name: "Schedule 3", reservations: [], rooms: []}];
     
-    rooms.forEach(r => r.schedule = schedules.find(s => s.id === r.scheduleId) ?? null);
+    rooms.forEach(r => r.schedule = schedules.find(s => s.id === r.scheduleId) ?? undefined);
 
     return(schedules.find((s) => s.id === scheduleId)?.rooms ?? []);
 }
@@ -311,6 +332,8 @@ function darken(day: number): string{
     if(day % 2 === 0) return(" darken ");
     return "";
 }
+
+// #endregion
 
 export const link: PageLink = {
     icon: _info.icon,

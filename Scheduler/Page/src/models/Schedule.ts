@@ -2,10 +2,10 @@ import Reservation from "./Reservation";
 import Room from "./Room";
 
 interface Schedule{
-    id: number | null;
-    name: string | null;
-    rooms: Room[] | null;
-    reservations: Reservation[] | null;
+    id: number | undefined;
+    name: string | undefined;
+    rooms: Room[] | undefined;
+    reservations: Reservation[] | undefined;
 }
 
 export default Schedule;

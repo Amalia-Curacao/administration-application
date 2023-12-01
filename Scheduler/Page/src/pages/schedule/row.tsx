@@ -51,9 +51,9 @@ function ScheduleRowIndex({schedule, onEdit, onDelete}: {schedule: Schedule, onE
 }
 
 function ScheduleRowEdit({schedule, onReturn, onFailure, onSuccess}: {schedule: Schedule, onReturn: VoidFunction, onFailure: VoidFunction, onSuccess: (toEdit: Schedule) => void}): ReactElement {
-    function onSave(toEdit: Schedule): Schedule | null {
+    function onSave(toEdit: Schedule): Schedule | undefined {
         const schedule = ScheduleEdit(toEdit).action();
-        if(schedule === null) return null;
+        if(!schedule) return undefined;
         onSuccess(schedule);
         return schedule;
     } 

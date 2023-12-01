@@ -19,7 +19,7 @@ function EditSchedule({schedule} : {schedule: Schedule}) : ReactElement {
     </>);
 }
 
-function Action() : Schedule | null {
+function Action() : Schedule | undefined {
     return { 
         id: Number(_idField.current?.innerText) ?? -1, 
         name: _nameField.current?.value ?? "", 
@@ -28,6 +28,6 @@ function Action() : Schedule | null {
     };
 }
 
-export default function ScheduleEdit(schedule: Schedule) : {body: ReactElement, action: () => Schedule | null} {
+export default function ScheduleEdit(schedule: Schedule) : {body: ReactElement, action: () => Schedule | undefined} {
     return({body: <EditSchedule schedule={schedule}/>, action: Action});
 }

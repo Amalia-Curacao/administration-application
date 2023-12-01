@@ -89,9 +89,9 @@ function ScheduleMain(): ReactElement {
 }
 
 function ScheduleRowCreate({onReturn, addSchedule}: {onReturn: VoidFunction, addSchedule: (schedule: Schedule) => void}): ReactElement {
-        function onSave(): Schedule | null{
+        function onSave(): Schedule | undefined{
             const schedule = CreateSchedule().action();
-            if(schedule === null) return null;
+            if(!schedule) return undefined;
             addSchedule(schedule);
             return schedule;
         }

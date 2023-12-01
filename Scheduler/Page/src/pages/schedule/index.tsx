@@ -7,7 +7,7 @@ function Body({schedule} : {schedule: Schedule}): ReactElement {
             {schedule.id} 
         </th>
         <th colSpan={1} scope="col" className="bg-secondary">
-            <input type="text" readOnly className="bg-transparent form-control shadow-none border-0" value={schedule.name === null ? "" : schedule.name} />
+            <input type="text" readOnly className="bg-transparent form-control shadow-none border-0" value={!schedule.name ? "" : schedule.name} />
         </th>
     </>);
 }

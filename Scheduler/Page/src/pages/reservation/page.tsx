@@ -88,7 +88,7 @@ function Body({reservation}: {reservation: Reservation}): ReactElement {
 }
 
 function Action(scheduleId: number, roomNumber: number, roomType: RoomType): boolean {
-    const reservationToAdd = {
+    const reservationToAdd: Reservation = {
         id: -1,
         checkIn: new Date(checkInRef.current?.value!),
         checkOut: new Date(checkOutRef.current?.value!),
@@ -101,11 +101,13 @@ function Action(scheduleId: number, roomNumber: number, roomType: RoomType): boo
 
         scheduleId: scheduleId,
         roomNumber: roomNumber,
-        schedule: null,
+        schedule: undefined,
 
         roomType: roomType,
         roomScheduleId: scheduleId,
-        room: null,
+        room: undefined,
+        persons: [],
+        personIds: []
     };
 
     return (Validate(reservationToAdd));
