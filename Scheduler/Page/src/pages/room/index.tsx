@@ -1,4 +1,4 @@
-import { ReactElement, createRef, useState } from "react";
+import React, { ReactElement, createRef, useState } from "react";
 import "../../scss/room.table.scss";
 import { MdBedroomParent } from "react-icons/md";
 import Schedule from "../../models/Schedule";
@@ -10,8 +10,9 @@ import { useParams } from "react-router-dom";
 import Reservation from "../../models/Reservation";
 import { isSameDay, oldest } from "../../extensions/Date";
 import { FaLongArrowAltLeft, FaLongArrowAltRight } from "react-icons/fa";
-import ReservationCreate from "../reservation/create";
+import { default as ReservationPage} from "../reservation/page";
 import Modal from "react-bootstrap/Modal";
+import BookingSource from "../../models/BookingSource";
 
 const _info = {name: "Rooms", icon: <MdBedroomParent/>};
 
@@ -24,12 +25,16 @@ function RoomIndexBody(): ReactElement {
     const [createModal, setModal] = useState<ReactElement>(<></>);
     let groupedRooms = groupByRoomType(rooms);
 
-    function onCreateReservation(element: ReactElement){
+    function onCreateReservation(element: ReactElement, handleSave: () => boolean){
         if(state !== PageState.Default) return;  
         setModal(<Modal onHide={handleClose} show={true}>
-            <Modal.Body className="bg-primary">
+            <Modal.Body className="bg-primary d-flex">
                 {element}
             </Modal.Body>
+            <Modal.Footer className="bg-primary">
+                <button className="btn btn-secondary hover-danger" onClick={handleClose}>Cancel</button>
+                <button className="btn btn-secondary hover-success" onClick={() => {if(handleSave()) handleClose()}}>Save</button>
+            </Modal.Footer>
         </Modal>);
         setState(PageState.Create);
 
@@ -50,7 +55,8 @@ function RoomIndexBody(): ReactElement {
         </div>
         <div className="p-3 pb-0 d-flex flex-column flex-fill">
             {Object.keys(groupedRooms).map((key, index) => 
-                <Tables key={index} monthYear={monthYear} showDates={index === 0} rooms={groupedRooms[parseInt(key)]} onCreateReservation={onCreateReservation}/>)}
+                <Tables key={index} monthYear={monthYear} showDates={index === 0} rooms={groupedRooms[parseInt(key)]} 
+                onCreateReservation={onCreateReservation}/>)}
             <div className="table-end" style={{borderRadius:"0 0 5px 5px"}}></div>
         </div>
     </>);
@@ -58,7 +64,7 @@ function RoomIndexBody(): ReactElement {
 
 // #region Elements
 
-function Tables({rooms, monthYear, showDates, onCreateReservation}: {rooms: Room[], monthYear: Date, showDates: boolean, onCreateReservation: (e :ReactElement) => void}): ReactElement{
+function Tables({rooms, monthYear, showDates, onCreateReservation}: {rooms: Room[], monthYear: Date, showDates: boolean, onCreateReservation: (e :ReactElement, f: () => boolean) => void}): ReactElement{
     if(rooms.length === 0) return(<></>);
 
     return(<>
@@ -87,7 +93,7 @@ function Tables({rooms, monthYear, showDates, onCreateReservation}: {rooms: Room
     </>);
 }
 
-function RoomAvailibilty({monthYear, reservations, room, onCreateReservation}: {monthYear: Date, reservations: Reservation[], room: Room, onCreateReservation: (e :ReactElement) => void}): ReactElement {
+function RoomAvailibilty({monthYear, reservations, room, onCreateReservation}: {monthYear: Date, reservations: Reservation[], room: Room, onCreateReservation: (e : ReactElement, f: () => boolean) => void}): ReactElement {
     const amount = new Date(monthYear.getFullYear(), monthYear.getMonth() + 1, 0).getDate();
 
     let days: ReactElement[] = [];
@@ -98,32 +104,29 @@ function RoomAvailibilty({monthYear, reservations, room, onCreateReservation}: {
         const occupied: Reservation | undefined =  reservations.find(r => (r.checkIn! < currentDate) && (r.checkOut! > currentDate));
         
         const element = (): ReactElement => {
-            const ref = createRef<HTMLButtonElement>();
-            const checkInElement = <div style={{marginLeft: "-50%"}} className="flex-fill check-in"></div>;
-            const checkOutElement = <div style={{marginRight: "-50%"}} className="flex-fill check-out"></div>;
-            const emptyElement = <button className="d-flex flex-fill no-decoration" ref={ref}
-            onClick={() => onCreateReservation(ReservationCreate(room.scheduleId!, room.number!, room.type!, currentDate).body)}/>;
             
             switch(true) {
                 case checkIn !== undefined && checkOut !== undefined: return(<>
-                    {checkOutElement}
-                    {checkInElement}
+                    <CheckOutCell reservation={checkOut!} onClick={onCreateReservation}/>
+                    <CheckInCell reservation={checkIn!} onClick={onCreateReservation}/>
                 </>);
-                case checkIn !== undefined: return(
-                    <div className={"flex-fill check-in"}></div>
-                );
-                case checkOut !== undefined: return(
-                    <div className={"flex-fill check-out"}></div>
-                );
+                case checkIn !== undefined: return(<>
+                    <EmptyCell room={room} currentDate={currentDate} shape="L" onClick={onCreateReservation}/>
+                    <CheckInCell reservation={checkIn!} onClick={onCreateReservation}/>
+                </>);
+                case checkOut !== undefined: return(<>
+                    <CheckOutCell reservation={checkOut!} onClick={onCreateReservation}/>
+                    <EmptyCell room={room} currentDate={currentDate} shape="R" onClick={onCreateReservation}/>
+                </>);
                 case occupied !== undefined: return(
-                    <div className={"flex-fill occupied"}>{GuestName(occupied!, currentDate)}</div>
+                    <OccupiedCell reservation={occupied!} currentDate={currentDate} onClick={onCreateReservation}/>
                 );
                 // TODO add the add reservation button
-                default: return(emptyElement);
+                default: return(<EmptyCell room={room} currentDate={currentDate} shape="" onClick={onCreateReservation}/>);
             }
         }
 
-        days.push(<td key={day} className={"p-0 d-flex flex-fill cell" + darken(day)}>
+        days.push(<td style={{overflow:"hidden"}} key={day} className={"p-0 d-flex flex-fill cell" + darken(day)}>
             {element()}
         </td>); 
     }
@@ -131,6 +134,22 @@ function RoomAvailibilty({monthYear, reservations, room, onCreateReservation}: {
     return(<tr className="d-flex flex-fill bg-secondary p-0">
         {days}
     </tr>);
+}
+
+function CheckInCell({onClick, reservation}: {onClick: (e : ReactElement, f: () => boolean) => void, reservation: Reservation}): ReactElement{
+    const editReservationPage = ReservationPage(reservation);
+    return(<button onClick={() => onClick(editReservationPage.body, editReservationPage.action)} style={{marginLeft: "-50%"}} className="flex-fill check-in no-decoration"></button>);
+}
+
+function CheckOutCell({onClick, reservation}: {onClick: (e : ReactElement, f: () => boolean) => void, reservation: Reservation}): ReactElement{
+    const editReservationPage = ReservationPage(reservation);
+    return(<button onClick={() => onClick(editReservationPage.body, editReservationPage.action)} style={{marginRight: "-50%"}} className="flex-fill check-out no-decoration"></button>);
+}
+
+function OccupiedCell({onClick, reservation, currentDate}: {onClick: (e : ReactElement, f: () => boolean) => void, reservation: Reservation, currentDate: Date}): ReactElement{
+    const editReservationPage = ReservationPage(reservation);
+    return(<button onClick={() => onClick(editReservationPage.body, editReservationPage.action)} 
+    className="flex-fill occupied no-decoration">{GuestName(reservation!, currentDate)}</button>);
 
     function GuestName(occupied: Reservation, currentDate: Date) : ReactElement {
         if(!occupied) return(<></>);
@@ -138,9 +157,40 @@ function RoomAvailibilty({monthYear, reservations, room, onCreateReservation}: {
         const dayAfterCheckIn = new Date(occupied.checkIn!.getFullYear(), occupied.checkIn!.getMonth(), occupied.checkIn!.getDate() + 1);
         const dayToShow = oldest(beginingOfMonth, dayAfterCheckIn).getDate();
         // TODO: change to occupied.guest?.name ?? ""
-        if(currentDate.getDate() === dayToShow) return(<span className="guest-name p-2">{"PETER van BLANKEN"}</span>);
+        if(currentDate.getDate() === dayToShow) return(<span className="guest-name">{"PETER van BLANKEN"}</span>);
         return <></>;
     } 
+}
+
+function EmptyCell({onClick, shape, room, currentDate}: {onClick: (e : ReactElement, f: () => boolean) => void, shape: string, room: Room, currentDate: Date}): ReactElement{
+    const reservationPage = ReservationPage({
+        scheduleId: room.scheduleId,
+        roomNumber: room.number,
+        roomType: room.type,
+        checkIn: currentDate,
+        id: null,
+        checkOut: null,
+        flightArrivalNumber: null,
+        flightDepartureNumber: null,
+        flightArrivalTime: null,
+        flightDepartureTime: null,
+        bookingSource: null,
+        remarks: null,
+        roomScheduleId: room.scheduleId,
+        room: null,
+        schedule: null
+    });
+    switch(shape){
+        case "L":
+            return (<button style={{marginLeft: "-50%"}} className="d-flex flex-fill no-decoration"
+            onClick={() => onClick(reservationPage.body, reservationPage.action)}/>);
+        case "R":
+            return(<button style={{marginRight: "-50%"}} className="d-flex flex-fill no-decoration"
+            onClick={() => onClick(reservationPage.body, reservationPage.action)}/>);
+        default:
+            return(<button className="d-flex flex-fill no-decoration"
+            onClick={() => onClick(reservationPage.body, reservationPage.action)}/>);
+    }
 }
 
 function Dates({monthYear}: {monthYear: Date}): ReactElement {
@@ -172,20 +222,19 @@ function Dates({monthYear}: {monthYear: Date}): ReactElement {
 }
 
 function MonthYearSelector({monthYear, onChange}: {monthYear: Date, onChange: (monthYear: Date) => void}): ReactElement {
-    const arrowClass = "btn btn-secondary me-2 justify-content-center";
+    const arrowClass = "me-2 justify-content-center align-content-middle no-decoration bg-primary";
     return(<>
         <div className="d-flex flex-fill flex-row justify-content-center align-items-center">
             <button className={arrowClass} onClick={() => onChange(new Date(monthYear.getFullYear(), monthYear.getMonth() - 1, 1))}>
-                <FaLongArrowAltLeft />
+                <FaLongArrowAltLeft size={32} className="text-secondary"/>
             </button>
             <h5 className="text-center text-secondary me-2 ms-2">{monthYear.toLocaleString('default', { month: 'long' }) + " " + monthYear.getFullYear()}</h5>
             <button className={arrowClass} onClick={() => onChange(new Date(monthYear.getFullYear(), monthYear.getMonth() + 1, 1))}>
-                <FaLongArrowAltRight />
+                <FaLongArrowAltRight size={32} className="text-secondary i-l"/>
             </button>
         </div>
     </>);
 }
-
 
 function groupByRoomType(rooms: Room[]): {[type: number]: Room[]} {
     let groupedRooms: {[type: number]: Room[]} = [];

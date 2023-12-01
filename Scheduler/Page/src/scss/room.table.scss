@@ -50,7 +50,6 @@ $cell-width: 34px;
 button.no-decoration{
 	border: none;
 	font: inherit;
-	cursor: pointer;
 }
 
 .past{
@@ -71,12 +70,16 @@ table th, table td.flipped{
     background-color: $primary !important;
 }
 
-.create-modal{
-    position: absolute;
-    border-radius: "5px";
-    max-width: auto ;
-    max-height: 200px;
-    overflow: auto;
+button.hover-success:hover{
+    background-color: $success !important;
+    border-color: $success !important;
+    color: $secondary !important;   
+}
+
+button.hover-danger:hover{
+    background-color: $danger !important;
+    border-color: $danger !important;
+    color: $secondary !important;   
 }
 
 // #region darken
