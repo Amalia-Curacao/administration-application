@@ -1,64 +1,66 @@
-import React, { Fragment, ReactElement, createRef, useState } from "react";
+import { ReactElement, useState } from "react";
 import "../../scss/room.table.scss";
 import { MdBedroomParent } from "react-icons/md";
 import Schedule from "../../models/Schedule";
 import PageLink from "../../types/PageLink";
-import PageState from "../../types/PageState";
 import Room from "../../models/Room";
 import RoomType from "../../models/RoomType";
 import { useParams } from "react-router-dom";
 import Reservation from "../../models/Reservation";
 import { isSameDay, oldest } from "../../extensions/Date";
 import { FaLongArrowAltLeft, FaLongArrowAltRight } from "react-icons/fa";
-import { default as ReservationPage} from "../reservation/page";
-import Modal from "react-bootstrap/Modal";
-import BookingSource from "../../models/BookingSource";
 import Person from "../../models/Person";
+import { Modal } from "react-bootstrap";
+import {default as GuestPage} from "../guest/page";
+import {default as ReservationPage} from "../reservation/page";
+import BookingSource from "../../models/BookingSource";
+import PersonPrefix from "../../models/PersonPrefix";
 
 const _info = {name: "Rooms", icon: <MdBedroomParent/>};
+let onChange: { room(room: Room): void, reservation(reservation: Reservation): void, guest(guest: Person): void };
 
 function RoomIndexBody(): ReactElement {
     const { id } = useParams();
     if(!id) throw new Error("Schedule ID is undefined.");
     const [monthYear, setMonthYear] = useState(new Date()); // [1, 12]
     const [rooms, setRooms] = useState(getRooms(parseInt(id)));
-    const [state, setState] = useState(PageState.Default);
-    const [reservationModal, setReservationModal] = useState<ReactElement>(<Fragment/>);
-    const [guestModal, setGuestModal] = useState<ReactElement>(<Fragment/>);
     let groupedRooms = groupByRoomType(rooms);
+    onChange = {
+        room: (room: Room): void => {
+            // TODO make call to the backend and fill the rooms with the new data
+            setRooms(rooms.map(r => r.number === room.number && r.type === room.type ? room : r));
+        },
 
-    function onReservationDetails(reservationPage: ReactElement, handleSave: () => boolean){
-        if(state !== PageState.Default) return;  
-        setReservationModal(<ReservationModal reservationPage={reservationPage} onSave={handleSave} onClose={handleClose} onGuestDetails={onGuestDetails}/>);
-        setState(PageState.Create);
+        reservation: (reservation: Reservation): void => {
+            const room = rooms.find(r => r.number === reservation.roomNumber && r.type === reservation.roomType);
+            if(!room) return;
+            const reservationIndex = room.reservations!.findIndex(r => r.id === reservation.id);
+            reservationIndex !== -1 ? room.reservations![reservationIndex] = reservation : room.reservations!.push(reservation);
+            onChange.room({...room, reservations: room.reservations});
+        },
 
-        function handleClose(): void {
-            setState(PageState.Default);
-            setReservationModal(<Fragment/>);
-        }
-    }
-
-    function onGuestDetails(guest: Person | undefined, handleSave: () => boolean){
-        if(state !== PageState.Create) return;
-        setGuestModal();
-    }
-
-    function onMonthYearSelected(monthYear: Date): void {
-        setMonthYear(monthYear);
-    }
-
+        guest: (guest: Person): void => {
+            const reservation = rooms.flatMap(r => r.reservations).find(res => res!.id === guest.reservationId);
+            if(!reservation) throw new Error("reservation could not be found");
+            const personToChangeIndex = reservation!.people!.findIndex(p => p.id === guest.id);
+            personToChangeIndex !== -1 ? reservation!.people![personToChangeIndex] = guest : reservation!.people!.push(guest);
+            onChange.reservation(reservation!);
+        },
+    };
+    
     return(<>
-        {reservationModal}
         <div style={{borderRadius:"5px"}} className="p-3 m-3 mb-2 bg-primary d-flex flex-fill flex-row">
             <MonthYearSelector monthYear={monthYear} onChange={onMonthYearSelected}/>
         </div>
         <div className="p-3 pb-0 d-flex flex-column flex-fill">
-            {Object.keys(groupedRooms).map((key, index) => 
-                <Tables key={index} monthYear={monthYear} showDates={index === 0} rooms={groupedRooms[parseInt(key)]} 
-                onCreateReservation={onReservationDetails}/>)}
+            {Object.keys(groupedRooms).map((key, index) => <Tables key={index} monthYear={monthYear} showDates={index === 0} rooms={groupedRooms[parseInt(key)]}/>)}
             <div className="table-end" style={{borderRadius:"0 0 5px 5px"}}></div>
         </div>
     </>);
+    
+    function onMonthYearSelected(monthYear: Date): void {
+        setMonthYear(monthYear);
+    }
 }
 
 // #region Elements
@@ -78,7 +80,7 @@ function MonthYearSelector({monthYear, onChange}: {monthYear: Date, onChange: (m
     </>);
 }
 
-function Tables({rooms, monthYear, showDates, onCreateReservation}: {rooms: Room[], monthYear: Date, showDates: boolean, onCreateReservation: (e :ReactElement, f: () => boolean) => void}): ReactElement{
+function Tables({rooms, monthYear, showDates}: {rooms: Room[], monthYear: Date, showDates: boolean}): ReactElement{
     if(rooms.length === 0) return(<></>);
 
     return(<>
@@ -100,7 +102,7 @@ function Tables({rooms, monthYear, showDates, onCreateReservation}: {rooms: Room
                 {rooms.map((r, index) => 
                 <tr style={{overflow:"visible"}} className="darken-on-hover" key={index}>
                     <td className="flipped text-center">{r.number}</td>
-                    <RoomAvailibilty key={index} monthYear={monthYear} reservations={r.reservations ?? []} room={r} onCreateReservation={onCreateReservation}/>
+                    <RoomAvailibilty key={index} monthYear={monthYear} reservations={r.reservations ?? []} room={r}/>
                 </tr>)}
             </tbody>
         </table>
@@ -135,7 +137,7 @@ function Dates({monthYear}: {monthYear: Date}): ReactElement {
     }
 }
 
-function RoomAvailibilty({monthYear, reservations, room, onCreateReservation}: {monthYear: Date, reservations: Reservation[], room: Room, onCreateReservation: (e : ReactElement, f: () => boolean) => void}): ReactElement {
+function RoomAvailibilty({monthYear, reservations, room}: {monthYear: Date, reservations: Reservation[], room: Room}): ReactElement {
     const amount = new Date(monthYear.getFullYear(), monthYear.getMonth() + 1, 0).getDate();
 
     let days: ReactElement[] = [];
@@ -149,22 +151,21 @@ function RoomAvailibilty({monthYear, reservations, room, onCreateReservation}: {
             
             switch(true) {
                 case checkIn !== undefined && checkOut !== undefined: return(<>
-                    <CheckOutCell reservation={checkOut!} onClick={onCreateReservation}/>
-                    <CheckInCell reservation={checkIn!} onClick={onCreateReservation}/>
+                    <CheckOutCell reservation={checkOut!}/>
+                    <CheckInCell reservation={checkIn!}/>
                 </>);
                 case checkIn !== undefined: return(<>
-                    <EmptyCell room={room} currentDate={currentDate} shape="L" onClick={onCreateReservation}/>
-                    <CheckInCell reservation={checkIn!} onClick={onCreateReservation}/>
+                    <EmptyCell room={room} currentDate={currentDate} shape="L"/>
+                    <CheckInCell reservation={checkIn!}/>
                 </>);
                 case checkOut !== undefined: return(<>
-                    <CheckOutCell reservation={checkOut!} onClick={onCreateReservation}/>
-                    <EmptyCell room={room} currentDate={currentDate} shape="R" onClick={onCreateReservation}/>
+                    <CheckOutCell reservation={checkOut!}/>
+                    <EmptyCell room={room} currentDate={currentDate} shape="R"/>
                 </>);
                 case occupied !== undefined: return(
-                    <OccupiedCell reservation={occupied!} currentDate={currentDate} onClick={onCreateReservation}/>
+                    <OccupiedCell reservation={occupied!} currentDate={currentDate}/>
                 );
-                // TODO add the add reservation button
-                default: return(<EmptyCell room={room} currentDate={currentDate} shape="" onClick={onCreateReservation}/>);
+                default: return(<EmptyCell room={room} currentDate={currentDate} shape=""/>);
             }
         }
 
@@ -178,20 +179,31 @@ function RoomAvailibilty({monthYear, reservations, room, onCreateReservation}: {
     </tr>);
 }
 
-function CheckInCell({onClick, reservation}: {onClick: (e : ReactElement, f: () => boolean) => void, reservation: Reservation}): ReactElement{
-    const editReservationPage = ReservationPage(reservation);
-    return(<button onClick={() => onClick(editReservationPage.body, editReservationPage.action)} style={{marginLeft: "-50%"}} className="flex-fill check-in no-decoration"></button>);
+function CheckInCell({reservation}: {reservation: Reservation}): ReactElement{
+    const [modal, setModal] = useState<boolean>(false);
+    const button: ReactElement = <button onClick={() => setModal(!modal)} style={{marginLeft: "-50%"}} className="flex-fill check-in no-decoration"></button>;
+    return(<>
+        {button}
+        <ReservationModal show={modal} setShow={(b: boolean) => setModal(b)} reservation={reservation}/>
+    </>);
 }
 
-function CheckOutCell({onClick, reservation}: {onClick: (e : ReactElement, f: () => boolean) => void, reservation: Reservation}): ReactElement{
-    const editReservationPage = ReservationPage(reservation);
-    return(<button onClick={() => onClick(editReservationPage.body, editReservationPage.action)} style={{marginRight: "-50%"}} className="flex-fill check-out no-decoration"></button>);
+function CheckOutCell({reservation}: {reservation: Reservation}): ReactElement{
+    const [modal, setModal] = useState<boolean>(false);
+    const button: ReactElement = <button onClick={() => setModal(!modal)} style={{marginRight: "-50%"}} className="flex-fill check-out no-decoration"></button>;
+    return(<>
+        {button}
+        <ReservationModal show={modal} setShow={(b: boolean) => setModal(b)} reservation={reservation}/>
+    </>);
 }
 
-function OccupiedCell({onClick, reservation, currentDate}: {onClick: (e : ReactElement, f: () => boolean) => void, reservation: Reservation, currentDate: Date}): ReactElement{
-    const editReservationPage = ReservationPage(reservation);
-    return(<button onClick={() => onClick(editReservationPage.body, editReservationPage.action)} 
-    className="flex-fill occupied no-decoration">{GuestName(reservation!, currentDate)}</button>);
+function OccupiedCell({reservation, currentDate}: {reservation: Reservation, currentDate: Date}): ReactElement{
+    const [modal, setModal] = useState<boolean>(false);
+    const button: ReactElement = <button onClick={() => setModal(!modal)} className="flex-fill occupied no-decoration">{GuestName(reservation!, currentDate)}</button>;
+    return(<>
+        {button}
+        <ReservationModal show={modal} setShow={(b: boolean) => setModal(b)} reservation={reservation}/>
+    </>);
 
     function GuestName(occupied: Reservation, currentDate: Date) : ReactElement {
         if(!occupied) return(<></>);
@@ -204,49 +216,122 @@ function OccupiedCell({onClick, reservation, currentDate}: {onClick: (e : ReactE
     } 
 }
 
-function EmptyCell({onClick, shape, room, currentDate}: {onClick: (e : ReactElement, f: () => boolean) => void, shape: string, room: Room, currentDate: Date}): ReactElement{
-    const reservationPage = ReservationPage({
-        scheduleId: room.scheduleId,
-        roomNumber: room.number,
-        roomType: room.type,
-        checkIn: currentDate,
-        id: undefined,
+function EmptyCell({shape, room, currentDate}: {shape: string, room: Room, currentDate: Date}): ReactElement{
+    const [modal, setModal] = useState<boolean>(false);
+    function onClick(): void{
+        setModal(!modal);
+    }
+
+    function setShow(b: boolean){
+        setModal(b);
+    }
+
+    const button = (): ReactElement => {
+        switch(shape){
+            case "L":
+                return (<button style={{marginLeft: "-50%"}} className="d-flex flex-fill no-decoration" onClick={onClick}/>);
+            case "R":
+                return(<button style={{marginRight: "-50%"}} className="d-flex flex-fill no-decoration" onClick={onClick}/>);
+            default:
+                return(<button className="d-flex flex-fill no-decoration" onClick={onClick}/>);
+        }
+    }
+
+    return(<>
+        {button()} 
+        <CreateReservationModal setShow={setShow} checkIn={currentDate} room={room} show={modal} />
+    </>);
+}
+
+function CreateReservationModal({checkIn, room, show, setShow}: {checkIn: Date, room: Room, show: boolean, setShow: (b: boolean) => void}): ReactElement {
+    const blankReservation: Reservation = {
+        id: -1,
+        checkIn: checkIn,
         checkOut: undefined,
         flightArrivalNumber: undefined,
         flightDepartureNumber: undefined,
         flightArrivalTime: undefined,
         flightDepartureTime: undefined,
-        bookingSource: undefined,
-        remarks: undefined,
+        bookingSource: BookingSource.None,
+        remarks: "",
+        roomNumber: room.number,
+        roomType: room.type,
         roomScheduleId: room.scheduleId,
-        room: undefined,
-        schedule: undefined,
-        personIds: [],
-        persons: []
-    });
-    switch(shape){
-        case "L":
-            return (<button style={{marginLeft: "-50%"}} className="d-flex flex-fill no-decoration"
-            onClick={() => onClick(reservationPage.body, reservationPage.action)}/>);
-        case "R":
-            return(<button style={{marginRight: "-50%"}} className="d-flex flex-fill no-decoration"
-            onClick={() => onClick(reservationPage.body, reservationPage.action)}/>);
-        default:
-            return(<button className="d-flex flex-fill no-decoration"
-            onClick={() => onClick(reservationPage.body, reservationPage.action)}/>);
+        room: room,
+        scheduleId: room.scheduleId,
+        schedule: room.schedule,
+        people: [],
+        peopleIds: []
     }
+    return(<>
+        <ReservationModal show={show} setShow={setShow} reservation={blankReservation}/>
+    </>);
 }
 
-function ReservationModal({reservationPage, onSave, onClose}: {reservationPage: ReactElement, onSave: () => boolean, onClose: VoidFunction}): ReactElement {
-    return(<Modal onHide={onClose} show={true}>
-        <Modal.Body className="bg-primary d-flex">
-            {reservationPage}
-        </Modal.Body>
-        <Modal.Footer className="bg-primary">
-            <button className="btn btn-secondary hover-danger" onClick={onClose}>Cancel</button>
-            <button className="btn btn-secondary hover-success" onClick={() => {if(onSave()) onClose()}}>Save</button>
-        </Modal.Footer>
-    </Modal>);
+function ReservationModal({reservation, show, setShow}: {reservation: Reservation, show: boolean, setShow: (s: boolean) => void}): ReactElement {
+    const [showGuest, setShowGuest] = useState<{[index: number]: boolean}>({});
+    const [tempReservation, ] = useState<Reservation>({...reservation});
+    const reservationPage = ReservationPage(tempReservation);
+    const toReservationModal = (index: number): void => { 
+        setShowGuest(showGuest => ({...showGuest, [index]: false}));
+        setShow(true);
+    };
+    const toGuestModal = (index: number): void => {
+        setShow(false);
+        setShowGuest(showGuest => ({...showGuest, [index]: true}));
+    }
+    const onSave = (): void => {
+        if(!reservationPage.action()) return;
+        onChange.reservation(tempReservation);
+        setShow(false);
+     }
+    return(<>
+        <Modal show={show} onHide={() => setShow(false)}>
+                <Modal.Body className="bg-primary">
+                    {reservationPage.body}
+                </Modal.Body>
+                <Modal.Footer className="bg-primary">
+                    {reservation.people!.length < 2 
+                        ? (<button className="btn btn-secondary hover-success float-start" 
+                            onClick={() => toGuestModal(reservation.peopleIds!.length)}>Add guest</button>) 
+                        : (<></>)}
+                    <button className="btn btn-secondary hover-success" onClick={onSave}>Save</button>
+                </Modal.Footer>
+        </Modal>
+        {tempReservation.people?.map((p, index) => 
+            <GuestModal key={index} show={showGuest[index] ?? (showGuest[index] = false)} guest={p} onClose={() => toReservationModal(index)}/>
+        )}
+        <CreateGuestModal reservation={tempReservation} onClose={() => toReservationModal(tempReservation.peopleIds!.length)}
+            show={showGuest[tempReservation.peopleIds!.length] ?? (showGuest[tempReservation.peopleIds!.length] = false)}/>
+    </>);
+
+    function GuestModal({show, guest, onClose}: {show: boolean, guest: Person, onClose: VoidFunction}): ReactElement {
+        const guestPage = GuestPage(guest);
+        return(<>
+            <Modal show={show} onHide={onClose}>
+                <Modal.Body className="bg-primary">
+                    {guestPage.body}
+                </Modal.Body>
+                <Modal.Footer className="bg-primary">
+                    <button className="btn btn-secondary hover-success" onClick={onClose}>Close</button>
+                </Modal.Footer>
+            </Modal>
+        </>);
+    }
+
+    function CreateGuestModal({show, reservation, onClose}: {show: boolean, reservation: Reservation, onClose: VoidFunction}): ReactElement {
+        const blankGuest: Person = {
+            id: -1,
+            firstName: "",
+            lastName: "",
+            prefix: PersonPrefix.Unknown,
+            reservationId: reservation.id,
+            reservation: reservation,
+            note: "",
+            age: undefined,
+        };
+        return(<GuestModal guest={blankGuest} onClose={onClose} show={show}/>);
+    }
 }
 
 // #endregion
@@ -282,8 +367,8 @@ function getRooms(scheduleId: number): Room[] {
                 roomType: RoomType.Room,
                 schedule: undefined,
                 scheduleId: 1,
-                personIds: [],
-                persons: []
+                peopleIds: [],
+                people: []
             },
             {
                 id: 2,
@@ -301,8 +386,8 @@ function getRooms(scheduleId: number): Room[] {
                 roomType: RoomType.Room,
                 schedule: undefined,
                 scheduleId: 1,
-                personIds: [],
-                persons: []
+                peopleIds: [],
+                people: []
             },
         ], 
         schedule: undefined, scheduleId: scheduleId, type: RoomType.Room},

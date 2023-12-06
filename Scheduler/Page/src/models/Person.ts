@@ -1,3 +1,4 @@
+import PersonPrefix from "./PersonPrefix";
 import Reservation from "./Reservation";
 
 export default interface Person{

@@ -21,6 +21,6 @@ export default interface Reservation{
     room: Room | undefined;
     scheduleId: number | undefined;
     schedule: Schedule | undefined;
-    persons: Person[] | undefined;
-    personIds: number[] | undefined;
+    people: Person[] | undefined;
+    peopleIds: number[] | undefined;
 }
