@@ -1,4 +1,4 @@
-import { ReactElement } from "react";
+import { ReactElement, useEffect } from "react";
 import Reservation from "../../models/Reservation";
 import BookingSource from "../../models/BookingSource";
 import RoomType from "../../models/RoomType";
@@ -15,52 +15,68 @@ function Body({reservation}: {reservation: Reservation}): ReactElement {
                 <tr>
                     <td colSpan={2} className="bg-primary text-secondary">
                         <label className="d-flex flex-column">Booking Source
-                            <select onChange={updateBookingSource} ref={references.GetSelect("booking-source")} defaultValue={reservation.bookingSource ? reservation.bookingSource : BookingSource.None } className="form-control">
-                                {Object.values(BookingSource).map((value, index) => <option key={index} value={value}>{value}</option>)}
-                            </select>
+                                <InputField refKey="booking-source">
+                                    <select onChange={updateBookingSource} ref={references.GetSelect("booking-source")} defaultValue={reservation.bookingSource ? reservation.bookingSource : BookingSource.None } className="form-control">
+                                        {Object.values(BookingSource).map((value, index) => <option key={index} value={value}>{value}</option>)}
+                                    </select>
+                                </InputField>
                         </label>
                     </td>
                 </tr>
                 <tr>
                     <td className="bg-primary text-secondary">
                         <label>Check In
+                            <InputField refKey="check-in">
                             <input onChange={updateCheckIn} ref={references.GetInput("check-in")} defaultValue={reservation.checkIn ? toDateOnlyString(reservation.checkIn) : ""} type="date" className="form-control"/>
+                            </InputField>
                         </label>
                     </td>
                     <td className="bg-primary text-secondary">
                         <label>Check Out
+                            <InputField refKey="check-out">
                             <input onChange={updateCheckOut} ref={references.GetInput("check-out")} defaultValue={reservation.checkOut ? toDateOnlyString(reservation.checkOut) : ""} type="date" className="form-control"/>
+                            </InputField>
                         </label>
                     </td>
                 </tr>
                 <tr>
                     <td className="bg-primary text-secondary">
                         <label>Flight Arrival Number
+                            <InputField refKey="flight-arrival-number">
                             <input onChange={updateFlightArrivalNumber} defaultValue={reservation.flightArrivalNumber ? reservation.flightArrivalNumber : ""} ref={references.GetInput("flight-arrival-number")} type="text" className="form-control"/>
+                            </InputField>
                         </label>
                     </td>
                     <td className="bg-primary text-secondary text-nowrap">
                         <label>Flight Departure Number
+                            <InputField refKey="flight-departure-number">
                             <input onChange={updateFlightDepartureNumber} defaultValue={reservation.flightDepartureNumber ? reservation.flightDepartureNumber : ""} ref={references.GetInput("flight-departure-number")} type="text" className="form-control"/>
+                            </InputField>
                         </label>
                     </td>
                 </tr>
                 <tr>
                     <td className="bg-primary text-secondary">
                         <label>Flight Arrival Time
+                            <InputField refKey="flight-arrival-time">
                             <input onChange={updateFlightArrivalTime} defaultValue={reservation.flightArrivalTime ? toTimeOnlyString(reservation.flightArrivalTime) : ""} ref={references.GetInput("flight-arrival-time")} type="time" className="form-control"/>
+                            </InputField>
                         </label>
                     </td>
                     <td className="bg-primary text-secondary">
                         <label>Flight Departure Time
+                            <InputField refKey="flight-departure-time">
                             <input onChange={updateFlightDepartureTime} defaultValue={reservation.flightDepartureTime ? toTimeOnlyString(reservation.flightDepartureTime) : ""} ref={references.GetInput("flight-departure-time")} type="time" className="form-control"/>
+                            </InputField>
                         </label>
                     </td>
                 </tr>
                 <tr>
                     <td colSpan={2} className="bg-primary text-secondary">
                         <label className="d-flex flex-column">Remarks
+                            <InputField refKey="remarks">
                             <textarea onChange={updateRemarks} defaultValue={reservation.remarks ? reservation.remarks : ""} className="form-control" ref={references.GetTextArea("remarks")} />
+                            </InputField>
                         </label>
                     </td>
                 </tr>
@@ -68,6 +84,7 @@ function Body({reservation}: {reservation: Reservation}): ReactElement {
         </table>
     </>);
 
+    // #region update functions
     function updateBookingSource(): void {
         reservation.bookingSource = BookingSource[references.GetSelect("booking-source")!.current?.value! as keyof typeof BookingSource];
     }
@@ -99,6 +116,7 @@ function Body({reservation}: {reservation: Reservation}): ReactElement {
     function updateRemarks(): void {
         reservation.remarks = references.GetTextArea("remarks")!.current?.value!;
     }
+    // #endregion
 }
 
 function Action(scheduleId: number, roomNumber: number, roomType: RoomType): boolean {
@@ -128,9 +146,40 @@ function Action(scheduleId: number, roomNumber: number, roomType: RoomType): boo
 }
 
 function Validate(reservation: Reservation): boolean {
-    console.log(references.GetInput("check-in").current!.labels);
-    // #region undefined/null validation
-    return (true);
+    let isValid: boolean = true;
+
+    const nullErrorMessage: string = "Required";
+    if(!reservation.checkIn || isNaN(reservation.checkIn!.valueOf())) {
+        references.GetSpan("check-in-validation")!.current!.innerText += nullErrorMessage;
+        references.GetDiv("check-in-wrapper")!.current!.classList.add("border-danger");
+        isValid = false;
+    };
+    if(!reservation.checkOut || isNaN(reservation.checkOut!.valueOf())) {
+        references.GetSpan("check-out-validation")!.current!.innerText += nullErrorMessage;
+        references.GetDiv("check-out-wrapper")!.current!.classList.add("border-danger");
+        isValid = false;
+    };
+    
+    if(reservation.bookingSource === BookingSource.None) {
+        references.GetSpan("booking-source-validation")!.current!.innerText += "Bookingsource cannot be none.";
+        references.GetDiv("booking-source-wrapper")!.current!.classList.add("border-danger");
+        isValid = false;
+    }
+
+    if(reservation.checkIn! > reservation.checkOut!) {
+        references.GetSpan("check-in-validation")!.current!.innerText += "Check in cannot be after check out.";
+        references.GetDiv("check-in-wrapper")!.current!.classList.add("border-danger");
+        isValid = false;
+    }
+
+    return (isValid);
+}
+
+function InputField({refKey, children}: {refKey: string, children: ReactElement}): ReactElement {
+    return(<div ref={references.GetDiv(refKey + "-wrapper")} className="bg-secondary border border-2" style={{borderRadius: "5px"}}>
+        <span key={refKey} className="text-danger bg-secondary" ref={references.GetSpan(refKey + "-validation")}/>
+        {children}
+    </div>);
 }
 
 export default function Page(reservation: Reservation): {body: ReactElement, action: () => boolean} {

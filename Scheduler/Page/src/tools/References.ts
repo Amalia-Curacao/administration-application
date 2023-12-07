@@ -21,4 +21,16 @@ export default class References {
     public GetSelect(key: string): RefObject<HTMLSelectElement> {
         return (this.references[key] = this.references[key] || createRef()) as unknown as RefObject<HTMLSelectElement>;
     }
+
+    public GetLabel(key: string): RefObject<HTMLLabelElement> {
+        return (this.references[key] = this.references[key] || createRef()) as unknown as RefObject<HTMLLabelElement>;
+    }
+
+    public GetDiv(key: string): RefObject<HTMLDivElement> {
+        return (this.references[key] = this.references[key] || createRef()) as unknown as RefObject<HTMLDivElement>;
+    }
+
+    public GetSpan(key: string): RefObject<HTMLSpanElement> {
+        return (this.references[key] = this.references[key] || createRef()) as unknown as RefObject<HTMLSpanElement>;
+    }
 }
