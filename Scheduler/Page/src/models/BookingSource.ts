@@ -1,10 +1,11 @@
 enum BookingSource{
     None = "None",
-    Tui = "Tui",
-    BookingDotCom = "BookingDotCom",
-    Expedia = "Expedia",
     Airbnb = "Airbnb",
+    BookingDotCom = "Booking.com",
+    Despegar = "Despegar",
     Direct = "Direct",
+    Expedia = "Expedia",
+    Tui = "Tui",
 }
 
 export default BookingSource;

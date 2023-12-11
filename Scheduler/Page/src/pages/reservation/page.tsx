@@ -1,21 +1,29 @@
-import { ReactElement, useEffect } from "react";
+import { ReactElement } from "react";
 import Reservation from "../../models/Reservation";
 import BookingSource from "../../models/BookingSource";
 import RoomType from "../../models/RoomType";
 import "../../scss/reservation.create.scss";
-import { toDateOnlyString, toTimeOnlyString } from "../../extensions/Date";
+import { isValidDate, toDateOnlyString, toTimeOnlyString } from "../../extensions/Date";
 import References from "../../tools/References";
+import InputField from "../../components/inputField";
 
 const references: References = new References();
 
+// Temp
+let id: number = 1;
+// TODO gets new id from server
+function getId(): number{
+    return(++id);
+}
+
 function Body({reservation}: {reservation: Reservation}): ReactElement {
     return (<>
-        <table>
+        <table className="w-100"    >
             <tbody>
                 <tr>
                     <td colSpan={2} className="bg-primary text-secondary">
-                        <label className="d-flex flex-column">Booking Source
-                                <InputField refKey="booking-source">
+                        <label className="d-flex flex-column w-100">Booking Source
+                                <InputField refKey="booking-source" references={references}>
                                     <select onChange={updateBookingSource} ref={references.GetSelect("booking-source")} defaultValue={reservation.bookingSource ? reservation.bookingSource : BookingSource.None } className="form-control">
                                         {Object.values(BookingSource).map((value, index) => <option key={index} value={value}>{value}</option>)}
                                     </select>
@@ -25,57 +33,57 @@ function Body({reservation}: {reservation: Reservation}): ReactElement {
                 </tr>
                 <tr>
                     <td className="bg-primary text-secondary">
-                        <label>Check In
-                            <InputField refKey="check-in">
-                            <input onChange={updateCheckIn} ref={references.GetInput("check-in")} defaultValue={reservation.checkIn ? toDateOnlyString(reservation.checkIn) : ""} type="date" className="form-control"/>
+                        <label className="w-100">Check In
+                            <InputField refKey="check-in" references={references}>
+                                <input onChange={updateCheckIn} ref={references.GetInput("check-in")} defaultValue={isValidDate(reservation.checkIn) ? toDateOnlyString(reservation.checkIn!) : ""} type="date" className="form-control"/>
                             </InputField>
                         </label>
                     </td>
                     <td className="bg-primary text-secondary">
-                        <label>Check Out
-                            <InputField refKey="check-out">
-                            <input onChange={updateCheckOut} ref={references.GetInput("check-out")} defaultValue={reservation.checkOut ? toDateOnlyString(reservation.checkOut) : ""} type="date" className="form-control"/>
+                        <label className="w-100">Check Out
+                            <InputField refKey="check-out" references={references}>
+                                <input onChange={updateCheckOut} ref={references.GetInput("check-out")} defaultValue={isValidDate(reservation.checkOut) ? toDateOnlyString(reservation.checkOut!) : ""} type="date" className="form-control"/>
                             </InputField>
                         </label>
                     </td>
                 </tr>
                 <tr>
                     <td className="bg-primary text-secondary">
-                        <label>Flight Arrival Number
-                            <InputField refKey="flight-arrival-number">
-                            <input onChange={updateFlightArrivalNumber} defaultValue={reservation.flightArrivalNumber ? reservation.flightArrivalNumber : ""} ref={references.GetInput("flight-arrival-number")} type="text" className="form-control"/>
+                        <label className="w-100">Flight Arrival Number
+                            <InputField refKey="flight-arrival-number" references={references}>
+                                <input onChange={updateFlightArrivalNumber} defaultValue={reservation.flightArrivalNumber ? reservation.flightArrivalNumber : ""} ref={references.GetInput("flight-arrival-number")} type="text" className="form-control"/>
                             </InputField>
                         </label>
                     </td>
                     <td className="bg-primary text-secondary text-nowrap">
-                        <label>Flight Departure Number
-                            <InputField refKey="flight-departure-number">
-                            <input onChange={updateFlightDepartureNumber} defaultValue={reservation.flightDepartureNumber ? reservation.flightDepartureNumber : ""} ref={references.GetInput("flight-departure-number")} type="text" className="form-control"/>
+                        <label className="w-100">Flight Departure Number
+                            <InputField refKey="flight-departure-number" references={references}>
+                                <input onChange={updateFlightDepartureNumber} defaultValue={reservation.flightDepartureNumber ? reservation.flightDepartureNumber : ""} ref={references.GetInput("flight-departure-number")} type="text" className="form-control"/>
                             </InputField>
                         </label>
                     </td>
                 </tr>
                 <tr>
                     <td className="bg-primary text-secondary">
-                        <label>Flight Arrival Time
-                            <InputField refKey="flight-arrival-time">
-                            <input onChange={updateFlightArrivalTime} defaultValue={reservation.flightArrivalTime ? toTimeOnlyString(reservation.flightArrivalTime) : ""} ref={references.GetInput("flight-arrival-time")} type="time" className="form-control"/>
+                        <label className="w-100">Flight Arrival Time
+                            <InputField refKey="flight-arrival-time" references={references}>
+                                <input onChange={updateFlightArrivalTime} defaultValue={isValidDate(reservation.flightArrivalTime) ? toTimeOnlyString(reservation.flightArrivalTime!) : ""} ref={references.GetInput("flight-arrival-time")} type="time" className="form-control"/>
                             </InputField>
                         </label>
                     </td>
                     <td className="bg-primary text-secondary">
-                        <label>Flight Departure Time
-                            <InputField refKey="flight-departure-time">
-                            <input onChange={updateFlightDepartureTime} defaultValue={reservation.flightDepartureTime ? toTimeOnlyString(reservation.flightDepartureTime) : ""} ref={references.GetInput("flight-departure-time")} type="time" className="form-control"/>
+                        <label className="w-100">Flight Departure Time
+                            <InputField refKey="flight-departure-time" references={references}>
+                                <input onChange={updateFlightDepartureTime} defaultValue={isValidDate(reservation.flightDepartureTime) ? toTimeOnlyString(reservation.flightDepartureTime!) : ""} ref={references.GetInput("flight-departure-time")} type="time" className="form-control"/>
                             </InputField>
                         </label>
                     </td>
                 </tr>
                 <tr>
                     <td colSpan={2} className="bg-primary text-secondary">
-                        <label className="d-flex flex-column">Remarks
-                            <InputField refKey="remarks">
-                            <textarea onChange={updateRemarks} defaultValue={reservation.remarks ? reservation.remarks : ""} className="form-control" ref={references.GetTextArea("remarks")} />
+                        <label className="d-flex flex-column w-100">Remarks
+                            <InputField refKey="remarks" references={references}>
+                                <textarea onChange={updateRemarks} defaultValue={reservation.remarks ? reservation.remarks : ""} className="form-control" ref={references.GetTextArea("remarks")} />
                             </InputField>
                         </label>
                     </td>
@@ -119,9 +127,9 @@ function Body({reservation}: {reservation: Reservation}): ReactElement {
     // #endregion
 }
 
-function Action(scheduleId: number, roomNumber: number, roomType: RoomType): boolean {
+function Action(scheduleId: number, roomNumber: number, roomType: RoomType, reservationId: number): Reservation | undefined {
     const reservationToAdd: Reservation = {
-        id: -1,
+        id: reservationId <= 0 ? getId() : reservationId,
         checkIn: new Date(references.GetInput("check-in")!.current?.value!),
         checkOut: new Date(references.GetInput("check-out")!.current?.value!),
         flightArrivalNumber: references.GetInput("flight-arrival-number")!.current?.value!,
@@ -142,7 +150,7 @@ function Action(scheduleId: number, roomNumber: number, roomType: RoomType): boo
         peopleIds: []
     };
 
-    return (Validate(reservationToAdd));
+    return (Validate(reservationToAdd) ? reservationToAdd : undefined);
 }
 
 function Validate(reservation: Reservation): boolean {
@@ -150,24 +158,24 @@ function Validate(reservation: Reservation): boolean {
 
     const nullErrorMessage: string = "Required";
     if(!reservation.checkIn || isNaN(reservation.checkIn!.valueOf())) {
-        references.GetSpan("check-in-validation")!.current!.innerText += nullErrorMessage;
+        references.GetSpan("check-in-validation")!.current!.innerText = nullErrorMessage;
         references.GetDiv("check-in-wrapper")!.current!.classList.add("border-danger");
         isValid = false;
     };
     if(!reservation.checkOut || isNaN(reservation.checkOut!.valueOf())) {
-        references.GetSpan("check-out-validation")!.current!.innerText += nullErrorMessage;
+        references.GetSpan("check-out-validation")!.current!.innerText = nullErrorMessage;
         references.GetDiv("check-out-wrapper")!.current!.classList.add("border-danger");
         isValid = false;
     };
     
     if(reservation.bookingSource === BookingSource.None) {
-        references.GetSpan("booking-source-validation")!.current!.innerText += "Bookingsource cannot be none.";
+        references.GetSpan("booking-source-validation")!.current!.innerText = "Bookingsource cannot be none.";
         references.GetDiv("booking-source-wrapper")!.current!.classList.add("border-danger");
         isValid = false;
     }
 
     if(reservation.checkIn! > reservation.checkOut!) {
-        references.GetSpan("check-in-validation")!.current!.innerText += "Check in cannot be after check out.";
+        references.GetSpan("check-in-validation")!.current!.innerText = "Check in cannot be after check out.";
         references.GetDiv("check-in-wrapper")!.current!.classList.add("border-danger");
         isValid = false;
     }
@@ -175,18 +183,11 @@ function Validate(reservation: Reservation): boolean {
     return (isValid);
 }
 
-function InputField({refKey, children}: {refKey: string, children: ReactElement}): ReactElement {
-    return(<div ref={references.GetDiv(refKey + "-wrapper")} className="bg-secondary border border-2" style={{borderRadius: "5px"}}>
-        <span key={refKey} className="text-danger bg-secondary" ref={references.GetSpan(refKey + "-validation")}/>
-        {children}
-    </div>);
-}
-
-export default function Page(reservation: Reservation): {body: ReactElement, action: () => boolean} {
+export default function Page(reservation: Reservation): {body: ReactElement, action: () => Reservation | undefined} {
     if(!reservation.scheduleId) throw new Error("Reservation scheduleId is undefined");
     if(!reservation.roomNumber) throw new Error("Reservation roomNumber is undefined");
     if(!reservation.roomType) throw new Error("Reservation roomType is undefined");
-
-    return ({body: <Body reservation={reservation}/>, action: () => Action(reservation.scheduleId!, reservation.roomNumber!, reservation.roomType!)});
+    if(!reservation.id) throw new Error("Reservation id is undefined");
+    return ({body: <Body reservation={reservation}/>, action: () => Action(reservation.scheduleId!, reservation.roomNumber!, reservation.roomType!, reservation.id!)});
 }
 
