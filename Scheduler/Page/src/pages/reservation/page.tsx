@@ -6,6 +6,7 @@ import "../../scss/reservation.create.scss";
 import { isValidDate, toDateOnlyString, toTimeOnlyString } from "../../extensions/Date";
 import References from "../../tools/References";
 import InputField from "../../components/inputField";
+import Person from "../../models/Person";
 
 const references: References = new References();
 
@@ -127,7 +128,7 @@ function Body({reservation}: {reservation: Reservation}): ReactElement {
     // #endregion
 }
 
-function Action(scheduleId: number, roomNumber: number, roomType: RoomType, reservationId: number): Reservation | undefined {
+function Action(scheduleId: number, roomNumber: number, roomType: RoomType, reservationId: number, people: Person[], peopleIds: number[]): Reservation | undefined {
     const reservationToAdd: Reservation = {
         id: reservationId <= 0 ? getId() : reservationId,
         checkIn: new Date(references.GetInput("check-in")!.current?.value!),
@@ -146,8 +147,8 @@ function Action(scheduleId: number, roomNumber: number, roomType: RoomType, rese
         roomType: roomType,
         roomScheduleId: scheduleId,
         room: undefined,
-        people: [],
-        peopleIds: []
+        people: people ?? [],
+        peopleIds: peopleIds ?? []
     };
 
     return (Validate(reservationToAdd) ? reservationToAdd : undefined);
@@ -188,6 +189,9 @@ export default function Page(reservation: Reservation): {body: ReactElement, act
     if(!reservation.roomNumber) throw new Error("Reservation roomNumber is undefined");
     if(!reservation.roomType) throw new Error("Reservation roomType is undefined");
     if(!reservation.id) throw new Error("Reservation id is undefined");
-    return ({body: <Body reservation={reservation}/>, action: () => Action(reservation.scheduleId!, reservation.roomNumber!, reservation.roomType!, reservation.id!)});
+    return ({
+        body: <Body reservation={reservation}/>, 
+        action: () => Action(reservation.scheduleId!, reservation.roomNumber!, reservation.roomType!, reservation.id!, reservation.people!, reservation.peopleIds!)
+    });
 }
 

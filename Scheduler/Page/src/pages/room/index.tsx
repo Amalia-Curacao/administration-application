@@ -183,7 +183,8 @@ function CheckOutCell({reservation}: {reservation: Reservation}): ReactElement{
 function OccupiedCell({reservation, currentDate}: {reservation: Reservation, currentDate: Date}): ReactElement{
     const [modal, setModal] = useState<boolean>(false);
     const [reservationState, setReservationState] = useState<Reservation>(reservation);
-    const button: ReactElement = <button onClick={() => setModal(!modal)} className="flex-fill occupied no-decoration">{GuestName(reservation!, currentDate)}</button>;
+    const button: ReactElement = <button onClick={() => setModal(!modal)} className="flex-fill occupied no-decoration">{
+        GuestName(reservation!, currentDate)}</button>;
     return(<>
         {button}
         <ReservationModal show={modal} setShow={(b: boolean) => setModal(b)} reservation={reservationState} setReservation={(r: Reservation) => setReservationState(r)}/>
@@ -272,8 +273,9 @@ function ReservationModal({reservation, show, setShow, setReservation}: {reserva
     const onSave = (): void => {
         const reservation = reservationPage.action();
         if(!reservation) return;
+        console.log(reservation)
         onChange.reservation(reservation);
-        console.log(reservation);
+        setReservation(reservation);
         setShow(false);
     }
     const onRemove = (): void => {
@@ -323,6 +325,7 @@ function ReservationModal({reservation, show, setShow, setReservation}: {reserva
                     tempReservation.people!.push(guest);
                     tempReservation.peopleIds!.push(guest.id!);
                 };
+                console.log(tempReservation);
                 setReservation(tempReservation);
                 onClose();
             }
