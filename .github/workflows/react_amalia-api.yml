@@ -9,6 +9,9 @@ on:
       - react
   workflow_dispatch:
 
+env:
+  AZURE_WEBAPP_PACKAGE_PATH: '/Scheduler/Api/'
+
 jobs:
   build:
     runs-on: windows-latest
