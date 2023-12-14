@@ -17,7 +17,7 @@ public class ReservationsController : Controller
 	private static readonly ValidationFailure RoomFull = 
 		new(nameof(Reservation.RoomNumber), "Reservation could not be added, because it was overlapping with an existing reservation.");
 	private static readonly ValidationFailure ReservationNotFound =
-		new($"{nameof(Reservation.RoomNumber)}", "Reservation could not be found");
+		new($"{nameof(Reservation.RoomNumber)}", "Reservation could not be located");
 
 	public ReservationsController(ScheduleDb db, IValidator<Reservation> validator)
 	{
@@ -32,10 +32,16 @@ public class ReservationsController : Controller
 		=> Ok(await _crud.Get());
 
 	/// <summary> Api endpoint for getting a reservation by id.</summary>
-	/// <returns> Status 200 (OK) with the reservation with the given id.</returns>
+	/// <returns> 
+	/// Status 200 (OK) with the reservation with the given id.
+	/// Status 400 (Bad request) with error message, when the reservation could not be found.
+	/// </returns>
 	[HttpGet($"[controller]/[action]/{{{nameof(Reservation.Id)}}}")]
-	public async Task<ObjectResult> Get(int id)
-		=> Ok(await _crud.Get(new HashSet<Key>(new Key[] {new(nameof(Reservation.Id), id)})));
+	public async Task<ObjectResult> Get(int Id)
+	{
+		var reservation = await _crud.Get(new HashSet<Key>(new Key[] { new(nameof(Reservation.Id), Id) }));
+		return reservation is null ? BadRequest(ReservationNotFound) : Ok(reservation);
+	}
 
 	/// <summary> Api endpoint for creating reservations in the database. </summary>
 	/// <returns> 
@@ -81,8 +87,8 @@ public class ReservationsController : Controller
 	/// Status 400 (Bad request) with error message, when the reservation does not exist.
 	/// </returns>
 	[HttpDelete($"[controller]/[action]/{{{nameof(Reservation.Id)}}}")]
-	public async Task<ObjectResult> Delete(int id)
-		=> Ok(await _crud.Delete(new HashSet<Key>(new Key[] {new(nameof(Reservation.Id), id)})));
+	public async Task<ObjectResult> Delete(int Id)
+		=> Ok(await _crud.Delete(new HashSet<Key>(new Key[] {new(nameof(Reservation.Id), Id)})));
 
 
 	/// <summary> Checks if a reservation can fit in the desired room. </summary>

@@ -12,7 +12,7 @@ public class GuestController : Controller
 {
 	private readonly ICrud<Guest> _crud;
 	private readonly IValidator<Guest> _validator;
-	private readonly ValidationException PersonNotFound = new ValidationException($"{nameof(Guest)} not found in the database.");
+	private readonly ValidationException PersonNotFound = new($"{nameof(Guest)} could not be located.");
 
 	public GuestController(ScheduleDb db, IValidator<Guest> validator)
 	{
@@ -21,16 +21,24 @@ public class GuestController : Controller
 	}
 
 	/// <summary> Api endpoint for getting all guests from a reservation in the database.</summary>
-	/// <returns> Status 200 (OK) with all guests  from a reservation in the database.</returns>
-	[HttpGet($"[controller]/[action]/{{{nameof(Reservation.Id)}}}")]
-	public async Task<ObjectResult> GetReservationGuests(int reservationId)
-		=> Ok((await _crud.GetAll()).Where(g => g.ReservationId == reservationId));
+	/// <returns> 
+	/// Status 200 (OK) with all guests  from a reservation in the database.
+	/// </returns>
+	[HttpGet($"[controller]/[action]/{{{nameof(Guest.ReservationId)}}}")]
+	public async Task<ObjectResult> GetReservationGuests(int ReservationId)
+		=> Ok((await _crud.GetAll()).Where(g => g.ReservationId == ReservationId));
 
 	/// <summary> Api endpoint for getting a specific guest in the database.</summary>
-	/// <returns> Status 200 (OK) with the guest with the given id.</returns>
+	/// <returns> 
+	/// Status 200 (OK) with the guest with the given id.
+	/// Status 400 (Bad request) with error message, when the guest could not be found.
+	/// </returns>
 	[HttpGet($"[controller]/[action]/{{{nameof(Guest.Id)}}}")]
-	public async Task<ObjectResult> Get(int id)
-		=> Ok(await _crud.Get(new HashSet<Key>(new Key[] { new(nameof(Guest.Id), id) })));
+	public async Task<ObjectResult> Get(int Id)
+	{
+		var guest = await _crud.TryGet(new HashSet<Key>(new Key[] { new(nameof(Guest.Id), Id) }));
+		return guest is null ? BadRequest(PersonNotFound) : Ok(guest);
+	}
 
 	/// <summary> Api endpoint for creating guests in the database. </summary>
 	/// <returns> Status 200 (OK) with the new guest, when the guest has been added. </returns>
@@ -58,7 +66,7 @@ public class GuestController : Controller
 	/// <summary> Api endpoint for deleting guests in the database. </summary>
 	/// <returns> Status 200 (OK) and a boolean true, when the guest has been deleted. </returns>
 	[HttpDelete($"[controller]/[action]/{{{nameof(Guest.Id)}}}")]
-	public async Task<ObjectResult> Delete(Guest person)
-		=> Ok(await _crud.Delete(person.GetPrimaryKey()));
+	public async Task<ObjectResult> Delete(int Id)
+		=> Ok(await _crud.Delete(new HashSet<Key>(new Key[] { new(nameof(Guest.Id), Id) })));
 
 }
