@@ -1,4 +1,5 @@
-﻿using Creative.Api.Interfaces;
+﻿using Creative.Api.Data;
+using Creative.Api.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -19,18 +20,23 @@ public sealed class Schedule : IModel
     [Display(Name = "Name")]
     public string? Name { get; set; }
 
-    public static IQueryable<T> IncludeAll<T>(DbSet<T> values) where T : class 
+	[Obsolete("Was part of an old implementation for eager loading.")]
+	public static IQueryable<T> IncludeAll<T>(DbSet<T> values) where T : class 
         => values
         .Include(nameof(Reservations))
-        .Include($"{nameof(Reservations)}.{nameof(Reservation.People)}")
+        .Include($"{nameof(Reservations)}.{nameof(Reservation.Guests)}")
         .Include(nameof(Rooms));
 
     public void AutoIncrementPrimaryKey() 
         => Id = null;
 
-    public IDictionary<string, object> GetPrimaryKey() 
-        => new Dictionary<string, object> { { nameof(Id), Id! } };
+	public void SetPrimaryKey(HashSet<Key> keys)
+	{
+        Id = keys.Single(key => key.Name == nameof(Id)).Value as int?;
+	}
 
-    public void SetPrimaryKey(IDictionary<string, object> primaryKey) 
-        => Id = primaryKey[nameof(Id)] as int?;
+	public HashSet<Key> GetPrimaryKey()
+	{
+		return new HashSet<Key> { new Key(nameof(Id), Id) };
+	}
 }

@@ -27,13 +27,13 @@ public class ScheduleDb : DatabaseContext
 
     private static ScheduleDb InitializeAsSqlite(SqliteOptions options)
     {
-        options.DbOptions = SqliteContextTool.InitDbContextOptions<ScheduleDb>(DbPath(options.DbName));
+        options.DbOptions = SqliteContextTool.InitDbContextOptions<ScheduleDb>(options);
         return new ScheduleDb(options);
     }
 
     private static ScheduleDb InitializeAsSqlServer(SqlServerOptions options)
     {
-        options.DbOptions = SqlServerContextTool.InitDbContextOptions<ScheduleDb>(options.ConnectionString);
+        options.DbOptions = SqlServerContextTool.InitDbContextOptions<ScheduleDb>(options);
         return new ScheduleDb(options);
     }
 
@@ -43,10 +43,10 @@ public class ScheduleDb : DatabaseContext
         switch (Options.DatabaseSrc)
         {
             case DatabaseSrc.Sqlite:
-                SqliteContextTool.OnConfiguring(optionsBuilder, DbPath());
+                SqliteContextTool.OnConfiguring(optionsBuilder, (SqliteOptions)Options);
                 break;
             case DatabaseSrc.SqlServer:
-                SqlServerContextTool.OnConfiguring(optionsBuilder, ((SqlServerOptions)Options).ConnectionString);
+                SqlServerContextTool.OnConfiguring(optionsBuilder, (SqlServerOptions)Options);
                 break;
             default:
                 throw new NotImplementedException("Database src is not supported.");
@@ -69,7 +69,7 @@ public class ScheduleDb : DatabaseContext
     public DbSet<Schedule> Schedules { get; set; }
     public DbSet<Reservation> Reservations { get; set; }
     public DbSet<Room> Rooms { get; set; }
-    public DbSet<Person> Person { get; set; }
+    public DbSet<Guest> Person { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -81,13 +81,13 @@ public class ScheduleDb : DatabaseContext
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Reservation>()
-            .HasMany(r => r.People)
+            .HasMany(r => r.Guests)
             .WithOne(p => p.Reservation)
             .HasForeignKey(p => p.ReservationId)
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Reservation>().Property(e => e.Id).ValueGeneratedOnAdd();
-        modelBuilder.Entity<Person>().Property(e => e.Id).ValueGeneratedOnAdd();
+        modelBuilder.Entity<Guest>().Property(e => e.Id).ValueGeneratedOnAdd();
         modelBuilder.Entity<Schedule>().Property(e => e.Id).ValueGeneratedOnAdd();
     }
 }

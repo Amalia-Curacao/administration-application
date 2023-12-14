@@ -3,7 +3,7 @@ using Scheduler.Api.Data.Models;
 
 namespace Scheduler.Api.Data.Validators;
 
-public class PersonValidator : AbstractValidator<Person>
+public class PersonValidator : AbstractValidator<Guest>
 {
 	public PersonValidator()
 	{

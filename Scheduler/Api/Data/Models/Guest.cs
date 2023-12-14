@@ -8,7 +8,7 @@ namespace Scheduler.Api.Data.Models;
 
 [PrimaryKey(nameof(Id))]
 [Display(Name = "Guest")]
-public sealed class Person : IModel
+public sealed class Guest : IModel
 {
     public int? Id { get; set; }
 
@@ -26,22 +26,19 @@ public sealed class Person : IModel
     public PersonPrefix? Prefix { get; set; } = PersonPrefix.Unknown;
 
     /// <inheritdoc/>
-    public HashSet<Key> GetPrimaryKey() => new HashSet<Key>() { new Key(nameof(Id), Id!)};
+    public HashSet<Key> GetPrimaryKey() => new() { new Key(nameof(Id), Id!)};
 
     public void AutoIncrementPrimaryKey()
-    {
-        Id = null;
-    }
+        => Id = null;
 
     /// <inheritdoc/>
     public void SetPrimaryKey(HashSet<Key> keys)
-    {
-        Id = keys.Single(key => key.Name == nameof(Id)).Value as int?;
-    }
+        => Id = keys.Single(key => key.Name == nameof(Id)).Value as int?;
 
-    public static IQueryable<T> IncludeAll<T>(DbSet<T> values) where T : class
+    [Obsolete("Was part of an old implementation for eager loading.")]
+	public static IQueryable<T> IncludeAll<T>(DbSet<T> values) where T : class
         => values
-        .Include(nameof(Reservation))
-        .Include($"{nameof(Reservation)}.{nameof(Models.Reservation.Room)}")
-        .Include($"{nameof(Reservation)}.{nameof(Models.Reservation.Schedule)}");
+            .Include(nameof(Reservation))
+            .Include($"{nameof(Reservation)}.{nameof(Models.Reservation.Room)}")
+            .Include($"{nameof(Reservation)}.{nameof(Models.Reservation.Schedule)}");
 }

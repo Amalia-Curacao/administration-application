@@ -1,4 +1,5 @@
-﻿using Creative.Api.Interfaces;
+﻿using Creative.Api.Data;
+using Creative.Api.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -37,35 +38,39 @@ public sealed class Room : IModel
     /// <returns> Returns true if the room can fit the reservation. </returns>
     /// <remarks> Will not detect reservations with the same primary key as overlapping. </remarks>
     public bool CanFit(Reservation reservation)
-        => Reservations!.All(r => !r.Overlap(reservation) || reservation.GetPrimaryKey().ContentEquals(r.GetPrimaryKey()));
+        => Reservations!.All(r => !r.Overlap(reservation) || reservation.GetPrimaryKey().SetEquals(r.GetPrimaryKey()));
 
     /// <inheritdoc cref="ICollection{T}.Remove(T)"/>
     public bool RemoveReservation(Reservation reservation)
         => Reservations!.Remove(reservation);
 
-    /// <summary> Removes relations with objects. </summary>
-    /// <remarks> This method is used to avoid circular references when serializing to JSON. </remarks>
-    public Room RemoveRelations()
+	/// <summary> Removes relations with objects. </summary>
+	/// <remarks> This method is used to avoid circular references when serializing to JSON. </remarks>
+	[Obsolete("Was part of an old implementation for lazy loading.")]
+	public Room RemoveRelations()
     {
         Reservations = null; 
         Schedule = null;
         return this;
     }
 
-    public IDictionary<string, object> GetPrimaryKey() 
-        => new Dictionary<string, object> { { nameof(Number), Number! }, { nameof(ScheduleId), ScheduleId } };
-
-    public void SetPrimaryKey(IDictionary<string, object> key)
-    {
-        Number = (int)key[nameof(Number)];
-        ScheduleId = (int)key[nameof(ScheduleId)];
-    }
-
     public void AutoIncrementPrimaryKey() { }
 
-    public static IQueryable<T> IncludeAll<T>(DbSet<T> values) where T : class 
+	[Obsolete("Was part of an old implementation for eager loading.")]
+	public static IQueryable<T> IncludeAll<T>(DbSet<T> values) where T : class 
         => values
         .Include(nameof(Schedule))
         .Include(nameof(Reservations))
-        .Include($"{nameof(Reservations)}.{nameof(Reservation.People)}");
+        .Include($"{nameof(Reservations)}.{nameof(Reservation.Guests)}");
+
+	public HashSet<Key> GetPrimaryKey()
+	{
+        return new HashSet<Key>() { new Key(nameof(Number), Number), new Key(nameof(ScheduleId), ScheduleId) };
+	}
+
+	public void SetPrimaryKey(HashSet<Key> keys)
+	{
+        Number = (int)keys.Single(key => key.Name.Equals(nameof(Number))).Value!;
+		ScheduleId = (int)keys.Single(key => key.Name.Equals(nameof(ScheduleId))).Value!;
+	}
 }

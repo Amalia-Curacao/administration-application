@@ -1,4 +1,5 @@
-﻿using Creative.Api.Interfaces;
+﻿using Creative.Api.Data;
+using Creative.Api.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -11,8 +12,8 @@ public sealed class Reservation : IModel
     public int? Id { get; set; }
 
     [Display(Name = "Guest(s)")]
-    [InverseProperty(nameof(Person.Reservation))]
-    public ICollection<Person>? People { get; set; } = new List<Person>();
+    [InverseProperty(nameof(Guest.Reservation))]
+    public ICollection<Guest>? Guests { get; set; } = new List<Guest>();
 
     [Display(Name = "Room #")]
     [ForeignKey(nameof(Models.Room.Number))]
@@ -65,7 +66,7 @@ public sealed class Reservation : IModel
 
     [Display(Name = "Guests amount")]
     public int GuestsAmount() 
-        => People?.Count ?? 0;
+        => Guests?.Count ?? 0;
 
     /// <summary> Checks if the reservation's check-in and check out overlap with the given date as if the date was a check-in. </summary>
     /// <returns> Returns true if they overlap. </returns>
@@ -94,34 +95,37 @@ public sealed class Reservation : IModel
     public bool Overlap(Reservation reservation)
         => OverlapCheckIn(reservation.CheckIn!.Value) || OverlapCheckOut(reservation.CheckOut!.Value);
 
-    /// <summary> Removes the relations of the reservation. </summary>
-    /// <remarks> This is used to prevent circular reference when serializing to JSON. </remarks>
-    public Reservation RemoveRelations()
+	/// <summary> Removes the relations of the reservation. </summary>
+	/// <remarks> This is used to prevent circular reference when serializing to JSON. </remarks>
+	[Obsolete("Was part of an old implementation for lazy loading.")]
+	public Reservation RemoveRelations()
     {
 		Room = null;
 		Schedule = null;
-		foreach (var person in People!)
+		foreach (var guest in Guests!)
         {
-			person.Reservation = null;
+			guest.Reservation = null;
 		}
 		return this;
 	}
 
-    public IDictionary<string, object> GetPrimaryKey() => new Dictionary<string, object>() { { nameof(Id), Id! } };
+	/// <inheritdoc/>
+	public void AutoIncrementPrimaryKey()
+		=> Id = null;
 
-    public void SetPrimaryKey(IDictionary<string, object> primaryKey)
-    {
-        Id = primaryKey[nameof(Id)] as int?;
-    }
-
-    public void AutoIncrementPrimaryKey()
-    {
-        Id = null;
-    }
-
-    public static IQueryable<T> IncludeAll<T>(DbSet<T> values) where T : class 
+	/// <inheritdoc/>
+	[Obsolete("Was part of an old implementation for eager loading.")]
+	public static IQueryable<T> IncludeAll<T>(DbSet<T> values) where T : class 
         => values
-        .Include(nameof(Room))
-        .Include(nameof(Schedule))
-        .Include(nameof(People));
+            .Include(nameof(Room))
+            .Include(nameof(Schedule))
+            .Include(nameof(Guests));
+
+    /// <inheritdoc/>
+	public HashSet<Key> GetPrimaryKey()
+        => new() { new Key(nameof(Id), Id) };
+
+    /// <inheritdoc/>
+	public void SetPrimaryKey(HashSet<Key> keys)
+        => Id = keys.Single(key => key.Name.Equals(nameof(Id))).Value as int?;
 }

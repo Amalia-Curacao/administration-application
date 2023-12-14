@@ -1,11 +1,11 @@
-﻿using Creative.Api.Interfaces;
+﻿using Creative.Api.Data;
+using Creative.Api.Implementations.EntityFrameworkCore;
+using Creative.Api.Interfaces;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Scheduler.Api.Data;
 using Scheduler.Api.Data.Models;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Scheduler.Api.Controllers;
 
@@ -14,93 +14,87 @@ public class ReservationsController : Controller
 	private readonly ICrud<Reservation> _crud;
 	private readonly IValidator<Reservation> _validator;
 
-	private static readonly ValidationFailure RoomFull = new ValidationFailure(nameof(Reservation.RoomNumber), "Reservation could not be added, because it was overlapping with an existing reservation.");
-	private static readonly ValidationException ReservationNotFound = new ValidationException("Reservation could not be found");
+	private static readonly ValidationFailure RoomFull = 
+		new(nameof(Reservation.RoomNumber), "Reservation could not be added, because it was overlapping with an existing reservation.");
+	private static readonly ValidationFailure ReservationNotFound =
+		new($"{nameof(Reservation.RoomNumber)}", "Reservation could not be found");
+
 	public ReservationsController(ScheduleDb db, IValidator<Reservation> validator)
 	{
 		_crud = new Crud<Reservation>(db);
 		_validator = validator;
 	}
 
+	/// <summary> Api endpoint for getting all reservations in the database.</summary>
+	/// <returns> Status 200 (OK) with all reservations in the database.</returns>
+	[HttpGet("[controller]/[action]")]
+	public async Task<ObjectResult> Get()
+		=> Ok(await _crud.Get());
+
+	/// <summary> Api endpoint for getting a reservation by id.</summary>
+	/// <returns> Status 200 (OK) with the reservation with the given id.</returns>
+	[HttpGet($"[controller]/[action]/{{{nameof(Reservation.Id)}}}")]
+	public async Task<ObjectResult> Get(int id)
+		=> Ok(await _crud.Get(new HashSet<Key>(new Key[] {new(nameof(Reservation.Id), id)})));
+
 	/// <summary> Api endpoint for creating reservations in the database. </summary>
 	/// <returns> 
-	/// An HTTP Status: 200 (OK) with the new reservation, when the reservation has been added.
-	/// An HTTP Status: 400 (Bad request) with error message, when the reservation overlaps another.
-	/// A new View with validation error, for fields that do not comply with the validation rules.
+	/// Status 200 (OK) with the new reservation, when the reservation has been added.
+	/// Status 400 (Bad request) with error message, when the reservation overlaps another, or properties are invalid.
 	/// </returns>
 	[HttpPost("[controller]/[action]")]
-	public async Task<IActionResult> Create(Reservation reservation)
+	public async Task<ObjectResult> Create(Reservation reservation)
 	{
 		// Validates properties
 		var result = _validator.Validate(reservation);
-		if (!result.IsValid)
-		{
-			result.AddToModelState(ModelState);
-			return BadRequest(result);
-		}
+		// Checks if the reservation can fit in the room.
+		if (!await CanFit(reservation)) result.Errors.Add(RoomFull);
 
-		// Adds reservation to databases
-		await _crud.Add(reservation);
-
-		// Checks if reservation fits in the room, if not delete it from database.
-		reservation = await _crud.Get(reservation.GetPrimaryKey());
-		if (!reservation.Room!.CanFit(reservation))
-		{
-			await _crud.Delete(reservation);
-			// Add error that shows room in not available.
-			result.Errors.Add(RoomFull);
-			return BadRequest(result);
-		}
-		var serializationOptions = new JsonSerializerOptions() { ReferenceHandler = ReferenceHandler.IgnoreCycles };
-		var json = JsonSerializer.Serialize(reservation, serializationOptions);
-		return Ok(JsonSerializer.Deserialize<Reservation>(json, serializationOptions));
+		return result.IsValid 
+			? Ok((await _crud.Add(true, reservation))[^1]) 
+			: BadRequest(result.Errors);
 	}
 
-
-	// TODO: test
+	/// <summary> Api endpoint for editing reservations in the database. </summary>
+	/// <returns> 
+	/// Status 200 (OK) with the edited reservation, when the reservation has been successfully edited.
+	/// Status 400 (Bad request) with error message, when the reservation overlaps another, or properties are invalid.
+	/// </returns>
 	[HttpPut("[controller]/[action]")]
-	public async Task<IActionResult> Edit(Reservation reservation)
+	public async Task<ObjectResult> Edit(Reservation reservation)
 	{
-		try
-		{
-			await _crud.Get(reservation.GetPrimaryKey());
-        }
-		catch (Exception)
-		{
-			return BadRequest(ReservationNotFound);
-		}
+		// Validates properties
+		var result = _validator.Validate(reservation);	
+		// Checks if the reservation exists
+		if(await _crud.TryGet(reservation.GetPrimaryKey()) is null) result.Errors.Add(ReservationNotFound);
+		// Checks if the reservation can fit in the room.
+		if (!await CanFit(reservation)) result.Errors.Add(RoomFull);
 
-		// Validates properties.
-		var result = _validator.Validate(reservation);
-		if (!result.IsValid)
-		{
-			return BadRequest(result);
-		}
-
-		reservation = await _crud.Update(reservation);
-		if (!reservation.Room!.CanFit(reservation))
-		{
-			await _crud.Delete(reservation);
-            result.Errors.Add(RoomFull);
-            return BadRequest(result);
-		}
-
-		return Ok(reservation);
+		return result.IsValid 
+			? Ok(await _crud.Update(reservation)) 
+			: BadRequest(result.Errors);
 	}
 
-	[HttpDelete("[controller]/[action]")]
-	public async Task<IActionResult> Delete(Reservation reservation)
+	/// <summary> Api endpoint for deleting reservations in the database. </summary>
+	/// <returns> 
+	/// Status 200 (OK) with the deleted reservation, when the reservation has been deleted.
+	/// Status 400 (Bad request) with error message, when the reservation does not exist.
+	/// </returns>
+	[HttpDelete($"[controller]/[action]/{{{nameof(Reservation.Id)}}}")]
+	public async Task<ObjectResult> Delete(int id)
+		=> Ok(await _crud.Delete(new HashSet<Key>(new Key[] {new(nameof(Reservation.Id), id)})));
+
+
+	/// <summary> Checks if a reservation can fit in the desired room. </summary>
+	/// <returns> Returns true if the reservation can fit in the desired room. </returns>
+	/// <remarks> Uses the room foreign key in the properties to check rooms. </remarks>
+	[HttpPost("[controller]/[action]")]
+	public async Task<bool> CanFit(Reservation reservation)
 	{
-		try
-		{
-            reservation = await _crud.Get(reservation.GetPrimaryKey());
-            await _crud.Delete(reservation);
-            return Ok();
-        }
-		catch (Exception e)
-		{
-			return BadRequest(e);
-		}
+		reservation = (await _crud.Add(true, reservation))![^1];
+		var result = reservation.Room!.CanFit(reservation);
+		await _crud.Delete(reservation.GetPrimaryKey());
+		return result;
 	}
 }
  

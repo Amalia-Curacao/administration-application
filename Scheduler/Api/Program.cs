@@ -8,13 +8,14 @@ using Scheduler.Api.Data.Validators.Abstract;
 var builder = WebApplication.CreateBuilder(args);
 
 // Register database context
-var connectionString = builder.Configuration.GetConnectionString("AZURE_SQL_CONNECTIONSTRING")
+/*var connectionString = builder.Configuration.GetConnectionString("AZURE_SQL_CONNECTIONSTRING")
     ?? throw new NullReferenceException($"The azure connection string cannot be null.");
-var options = new SqlServerOptions() { ConnectionString = connectionString };
+var options = new SqlServerOptions() { ConnectionString = connectionString };*/
+var options = new SqliteOptions();
 builder.Services.AddDbContext<ScheduleDb>(_ => ScheduleDb.Create(options));
 
 // Register validators
-builder.Services.AddScoped<IValidator<Person>, PersonValidator>();
+builder.Services.AddScoped<IValidator<Guest>, PersonValidator>();
 builder.Services.AddScoped<IValidator<Reservation>, ReservationValidator>();
 builder.Services.AddScoped<IValidator<Room>, RoomValidator>();  
 builder.Services.AddScoped<RelationshipValidator<Reservation>, ReservationRelationshipValidator>();
