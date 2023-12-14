@@ -2,7 +2,7 @@ import BookingSource from "./BookingSource";
 import Room from "./Room";
 import RoomType from "./RoomType";
 import Schedule from "./Schedule";
-import Person from "./Person";
+import Guest from "./Guest";
 
 export default interface Reservation{
     id: number | undefined;
@@ -21,6 +21,6 @@ export default interface Reservation{
     room: Room | undefined;
     scheduleId: number | undefined;
     schedule: Schedule | undefined;
-    people: Person[] | undefined;
-    peopleIds: number[] | undefined;
+    guests: Guest[] | undefined;
+    guestIds: number[] | undefined;
 }

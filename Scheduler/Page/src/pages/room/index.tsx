@@ -9,7 +9,7 @@ import { useParams } from "react-router-dom";
 import Reservation from "../../models/Reservation";
 import { isSameDay, oldest } from "../../extensions/Date";
 import { FaLongArrowAltLeft, FaLongArrowAltRight } from "react-icons/fa";
-import Person from "../../models/Person";
+import Guest from "../../models/Guest";
 import { Modal } from "react-bootstrap";
 import {default as GuestPage} from "../guest/page";
 import {default as ReservationPage} from "../reservation/page";
@@ -17,8 +17,8 @@ import BookingSource from "../../models/BookingSource";
 import PersonPrefix from "../../models/PersonPrefix";
 
 const _info = {name: "Rooms", icon: <MdBedroomParent/>};
-let onChange: { room(room: Room): void, reservation(reservation: Reservation): void, guest(guest: Person): void };
-let onDelete: { room(room: Room): void, reservation(reservation: Reservation): void, guest(guest: Person): void };
+let onChange: { room(room: Room): void, reservation(reservation: Reservation): void, guest(guest: Guest): void };
+let onDelete: { room(room: Room): void, reservation(reservation: Reservation): void, guest(guest: Guest): void };
 
 function RoomIndexBody(): ReactElement {
     const { id } = useParams();
@@ -198,8 +198,8 @@ function OccupiedCell({reservation, currentDate}: {reservation: Reservation, cur
         // TODO: change to occupied.guest?.name ?? ""
         if(currentDate.getDate() === dayToShow) 
         return(<span className="guest-name">
-            {occupied.people!.length > 0 
-                ? occupied.people![0].lastName!
+            {occupied.guests!.length > 0 
+                ? occupied.guests![0].lastName!
                 : "" }
             </span>);
         return <></>;
@@ -250,8 +250,8 @@ function CreateReservationModal({checkIn, room, show, setShow}: {checkIn: Date, 
         room: room,
         scheduleId: room.scheduleId,
         schedule: room.schedule,
-        people: [],
-        peopleIds: []
+        guests: [],
+        guestIds: []
     }
     const [reservation, setReservation] = useState<Reservation>(blankReservation);
     return(<>
@@ -290,11 +290,11 @@ function ReservationModal({reservation, show, setShow, setReservation}: {reserva
             <Modal.Footer style={{borderRadius: "0px 0px 5px 5px"}} className="bg-primary">
                 <div className="flex flex-fill pe-3 ps-3">
                     <div className="float-start btn-group">
-                        {reservation.people?.map((p, index) => 
+                        {reservation.guests?.map((p, index) => 
                             <button key={index} className="btn btn-secondary hover-success" onClick={() => toGuestModal(index)}>{p.firstName}</button>)}
-                        {reservation.people!.length < 2 
+                        {reservation.guests!.length < 2 
                             ? (<button className="btn btn-secondary hover-success float-start" 
-                                onClick={() => toGuestModal(reservation.peopleIds!.length)}>Add guest</button>) 
+                                onClick={() => toGuestModal(reservation.guestIds!.length)}>Add guest</button>) 
                             : (<></>)}
                     </div>
                     <div className="float-end btn-group">
@@ -306,24 +306,24 @@ function ReservationModal({reservation, show, setShow, setReservation}: {reserva
                 </div>
             </Modal.Footer>
         </Modal>
-        {reservation.people?.map((p, index) => 
+        {reservation.guests?.map((p, index) => 
             <GuestModal key={index} show={showGuest[index] ?? (showGuest[index] = false)} guest={p} onClose={toReservationModal}/>
         )}
         <CreateGuestModal reservation={reservation} onClose={toReservationModal}
-            show={showGuest[reservation.peopleIds!.length] ?? (showGuest[reservation.peopleIds!.length] = false)}/>
+            show={showGuest[reservation.guestIds!.length] ?? (showGuest[reservation.guestIds!.length] = false)}/>
     </>);
 
-    function GuestModal({show, guest, onClose}: {show: boolean, guest: Person, onClose: VoidFunction}): ReactElement {
+    function GuestModal({show, guest, onClose}: {show: boolean, guest: Guest, onClose: VoidFunction}): ReactElement {
         const guestPage = GuestPage(guest);
         const onSave = (): void => {
             const guest = guestPage.action(); 
             if(guest) {
                 const tempReservation = {...reservation};
-                const guestIndex = tempReservation.people!.findIndex(p => p.id === guest.id);
-                if(guestIndex !== -1) tempReservation.people![guestIndex] = guest;
+                const guestIndex = tempReservation.guests!.findIndex(p => p.id === guest.id);
+                if(guestIndex !== -1) tempReservation.guests![guestIndex] = guest;
                 else {
-                    tempReservation.people!.push(guest);
-                    tempReservation.peopleIds!.push(guest.id!);
+                    tempReservation.guests!.push(guest);
+                    tempReservation.guestIds!.push(guest.id!);
                 };
                 console.log(tempReservation);
                 setReservation(tempReservation);
@@ -350,7 +350,7 @@ function ReservationModal({reservation, show, setShow, setReservation}: {reserva
     }
 
     function CreateGuestModal({show, reservation, onClose}: {show: boolean, reservation: Reservation, onClose: VoidFunction}): ReactElement {
-        const blankGuest: Person = {
+        const blankGuest: Guest = {
             id: -1,
             firstName: "",
             lastName: "",
@@ -395,8 +395,8 @@ function getRooms(scheduleId: number): Room[] {
                 roomType: RoomType.Room,
                 schedule: undefined,
                 scheduleId: 1,
-                peopleIds: [],
-                people: []
+                guestIds: [],
+                guests: []
             },
             {
                 id: 2,
@@ -414,8 +414,8 @@ function getRooms(scheduleId: number): Room[] {
                 roomType: RoomType.Room,
                 schedule: undefined,
                 scheduleId: 1,
-                peopleIds: [],
-                people: []
+                guestIds: [],
+                guests: []
             },
         ], 
         schedule: undefined, scheduleId: scheduleId, type: RoomType.Room},
@@ -461,11 +461,11 @@ function initOnChange(rooms: Room[], setRooms: (r: Room[]) => void): void {
             onChange.room({...room, reservations: room.reservations});
         },
 
-        guest: (guest: Person): void => {
+        guest: (guest: Guest): void => {
             const reservation = rooms.flatMap(r => r.reservations).find(res => res!.id === guest.reservationId);
             if(!reservation) throw new Error("reservation could not be found");
-            const personToChangeIndex = reservation!.people!.findIndex(p => p.id === guest.id);
-            personToChangeIndex !== -1 ? reservation!.people![personToChangeIndex] = guest : reservation!.people!.push(guest);
+            const personToChangeIndex = reservation!.guests!.findIndex(p => p.id === guest.id);
+            personToChangeIndex !== -1 ? reservation!.guests![personToChangeIndex] = guest : reservation!.guests!.push(guest);
             onChange.reservation(reservation!);
         },
     };
@@ -487,13 +487,13 @@ function initOnDelete(rooms: Room[], setRooms: (r: Room[]) => void): void {
             onChange.room({...room, reservations: room.reservations});
         },
 
-        guest: (guest: Person): void => {
+        guest: (guest: Guest): void => {
             const reservation = rooms.flatMap(r => r.reservations).find(res => res!.id === guest.reservationId);
             if(!reservation) throw new Error("reservation could not be found");
-            const personToDeleteIndex = reservation!.people!.findIndex(p => p.id === guest.id);
+            const personToDeleteIndex = reservation!.guests!.findIndex(p => p.id === guest.id);
             if(personToDeleteIndex === -1) return;
-            reservation!.people!.splice(personToDeleteIndex, 1);
-            reservation!.peopleIds!.splice(personToDeleteIndex, 1);
+            reservation!.guests!.splice(personToDeleteIndex, 1);
+            reservation!.guestIds!.splice(personToDeleteIndex, 1);
             onChange.reservation(reservation!);
         },
     };

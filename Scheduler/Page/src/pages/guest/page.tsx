@@ -1,5 +1,5 @@
 import { ReactElement, Fragment } from "react";
-import Person from "../../models/Person";
+import Guest from "../../models/Guest";
 import References from "../../tools/References";
 import PersonPrefix from "../../models/PersonPrefix";
 import InputField from "../../components/inputField";
@@ -12,8 +12,8 @@ function getId(): number{
     return(++id);
 }
 
-function Action(reservationId: number, guestId: number): Person | undefined{
-    const guest: Person = {
+function Action(reservationId: number, guestId: number): Guest | undefined{
+    const guest: Guest = {
         id: guestId <= 0 ? getId() : guestId,
         prefix: PersonPrefix[references.GetSelect("prefix").current!.value! as keyof typeof PersonPrefix],
         firstName: references.GetInput("first-name").current?.value,
@@ -27,7 +27,7 @@ function Action(reservationId: number, guestId: number): Person | undefined{
     return(Validate(guest) ? guest : undefined);
 }
 
-function Validate(guest: Person): boolean{
+function Validate(guest: Guest): boolean{
     let isValid: boolean = true;
     
     const nullErrorMessage: string = "Required";
@@ -51,7 +51,7 @@ function Validate(guest: Person): boolean{
     return (isValid);
 }
 
-function Body({guest}: {guest: Person}): ReactElement{
+function Body({guest}: {guest: Guest}): ReactElement{
     return(<>
         <table className="w-100">
             <tbody>
@@ -103,7 +103,7 @@ function Body({guest}: {guest: Person}): ReactElement{
     </>);
 }
 
-export default function Page(guest: Person): {action: () => Person | undefined, body: ReactElement}{
+export default function Page(guest: Guest): {action: () => Guest | undefined, body: ReactElement}{
     if(!guest.reservationId) throw new Error("Guest does not have a reservation");
     if(!guest.id) throw new Error("Guest does not have an id");
 

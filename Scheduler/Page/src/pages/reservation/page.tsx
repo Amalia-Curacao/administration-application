@@ -6,7 +6,7 @@ import "../../scss/reservation.create.scss";
 import { isValidDate, toDateOnlyString, toTimeOnlyString } from "../../extensions/Date";
 import References from "../../tools/References";
 import InputField from "../../components/inputField";
-import Person from "../../models/Person";
+import Guest from "../../models/Guest";
 
 const references: References = new References();
 
@@ -128,7 +128,7 @@ function Body({reservation}: {reservation: Reservation}): ReactElement {
     // #endregion
 }
 
-function Action(scheduleId: number, roomNumber: number, roomType: RoomType, reservationId: number, people: Person[], peopleIds: number[]): Reservation | undefined {
+function Action(scheduleId: number, roomNumber: number, roomType: RoomType, reservationId: number, people: Guest[], peopleIds: number[]): Reservation | undefined {
     const reservationToAdd: Reservation = {
         id: reservationId <= 0 ? getId() : reservationId,
         checkIn: new Date(references.GetInput("check-in")!.current?.value!),
@@ -147,8 +147,8 @@ function Action(scheduleId: number, roomNumber: number, roomType: RoomType, rese
         roomType: roomType,
         roomScheduleId: scheduleId,
         room: undefined,
-        people: people ?? [],
-        peopleIds: peopleIds ?? []
+        guests: people ?? [],
+        guestIds: peopleIds ?? []
     };
 
     return (Validate(reservationToAdd) ? reservationToAdd : undefined);
@@ -191,7 +191,7 @@ export default function Page(reservation: Reservation): {body: ReactElement, act
     if(!reservation.id) throw new Error("Reservation id is undefined");
     return ({
         body: <Body reservation={reservation}/>, 
-        action: () => Action(reservation.scheduleId!, reservation.roomNumber!, reservation.roomType!, reservation.id!, reservation.people!, reservation.peopleIds!)
+        action: () => Action(reservation.scheduleId!, reservation.roomNumber!, reservation.roomType!, reservation.id!, reservation.guests!, reservation.guestIds!)
     });
 }
 
