@@ -24,8 +24,4 @@
         </PackageReference>
     </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\TuiReader\TuiReader.csproj" />
-    </ItemGroup>
-
 </Project>
