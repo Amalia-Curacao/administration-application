@@ -22,5 +22,4 @@ export default interface Reservation{
     scheduleId: number | undefined;
     schedule: Schedule | undefined;
     guests: Guest[] | undefined;
-    guestIds: number[] | undefined;
 }

@@ -19,15 +19,17 @@ function EditSchedule({schedule} : {schedule: Schedule}) : ReactElement {
     </>);
 }
 
-function Action() : Schedule | undefined {
+function Action(schedule : Schedule) : Schedule | undefined {
     return { 
-        id: Number(_idField.current?.innerText) ?? -1, 
+        id: schedule.id, 
         name: _nameField.current?.value ?? "", 
         rooms: [], 
         reservations: [] 
     };
 }
 
-export default function ScheduleEdit(schedule: Schedule) : {body: ReactElement, action: () => Schedule | undefined} {
-    return({body: <EditSchedule schedule={schedule}/>, action: Action});
+export default function ScheduleEdit(schedule: Schedule) : {body: ReactElement, action: () => Schedule | undefined} 
+{
+    if(schedule.id === undefined) throw new Error("Schedule id is not defined");
+    return({body: <EditSchedule schedule={schedule}/>, action: () => Action(schedule)});
 }

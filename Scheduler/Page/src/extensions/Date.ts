@@ -7,6 +7,8 @@
 // isValidDate: returns true if the date is a valid date
 
 export function isSameDay(date1: Date, date2: Date): boolean {
+    date1 = new Date(date1);
+    date2 = new Date(date2);
     return date1.getFullYear() === date2.getFullYear() &&
         date1.getMonth() === date2.getMonth() &&
         date1.getDate() === date2.getDate();
@@ -21,13 +23,15 @@ export function youngest(date1: Date, date2: Date): Date {
 }
 
 export function toDateOnlyString(date: Date): string {
-    return date.toISOString().split('T')[0];
+    if(date instanceof Date) return date.toISOString().split('T')[0];
+    else return date;
 }
 
 export function toTimeOnlyString(date: Date): string {
-    return date.toISOString().split('T')[1];
+    if(date instanceof Date) return date.toISOString().split('T')[1];
+    else return date
 }
 
-export function isValidDate(date: Date | undefined): boolean {
-    return date !== undefined && date instanceof Date && !isNaN(date.getTime());
+export function toDateTimeString(date: Date): string {
+    return date.toISOString();
 }

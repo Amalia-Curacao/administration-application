@@ -5,16 +5,10 @@ import PersonPrefix from "../../models/PersonPrefix";
 import InputField from "../../components/inputField";
 
 const references: References = new References();
-// Temp
-let id: number = 1;
-// TODO gets new id from server
-function getId(): number{
-    return(++id);
-}
 
 function Action(reservationId: number, guestId: number): Guest | undefined{
     const guest: Guest = {
-        id: guestId <= 0 ? getId() : guestId,
+        id: guestId,
         prefix: PersonPrefix[references.GetSelect("prefix").current!.value! as keyof typeof PersonPrefix],
         firstName: references.GetInput("first-name").current?.value,
         lastName: references.GetInput("last-name").current?.value,
@@ -105,7 +99,6 @@ function Body({guest}: {guest: Guest}): ReactElement{
 
 export default function Page(guest: Guest): {action: () => Guest | undefined, body: ReactElement}{
     if(!guest.reservationId) throw new Error("Guest does not have a reservation");
-    if(!guest.id) throw new Error("Guest does not have an id");
 
     return({
         action: () => Action(guest.reservationId!, guest.id!),

@@ -35,16 +35,11 @@ function ScheduleRow({schedule, onDelete, onEdit}: {schedule: Schedule, onEdit: 
 }
 
 function ScheduleRowIndex({schedule, onEdit, onDelete}: {schedule: Schedule, onEdit: VoidFunction, onDelete: (toDelete: Schedule) => void}): ReactElement {
-    
-    function removeSchedule(toDelete: Schedule) {
-        onDelete(toDelete);
-    }
-    
     return(<tr>
         {ScheduleIndex(schedule).body}
         <td colSpan={1} className="bg-secondary"> 
             <div className="btn-group float-end">
-                <ActionGroup onDelete={() => removeSchedule(schedule)} schedule={schedule} onEdit={onEdit}/>
+                <ActionGroup onDelete={() => onDelete(schedule)} schedule={schedule} onEdit={onEdit}/>
             </div>
         </td>
     </tr>);

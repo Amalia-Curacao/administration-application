@@ -3,19 +3,12 @@ import Reservation from "../../models/Reservation";
 import BookingSource from "../../models/BookingSource";
 import RoomType from "../../models/RoomType";
 import "../../scss/reservation.create.scss";
-import { isValidDate, toDateOnlyString, toTimeOnlyString } from "../../extensions/Date";
+import { toDateOnlyString, toTimeOnlyString } from "../../extensions/Date";
 import References from "../../tools/References";
 import InputField from "../../components/inputField";
 import Guest from "../../models/Guest";
 
 const references: References = new References();
-
-// Temp
-let id: number = 1;
-// TODO gets new id from server
-function getId(): number{
-    return(++id);
-}
 
 function Body({reservation}: {reservation: Reservation}): ReactElement {
     return (<>
@@ -36,14 +29,14 @@ function Body({reservation}: {reservation: Reservation}): ReactElement {
                     <td className="bg-primary text-secondary">
                         <label className="w-100">Check In
                             <InputField refKey="check-in" references={references}>
-                                <input onChange={updateCheckIn} ref={references.GetInput("check-in")} defaultValue={isValidDate(reservation.checkIn) ? toDateOnlyString(reservation.checkIn!) : ""} type="date" className="form-control"/>
+                                <input onChange={updateCheckIn} ref={references.GetInput("check-in")} defaultValue={!reservation.checkIn ? "" : toDateOnlyString(reservation.checkIn!)} type="date" className="form-control"/>
                             </InputField>
                         </label>
                     </td>
                     <td className="bg-primary text-secondary">
                         <label className="w-100">Check Out
                             <InputField refKey="check-out" references={references}>
-                                <input onChange={updateCheckOut} ref={references.GetInput("check-out")} defaultValue={isValidDate(reservation.checkOut) ? toDateOnlyString(reservation.checkOut!) : ""} type="date" className="form-control"/>
+                                <input onChange={updateCheckOut} ref={references.GetInput("check-out")} defaultValue={!reservation.checkOut ? "" : toDateOnlyString(reservation.checkOut!)} type="date" className="form-control"/>
                             </InputField>
                         </label>
                     </td>
@@ -68,14 +61,14 @@ function Body({reservation}: {reservation: Reservation}): ReactElement {
                     <td className="bg-primary text-secondary">
                         <label className="w-100">Flight Arrival Time
                             <InputField refKey="flight-arrival-time" references={references}>
-                                <input onChange={updateFlightArrivalTime} defaultValue={isValidDate(reservation.flightArrivalTime) ? toTimeOnlyString(reservation.flightArrivalTime!) : ""} ref={references.GetInput("flight-arrival-time")} type="time" className="form-control"/>
+                                <input onChange={updateFlightArrivalTime} defaultValue={!reservation.flightArrivalTime ? "" : toTimeOnlyString(reservation.flightArrivalTime!)} ref={references.GetInput("flight-arrival-time")} type="time" className="form-control"/>
                             </InputField>
                         </label>
                     </td>
                     <td className="bg-primary text-secondary">
                         <label className="w-100">Flight Departure Time
                             <InputField refKey="flight-departure-time" references={references}>
-                                <input onChange={updateFlightDepartureTime} defaultValue={isValidDate(reservation.flightDepartureTime) ? toTimeOnlyString(reservation.flightDepartureTime!) : ""} ref={references.GetInput("flight-departure-time")} type="time" className="form-control"/>
+                                <input onChange={updateFlightDepartureTime} defaultValue={!reservation.flightDepartureTime ? "" : toTimeOnlyString(reservation.flightDepartureTime!)} ref={references.GetInput("flight-departure-time")} type="time" className="form-control"/>
                             </InputField>
                         </label>
                     </td>
@@ -128,9 +121,9 @@ function Body({reservation}: {reservation: Reservation}): ReactElement {
     // #endregion
 }
 
-function Action(scheduleId: number, roomNumber: number, roomType: RoomType, reservationId: number, people: Guest[], peopleIds: number[]): Reservation | undefined {
+function Action(scheduleId: number, roomNumber: number, roomType: RoomType, reservationId: number, people: Guest[]): Reservation | undefined {
     const reservationToAdd: Reservation = {
-        id: reservationId <= 0 ? getId() : reservationId,
+        id: reservationId,
         checkIn: new Date(references.GetInput("check-in")!.current?.value!),
         checkOut: new Date(references.GetInput("check-out")!.current?.value!),
         flightArrivalNumber: references.GetInput("flight-arrival-number")!.current?.value!,
@@ -147,8 +140,7 @@ function Action(scheduleId: number, roomNumber: number, roomType: RoomType, rese
         roomType: roomType,
         roomScheduleId: scheduleId,
         room: undefined,
-        guests: people ?? [],
-        guestIds: peopleIds ?? []
+        guests: people ?? []
     };
 
     return (Validate(reservationToAdd) ? reservationToAdd : undefined);
@@ -188,10 +180,9 @@ export default function Page(reservation: Reservation): {body: ReactElement, act
     if(!reservation.scheduleId) throw new Error("Reservation scheduleId is undefined");
     if(!reservation.roomNumber) throw new Error("Reservation roomNumber is undefined");
     if(!reservation.roomType) throw new Error("Reservation roomType is undefined");
-    if(!reservation.id) throw new Error("Reservation id is undefined");
     return ({
         body: <Body reservation={reservation}/>, 
-        action: () => Action(reservation.scheduleId!, reservation.roomNumber!, reservation.roomType!, reservation.id!, reservation.guests!, reservation.guestIds!)
+        action: () => Action(reservation.scheduleId!, reservation.roomNumber!, reservation.roomType!, reservation.id!, reservation.guests!)
     });
 }
 

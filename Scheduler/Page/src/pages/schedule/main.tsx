@@ -1,4 +1,4 @@
-import { ReactElement, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import { GrSchedules } from "react-icons/gr";
 import SaveButton from "../../components/saveButton";
 import "../../extensions/HTMLElement";
@@ -8,16 +8,45 @@ import PageState from "../../types/PageState";
 import CreateSchedule from "./create";
 import ScheduleRow from "./row";
 import PageTitle from "../../components/pageTitle";
+import axios from "axios";
 
 const _info = {name: "Schedules", icon: <GrSchedules/>};
+
 function ScheduleMain(): ReactElement {   
+    function createSchedule(schedule: Schedule): void {
+        axios.get(process.env.REACT_APP_API_URL + "/Schedules/Create/" + schedule.name)
+        .then(res => res.status === 200 
+            ? setSchedules([...schedules, res.data as Schedule]) 
+            : console.log(res));
+    }
+
+    function getSchedules(): void {
+        axios.get(process.env.REACT_APP_API_URL + "/Schedules/Get")
+        .then(res => res.status === 200 
+            ? setSchedules(res.data as Schedule[])
+            : console.log(res));
+    }
+
+    function deleteSchedule(schedule: Schedule): void {
+        axios.delete(process.env.REACT_APP_API_URL + "/Schedules/Delete/" + schedule.id)
+        .then(res => {
+            res.status === 200 && Boolean(res) ? setSchedules(schedules.filter(s => s.id !== schedule.id)) : console.log(res);
+        })
+    }
+
+    function editSchedule(schedule: Schedule): void{
+        console.log(schedule);
+        axios.put(process.env.REACT_APP_API_URL + "/Schedules/Edit/", {id: schedule.id, name: schedule.name})
+        .then(res => {
+            res.status === 200 
+            ? setSchedules(schedules.map(s => s.id === schedule.id ? schedule : s)) 
+            : console.log(res);
+        })
+    }
+
     let _state: PageState = PageState.Default;
-    const testSchedules: Schedule[] = [
-        {id: 1, name: "test1", reservations: [], rooms: []}, 
-        {id: 2, name: "test2", reservations: [], rooms: []}, 
-        {id: 3, name: "test3", reservations: [], rooms: []}];
-    const [schedules, setSchedules] = useState<Schedule[]>(testSchedules);
-        
+    const [schedules, setSchedules] = useState<Schedule[]>([]);
+    useEffect(() => getSchedules(), []);
     function Table(): ReactElement {
         const [creating, setCreating] = useState<boolean>(false);
         
@@ -31,15 +60,7 @@ function ScheduleMain(): ReactElement {
         function onEdit(toEdit: Schedule) {
             if(_state !== PageState.Default) return;
             _state = PageState.Edit;
-            setSchedules(schedules.map(s => s.id === toEdit.id ? toEdit : s));
-        }
-
-        function onDelete(toDelete: Schedule) {
-            setSchedules(schedules.filter(s => s.id !== toDelete.id));
-        }
-
-        function onAdd(schedule: Schedule) {
-            setSchedules([...schedules, schedule]);
+            editSchedule(toEdit);
         }
 
         function onReturn() {
@@ -71,10 +92,10 @@ function ScheduleMain(): ReactElement {
                 </thead>
                 <tbody>
                     <tr hidden={!creating}>
-                        <ScheduleRowCreate addSchedule={onAdd} onReturn={onReturn}/>
+                        <ScheduleRowCreate addSchedule={(schedule) => createSchedule(schedule)} onReturn={onReturn}/>
                     </tr>
 
-                    {schedules.map(schedule => <ScheduleRow key={schedule.id} schedule={schedule} onEdit={onEdit} onDelete={onDelete}/>)}
+                    {schedules.map(schedule => <ScheduleRow key={schedule.id} schedule={schedule} onEdit={onEdit} onDelete={deleteSchedule}/>)}
                 </tbody>        
             </table>
         </>);
