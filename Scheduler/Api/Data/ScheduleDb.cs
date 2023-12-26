@@ -24,7 +24,6 @@ public class ScheduleDb : DatabaseContext
         _ => throw new NotImplementedException("Database src is not supported.")
     };
     
-
     private static ScheduleDb InitializeAsSqlite(SqliteOptions options)
     {
         options.DbOptions = SqliteContextTool.InitDbContextOptions<ScheduleDb>(options);
@@ -85,6 +84,42 @@ public class ScheduleDb : DatabaseContext
             .WithOne(p => p.Reservation)
             .HasForeignKey(p => p.ReservationId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Reservation>()
+            .HasOne(r => r.Schedule)
+			.WithMany(s => s.Reservations)
+			.HasForeignKey(r => r.ScheduleId)
+			.OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<Room>()
+            .HasOne(r => r.Schedule)
+			.WithMany(s => s.Rooms)
+			.HasForeignKey(r => r.ScheduleId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Room>()
+            .HasMany(r => r.Reservations)
+			.WithOne(r => r.Room)
+			.HasForeignKey(r => new { r.RoomNumber, r.ScheduleId })
+			.OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Schedule>()
+			.HasMany(s => s.Reservations)
+			.WithOne(r => r.Schedule)
+			.HasForeignKey(r => r.ScheduleId)
+			.OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<Schedule>()
+            .HasMany(s => s.Rooms)
+            .WithOne(r => r.Schedule)
+            .HasForeignKey(r => r.ScheduleId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Guest>()
+            .HasOne(p => p.Reservation)
+			.WithMany(r => r.Guests)
+			.HasForeignKey(p => p.ReservationId)
+			.OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Reservation>().Property(e => e.Id).ValueGeneratedOnAdd();
         modelBuilder.Entity<Guest>().Property(e => e.Id).ValueGeneratedOnAdd();

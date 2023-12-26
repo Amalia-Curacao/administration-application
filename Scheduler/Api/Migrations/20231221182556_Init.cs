@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Scheduler.Migrations
+namespace Scheduler.Api.Migrations
 {
     /// <inheritdoc />
     public partial class Init : Migration
@@ -14,8 +15,9 @@ namespace Scheduler.Migrations
                 name: "Schedules",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -26,10 +28,10 @@ namespace Scheduler.Migrations
                 name: "Rooms",
                 columns: table => new
                 {
-                    Number = table.Column<int>(type: "INTEGER", nullable: false),
-                    ScheduleId = table.Column<int>(type: "INTEGER", nullable: false),
-                    Type = table.Column<int>(type: "INTEGER", nullable: false),
-                    Floor = table.Column<int>(type: "INTEGER", nullable: false)
+                    Number = table.Column<int>(type: "int", nullable: false),
+                    ScheduleId = table.Column<int>(type: "int", nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    Floor = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -46,19 +48,20 @@ namespace Scheduler.Migrations
                 name: "Reservations",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    RoomNumber = table.Column<int>(type: "INTEGER", nullable: true),
-                    RoomScheduleId = table.Column<int>(type: "INTEGER", nullable: true),
-                    ScheduleId = table.Column<int>(type: "INTEGER", nullable: true),
-                    CheckIn = table.Column<DateOnly>(type: "TEXT", nullable: true),
-                    CheckOut = table.Column<DateOnly>(type: "TEXT", nullable: true),
-                    FlightArrivalNumber = table.Column<string>(type: "TEXT", nullable: true),
-                    FlightDepartureNumber = table.Column<string>(type: "TEXT", nullable: true),
-                    FlightArrivalTime = table.Column<TimeOnly>(type: "TEXT", nullable: true),
-                    FlightDepartureTime = table.Column<TimeOnly>(type: "TEXT", nullable: true),
-                    BookingSource = table.Column<int>(type: "INTEGER", nullable: true),
-                    Remarks = table.Column<string>(type: "TEXT", nullable: true)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    RoomNumber = table.Column<int>(type: "int", nullable: true),
+                    RoomScheduleId = table.Column<int>(type: "int", nullable: true),
+                    ScheduleId = table.Column<int>(type: "int", nullable: true),
+                    CheckIn = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CheckOut = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    RoomType = table.Column<int>(type: "int", nullable: true),
+                    FlightArrivalNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FlightDepartureNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FlightArrivalTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    FlightDepartureTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    BookingSource = table.Column<int>(type: "int", nullable: true),
+                    Remarks = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -80,14 +83,14 @@ namespace Scheduler.Migrations
                 name: "Person",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    ReservationId = table.Column<int>(type: "INTEGER", nullable: true),
-                    FirstName = table.Column<string>(type: "TEXT", nullable: true),
-                    LastName = table.Column<string>(type: "TEXT", nullable: true),
-                    Age = table.Column<int>(type: "INTEGER", nullable: true),
-                    Note = table.Column<string>(type: "TEXT", nullable: true),
-                    Prefix = table.Column<int>(type: "INTEGER", nullable: true)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ReservationId = table.Column<int>(type: "int", nullable: true),
+                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Age = table.Column<int>(type: "int", nullable: true),
+                    Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Prefix = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {

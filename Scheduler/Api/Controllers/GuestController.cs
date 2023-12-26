@@ -25,7 +25,7 @@ public class GuestController : Controller
 	/// Status 200 (OK) with all guests  from a reservation in the database.
 	/// </returns>
 	[HttpGet($"[controller]/[action]/{{{nameof(Guest.ReservationId)}}}")]
-	public async Task<ObjectResult> GetReservationGuests(int ReservationId)
+	public async Task<ObjectResult> GetReservationGuests([FromRoute] int ReservationId)
 		=> Ok((await _crud.GetAll()).Where(g => g.ReservationId == ReservationId));
 
 	/// <summary> Api endpoint for getting a specific guest in the database.</summary>
@@ -34,7 +34,7 @@ public class GuestController : Controller
 	/// Status 400 (Bad request) with error message, when the guest could not be found.
 	/// </returns>
 	[HttpGet($"[controller]/[action]/{{{nameof(Guest.Id)}}}")]
-	public async Task<ObjectResult> Get(int Id)
+	public async Task<ObjectResult> Get([FromRoute] int Id)
 	{
 		var guest = await _crud.TryGet(new HashSet<Key>(new Key[] { new(nameof(Guest.Id), Id) }));
 		return guest is null ? BadRequest(PersonNotFound) : Ok(guest);
@@ -43,7 +43,7 @@ public class GuestController : Controller
 	/// <summary> Api endpoint for creating guests in the database. </summary>
 	/// <returns> Status 200 (OK) with the new guest, when the guest has been added. </returns>
 	[HttpPost("[controller]/[action]")]
-	public async Task<ObjectResult> Create(Guest person)
+	public async Task<ObjectResult> Create([FromBody] Guest person)
 	{
 		var result = _validator.Validate(person);
 		return result.IsValid ? Ok((await _crud.Add(true, person))[0])
@@ -56,7 +56,7 @@ public class GuestController : Controller
 	/// Status 400 (Bad request) with error message, when properties are invalid.
 	/// </returns>
 	[HttpPut("[controller]/[action]")]
-	public async Task<ObjectResult> Edit(Guest person)
+	public async Task<ObjectResult> Edit([FromBody] Guest person)
 	{
 		var result = _validator.Validate(person);
 		return result.IsValid ? Ok(await _crud.Update(person))
@@ -66,7 +66,7 @@ public class GuestController : Controller
 	/// <summary> Api endpoint for deleting guests in the database. </summary>
 	/// <returns> Status 200 (OK) and a boolean true, when the guest has been deleted. </returns>
 	[HttpDelete($"[controller]/[action]/{{{nameof(Guest.Id)}}}")]
-	public async Task<ObjectResult> Delete(int Id)
+	public async Task<ObjectResult> Delete([FromRoute] int Id)
 		=> Ok(await _crud.Delete(new HashSet<Key>(new Key[] { new(nameof(Guest.Id), Id) })));
 
 }

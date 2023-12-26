@@ -43,6 +43,8 @@ else{
     app.UseHsts();
 }
 
+// TODO think about CORS
+app.UseCors(builder => builder.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod());
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 

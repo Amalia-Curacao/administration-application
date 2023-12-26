@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Scheduler.Api.Data.Models;
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum BookingSource
 {
     [Display(Name = "None")]
@@ -21,4 +23,7 @@ public enum BookingSource
 
     [Display(Name = "Direct")]
     Direct = 5,
+
+    [Display(Name = "Despegar")]
+    Despegar = 6,
 }

@@ -44,6 +44,17 @@ public sealed class Room : IModel
     public bool RemoveReservation(Reservation reservation)
         => Reservations!.Remove(reservation);
 
+    /// <inheritdoc cref="ICollection{T}.Add(T)"/>
+    public bool AddReservation(Reservation reservation)
+    {
+		if (CanFit(reservation))
+        {
+			Reservations!.Add(reservation);
+			return true;
+		}
+		return false;
+	}
+
 	/// <summary> Removes relations with objects. </summary>
 	/// <remarks> This method is used to avoid circular references when serializing to JSON. </remarks>
 	[Obsolete("Was part of an old implementation for lazy loading.")]

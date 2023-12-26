@@ -25,7 +25,7 @@ public class SchedulesController : Controller
 	/// <summary> Api endpoint for getting a schedule by id.</summary>
 	/// <returns> Status 200 (OK) with the schedule with the given id.</returns>
 	[HttpGet($"[controller]/[action]/{{{nameof(Schedule.Id)}}}")]
-	public async Task<ObjectResult> Get(int Id)
+	public async Task<ObjectResult> Get([FromRoute] int Id)
 	{
 		var schedule = await _crud.TryGet(new HashSet<Key>(new Key[] { new(nameof(Schedule.Id), Id) }));
 		return schedule is null ? BadRequest(NotLocated) : Ok(schedule);
@@ -34,18 +34,18 @@ public class SchedulesController : Controller
 	/// <summary> Api endpoint for creating schedules in the database. </summary>
 	/// <returns> Status 200 (OK) with the new schedule, when the schedule has been added.</returns>
 	[HttpGet($"[controller]/[action]/{{{nameof(Schedule.Name)}}}")]
-	public async Task<ObjectResult> Create(string Name)
+	public async Task<ObjectResult> Create([FromRoute] string Name)
 		=> Ok((await _crud.Add(true, new Schedule() { Name = Name })).Single());
 	
 	/// <summary> Api endpoint for editing schedules in the database. </summary>
 	/// <returns> Status 200 (OK) with the edited schedule, when the schedule has been edited.</returns>
 	[HttpPut($"[controller]/[action]")]
-	public async Task<ObjectResult> Edit(Schedule schedule)
+	public async Task<ObjectResult> Edit([FromBody]Schedule schedule)
 		=> Ok(await _crud.Update(schedule));
 
 	/// <summary> Api endpoint for deleting schedules in the database. </summary>
 	/// <returns> Status 200 (OK) with the deleted schedule, when the schedule has been deleted.</returns>
 	[HttpDelete($"[controller]/[action]/{{{nameof(Schedule.Id)}}}")]
-	public async Task<ObjectResult> Delete(int Id)
+	public async Task<ObjectResult> Delete([FromRoute] int Id)
 		=> Ok(await _crud.Delete(new HashSet<Key>(new Key[] { new(nameof(Schedule.Id), Id) })));
 }

@@ -5,31 +5,32 @@ import PageLink from "../../types/PageLink";
 import Room from "../../models/Room";
 import RoomType from "../../models/RoomType";
 import { useParams } from "react-router-dom";
-import Reservation from "../../models/Reservation";
 import { FaLongArrowAltLeft, FaLongArrowAltRight } from "react-icons/fa";
-import Guest from "../../models/Guest";
 import axios from "axios";
-import Tables from "./table";
+import {default as Rooms} from "./table";
 
 const _info = {name: "Rooms", icon: <MdBedroomParent/>};
-let onChange: { rooms(): void, room(room: Room): void, reservation(reservation: Reservation): void, guest(guest: Guest): void };
 
 function RoomIndexBody(): ReactElement {
     const { id } = useParams();
     if(!id) throw new Error("Schedule ID is undefined.");
     const [monthYear, setMonthYear] = useState(new Date()); // [1, 12]
-    const [groupedRooms, setGroupedRooms] = useState<{[type: string]: Room[]}>({});
+    const [rooms, setRooms] = useState<Room[]>([]);
     useEffect(() => {
-        initOnChange(Number(id), (r: {[type: string]: Room[]}) => setGroupedRooms(r));
-        onChange.rooms()
+        axios.get(process.env.REACT_APP_API_URL + "/Rooms/Get/" + id)
+            .then(async response => {setRooms(response.data as Room[])})
+            .catch(error => console.log(error));
     }, [id]);
+
     
+    const groupedRooms = groupByRoomType(rooms);
     return(<>
         <div style={{borderRadius:"5px"}} className="p-3 m-3 mb-2 bg-primary d-flex flex-fill flex-row">
             <MonthYearSelector monthYear={monthYear} onChange={onMonthYearSelected}/>
         </div>
         <div className="p-3 pb-0 d-flex flex-column flex-fill">
-            {Object.keys(groupedRooms).map((key, index) => <Tables key={index} monthYear={monthYear} showDates={index === 0} rooms={groupedRooms[parseInt(key)]}/>)}
+            {Object.keys(groupedRooms).map((key, index) => 
+                <Rooms key={index} monthYear={monthYear} showDates={index === 0} rooms={groupedRooms[key]}/>)}
             <div className="table-end" style={{borderRadius:"0 0 5px 5px"}}/>
         </div>
     </>);
@@ -63,42 +64,6 @@ function groupByRoomType(rooms: Room[]): {[type: string]: Room[]} {
         groupedRooms[r.type].push(r);
     });
     return groupedRooms;
-}
-
-function initOnChange(scheduleId: number, setRooms: (r: {[type: string]: Room[]}) => void): void {
-    let rooms: Room[] = [];
-    onChange = {
-        rooms: (): void =>{
-            axios.get(process.env.REACT_APP_API_URL + "/Rooms/Get/" + scheduleId)
-                .then(async response => {
-                    setRooms(groupByRoomType(response.data as Room[]))
-                    rooms = response.data as Room[];
-                })
-                .catch(error => console.log(error));
-        },
-
-        room: (room: Room): void => {
-            axios.get(process.env.REACT_APP_API_URL + "/Rooms/Get/" + scheduleId + "/" + room.number)
-                .then(response => {
-                    const newRooms = rooms.map(r => r.number === room.number && r.scheduleId === room.scheduleId ? response.data as Room : r);
-                    setRooms(groupByRoomType(newRooms as Room[]))
-                    rooms = newRooms;
-                })
-                .catch(error => console.log(error));
-        },
-
-        reservation: (reservation: Reservation): void => {
-            const room = rooms.find(r => r.number === reservation.roomNumber && r.type === reservation.roomType);
-            if(!room) return;
-            else onChange.room(room);
-        },
-
-        guest: (guest: Guest): void => {
-            const reservation = rooms.flatMap(r => r.reservations).find(res => res!.id === guest.reservationId);
-            if(!reservation) return;
-            else onChange.reservation(reservation);
-        },
-    };
 }
 
 // #endregion
