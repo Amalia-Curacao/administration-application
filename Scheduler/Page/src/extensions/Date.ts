@@ -5,6 +5,7 @@
 // toDateOnlyString: returns the date element as a string
 // toTimeOnlyString: returns the time element as a string
 // isValidDate: returns true if the date is a valid date
+// toDateTimeString: returns the date and time as a string
 
 export function isSameDay(date1: Date, date2: Date): boolean {
     date1 = new Date(date1);
@@ -15,11 +16,15 @@ export function isSameDay(date1: Date, date2: Date): boolean {
 }
 
 export function oldest(date1: Date, date2: Date): Date {
-    return date1 > date2 ? date1 : date2;
+    const dateTime1 = new Date(date1);
+    const dateTime2 = new Date(date2);
+    return dateTime1 > dateTime2 ? date1 : date2;
 }
 
 export function youngest(date1: Date, date2: Date): Date {
-    return date1 < date2 ? date1 : date2;
+    const dateTime1 = new Date(date1);
+    const dateTime2 = new Date(date2);
+    return dateTime1 < dateTime2 ? date1 : date2;
 }
 
 export function toDateOnlyString(date: Date): string {
@@ -34,4 +39,17 @@ export function toTimeOnlyString(date: Date): string {
 
 export function toDateTimeString(date: Date): string {
     return date.toISOString();
+}
+
+export function DateOnlyToDateTime(date: Date): Date {
+    console.log(new Date(date as unknown as string + 'T00:00:00'));
+    return new Date(date as unknown as string + 'T00:00:00');
+}
+
+export function compareTo(date1: Date, date2: Date): number {
+    const dateTime1 = new Date(date1);
+    const dateTime2 = new Date(date2);
+    if(dateTime1 === dateTime2) return 0;
+    else if(dateTime1 > dateTime2) return 1;
+    else return -1;
 }

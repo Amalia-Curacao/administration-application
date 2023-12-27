@@ -8,6 +8,7 @@ import { useParams } from "react-router-dom";
 import { FaLongArrowAltLeft, FaLongArrowAltRight } from "react-icons/fa";
 import axios from "axios";
 import {default as Rooms} from "./table";
+import {MapAll as MapRooms} from "../../mapping/room";
 
 const _info = {name: "Rooms", icon: <MdBedroomParent/>};
 
@@ -18,7 +19,9 @@ function RoomIndexBody(): ReactElement {
     const [rooms, setRooms] = useState<Room[]>([]);
     useEffect(() => {
         axios.get(process.env.REACT_APP_API_URL + "/Rooms/Get/" + id)
-            .then(async response => {setRooms(response.data as Room[])})
+            .then(async response => {
+                setRooms(MapRooms(response.data as Room[]));
+            })
             .catch(error => console.log(error));
     }, [id]);
 

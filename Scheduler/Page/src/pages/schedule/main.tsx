@@ -36,7 +36,7 @@ function ScheduleMain(): ReactElement {
 
     function editSchedule(schedule: Schedule): void{
         console.log(schedule);
-        axios.put(process.env.REACT_APP_API_URL + "/Schedules/Edit/", {id: schedule.id, name: schedule.name})
+        axios.post(process.env.REACT_APP_API_URL + "/Schedules/Edit/", {id: schedule.id, name: schedule.name})
         .then(res => {
             res.status === 200 
             ? setSchedules(schedules.map(s => s.id === schedule.id ? schedule : s)) 
