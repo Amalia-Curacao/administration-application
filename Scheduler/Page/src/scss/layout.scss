@@ -1,0 +1,43 @@
+@import "./colors.module.scss";
+a {
+    color: inherit !important;
+    text-decoration: none;
+}
+
+path {
+    stroke: currentColor;
+}
+
+.btn-outline-success:hover {
+    color: $secondary !important;
+}
+
+.btn-outline-success {
+    color: $success !important;
+}
+
+.btn-outline-warning {
+    color: $warning !important;
+}
+
+.btn-outline-warning:hover {
+    color: $secondary !important;
+}
+
+.btn-outline-danger {
+    color: $danger !important;
+}
+
+.btn-outline-danger:hover {
+    color: $secondary !important;
+}
+
+.btn-outline-primary {
+    color: $primary !important;
+}
+
+.btn-outline-primary:hover {
+    color: $secondary !important;
+}
+
+@import "node_modules/bootstrap/scss/bootstrap";

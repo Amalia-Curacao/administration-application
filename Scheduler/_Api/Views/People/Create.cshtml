@@ -1,0 +1,62 @@
+﻿@model Person
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var successfulCreation = (bool?)ViewData["CreationSuccessful"];
+}
+<div class="row div-centered">
+    <div class="col-xs-8 w-50">
+        <p>
+            <h1>Person</h1>
+            <h4>Add</h4>
+        </p>
+        <div class="row">
+            <form asp-controller="People" asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group row">
+                    <div class="w-25">
+                        <label asp-for="Prefix" class="control-label"></label>
+                        <br />
+                        <span asp-validation-for="Prefix" class="text-danger"></span>
+                        <select asp-for="Prefix" class="form-control"
+                        asp-items="@Html.GetEnumSelectList<PersonPrefix>().Where(p => p.Text != PersonPrefix.Unknown.ToString())">
+                        </select>
+                    </div>
+                    <div class="row w-75">
+                        <div class="w-50">
+                            <label asp-for="FirstName" class="control-label"></label>
+                            <br/>
+                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                            <input asp-for="FirstName" class="form-control" />
+                        </div>
+                        <div class="w-50">
+                            <label asp-for="LastName" class="control-label"></label>
+                            <br />
+                            <span asp-validation-for="LastName" class="text-danger"></span>
+                            <input asp-for="LastName" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Age" class="control-label"></label>
+                    <br />
+                    <span asp-validation-for="Age" class="text-danger"></span>
+                    <input asp-for="Age" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label asp-for="Note" class="control-label"></label>
+                    <br />
+                    <span asp-validation-for="Note" class="text-danger"></span>
+                    <textarea asp-for="Note" class="form-control"></textarea>
+                </div>
+                <div class="form-group form-btn-group">
+                    <input type="submit" value="Create" class="btn btn-primary"/>
+                    @if (successfulCreation is not null && (bool)successfulCreation)
+                    {
+                        <a class="btn btn-outline-success" asp-controller="Rooms" asp-action="Index">Done</a>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

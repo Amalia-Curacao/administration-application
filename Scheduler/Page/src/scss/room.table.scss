@@ -1,0 +1,106 @@
+@import "./colors.module.scss";
+
+// colors
+$check-in: #AFE1AF;
+$check-out: #F7B4A6;
+$occupied: #F7F1A6;
+$darken-percentage: 5%;
+$dark-check-in: darken($check-in, $darken-percentage);
+$dark-check-out: darken($check-out, $darken-percentage);
+$dark-secondary: darken($secondary, $darken-percentage);
+$dark-primary: darken($primary, $darken-percentage);
+$cell-height: 40px;
+$cell-width: 34px;
+
+.table-end{
+    background-color: $primary !important;
+    height: $cell-height;
+    display: flex;
+    color: $secondary !important;
+}
+
+.cell{
+    height: $cell-height;
+    width: $cell-width;
+}
+
+.check-in{
+    background-color: $check-in !important;
+    height: $cell-height;
+    clip-path: polygon(100% 100%, 0 100%, 100% 0); // the calc ensures that the polygon does not overlap the border
+}
+
+.check-out{
+    background-color: $check-out !important;
+    height: $cell-height;
+    clip-path: polygon(0 0, 0 100%, 100% 0); // the calc ensures that the polygon does not overlap the border
+}
+
+.occupied {
+    background-color: $occupied !important;
+    height: $cell-height;
+}
+
+.guest-name {
+    position: absolute;
+    z-index: 2 !important;
+    white-space: nowrap;
+}
+
+button.no-decoration{
+	border: none;
+	font: inherit;
+}
+
+.past{
+    background: linear-gradient(to left top, transparent 47.75%, currentColor 49.5%, currentColor 50.5%, transparent 52.25%);
+}
+
+table td, table th.flipped{
+    height: $cell-height;
+    width: $cell-width;
+    color: $primary-dark !important;
+    background-color: $secondary !important;
+}
+
+table th, table td.flipped{
+    height: $cell-height;
+    width: $cell-width;
+    color: $secondary !important;
+    background-color: $primary !important;
+}
+
+button.hover-success:hover{
+    background-color: $success !important;
+    border-color: $success !important;
+    color: $secondary !important;   
+}
+
+button.hover-danger:hover{
+    background-color: $danger !important;
+    border-color: $danger !important;
+    color: $secondary !important;   
+}
+
+// #region darken
+
+.darken-on-hover:hover{
+    filter:brightness(95%);
+}
+
+.darken > .occupied{
+    background-color: darken($occupied, $darken-percentage) !important;
+}
+
+.darken > .check-in{
+    background: darken($check-in, $darken-percentage) !important;
+}
+
+.darken > .check-out{
+    background: darken($check-out, $darken-percentage) !important;
+}
+
+.darken > button{
+    background-color: darken($secondary, $darken-percentage) !important;
+}
+// #endregion

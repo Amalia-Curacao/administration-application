@@ -1,0 +1,62 @@
+﻿@model Person
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row div-centered">
+    <div class="col-xs-8 w-50">
+        <p>
+            <h1>Person</h1>
+            <h4>Edit</h4>
+        </p>
+        <div class="row">
+            <form asp-controller="People" asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group row">
+                    <div class="w-25">
+                        <label asp-for="Prefix" class="control-label"></label>
+                        <span asp-validation-for="Prefix" class="text-danger"></span>
+                        <select asp-for="Prefix"
+                                asp-items="@Html.GetEnumSelectList<PersonPrefix>()
+                                    .Where(p => p.Text != PersonPrefix.Unknown.ToString() && Model.Prefix.ToString() != p.Text)"
+                                class="form-control">
+                            <option selected value="@Model.Prefix.ToString()">@Model.Prefix.ToString()</option>
+                        </select>
+                    </div>
+                    <div class="row w-75">
+                        <div class="w-50">
+                            <label asp-for="FirstName" class="control-label"></label>
+                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                            <input asp-for="FirstName" class="form-control" />
+                        </div>
+                        <div class="w-50">
+                            <label asp-for="LastName" class="control-label"></label>
+                            <span asp-validation-for="LastName" class="text-danger"></span>
+                            <input asp-for="LastName" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group pe-4">
+                    <label asp-for="Age" class="control-label"></label>
+                    <span asp-validation-for="Age" class="text-danger"></span>
+                    <input asp-for="Age" class="form-control" />
+                </div>
+                <div class="form-group pe-4">
+                    <label asp-for="Note" class="control-label"></label>
+                    <span asp-validation-for="Note" class="text-danger"></span>
+                    <textarea asp-for="Note" class="form-control"></textarea>
+                </div>
+                <div class="form-group form-btn-group pe-4">
+                    <input type="submit" value="Save" class="btn btn-outline-success"/>
+                    <a class="btn btn-outline-danger" asp-controller="Rooms" asp-action="Index" asp-route-id="@Model.ReservationId">Back</a>
+                    <a class="btn btn-danger float-end" asp-controller="People" asp-action="Delete" asp-route-id="@Model.Id">Delete</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

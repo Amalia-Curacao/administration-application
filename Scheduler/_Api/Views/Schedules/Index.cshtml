@@ -1,0 +1,45 @@
+﻿@model IEnumerable<Schedule>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Schedules</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <td>
+                @Html.DisplayNameFor(model => model.First().Id)
+            <td>
+                @Html.DisplayNameFor(model => model.First().Name)
+            </td>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var schedule in Model) {
+        <tr>
+            <td>
+            @schedule.Id
+            </td>
+            <td>
+                @schedule.Name
+            </td>
+            <td>
+                <a class="btn btn-primary" asp-controller="Schedules" asp-action="Details" asp-route-id="@schedule.Id">Open</a>
+                <a class="btn btn-primary" onclick="DeleteSchedule(@schedule.Id)">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+@section Scripts{
+    <script>
+        function DeleteSchedule(id) {
+            $.ajax({
+                url: "/Schedules/Delete/" + id,
+                type: "DELETE",
+                success: location.reload()
+            });
+        }
+    </script>}

@@ -3,18 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TuiReader", "TuiReader\TuiReader.csproj", "{FF00BBE7-CAA3-4398-9420-710F84299290}"
-	ProjectSection(ProjectDependencies) = postProject
-		{826E2B71-C516-4769-9EC3-6742BC24F326} = {826E2B71-C516-4769-9EC3-6742BC24F326}
-	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TuiReader.Specs", "TuiReader.Specs\TuiReader.Specs.csproj", "{6F229388-1A6F-4043-81D7-37AC297569EA}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Creative.Database", "Creative.Database\Creative.Database.csproj", "{826E2B71-C516-4769-9EC3-6742BC24F326}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Creative.Api", "Creative.Api\Creative.Api.csproj", "{AD1DB482-31D3-4E05-A602-9DC3DDB696EA}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scheduler", "Scheduler\Scheduler.csproj", "{E90DC7C7-5EA3-4890-A2A6-A11DF3683999}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scheduler.Api", "Scheduler\Api\Scheduler.Api.csproj", "{E90DC7C7-5EA3-4890-A2A6-A11DF3683999}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -22,22 +11,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{FF00BBE7-CAA3-4398-9420-710F84299290}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FF00BBE7-CAA3-4398-9420-710F84299290}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FF00BBE7-CAA3-4398-9420-710F84299290}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FF00BBE7-CAA3-4398-9420-710F84299290}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6F229388-1A6F-4043-81D7-37AC297569EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6F229388-1A6F-4043-81D7-37AC297569EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6F229388-1A6F-4043-81D7-37AC297569EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6F229388-1A6F-4043-81D7-37AC297569EA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{826E2B71-C516-4769-9EC3-6742BC24F326}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{826E2B71-C516-4769-9EC3-6742BC24F326}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{826E2B71-C516-4769-9EC3-6742BC24F326}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{826E2B71-C516-4769-9EC3-6742BC24F326}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AD1DB482-31D3-4E05-A602-9DC3DDB696EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AD1DB482-31D3-4E05-A602-9DC3DDB696EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AD1DB482-31D3-4E05-A602-9DC3DDB696EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AD1DB482-31D3-4E05-A602-9DC3DDB696EA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E90DC7C7-5EA3-4890-A2A6-A11DF3683999}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E90DC7C7-5EA3-4890-A2A6-A11DF3683999}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E90DC7C7-5EA3-4890-A2A6-A11DF3683999}.Release|Any CPU.ActiveCfg = Release|Any CPU
