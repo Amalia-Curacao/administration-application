@@ -20,7 +20,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18.x'
-          app_location: "/Scheduler/Page"
 
       - name: npm install, build, and test
         run: |
@@ -60,6 +59,7 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: 'amalia-web'
+          app_location: "/Scheduler/Page"
           slot-name: 'Production'
           package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_5F4AA0DD39D747D2B036E1641EBDABAB }}
