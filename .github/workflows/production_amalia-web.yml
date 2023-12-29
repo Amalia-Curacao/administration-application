@@ -24,7 +24,8 @@ jobs:
 
       - name: npm install, build, and test
         run: |
-          cd /Scheduler/Page/
+          ls
+          ./Scheduler/Page/
           npm install
           npm run build --if-present
           npm run test --if-present
