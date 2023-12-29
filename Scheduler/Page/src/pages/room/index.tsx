@@ -4,7 +4,7 @@ import { MdBedroomParent } from "react-icons/md";
 import PageLink from "../../types/PageLink";
 import Room from "../../models/Room";
 import RoomType from "../../models/RoomType";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { FaLongArrowAltLeft, FaLongArrowAltRight } from "react-icons/fa";
 import axios from "axios";
 import {default as Rooms} from "./table";
