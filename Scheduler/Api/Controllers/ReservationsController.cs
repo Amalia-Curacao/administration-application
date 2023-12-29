@@ -79,7 +79,7 @@ public class ReservationsController : Controller
 	/// Status 200 (OK) with the edited reservation, when the reservation has been successfully edited.
 	/// Status 400 (Bad request) with error message, when the reservation overlaps another, or properties are invalid.
 	/// </returns>
-	[HttpPut("[controller]/[action]")]
+	[HttpPost("[controller]/[action]")]
 	public async Task<ObjectResult> Edit([FromBody] Reservation reservation)
 	{
 		// Validates properties

@@ -1,4 +1,6 @@
 import BookingSource from "../models/BookingSource";
+import Guest from "../models/Guest";
+import PersonPrefix from "../models/PersonPrefix";
 import Reservation from "../models/Reservation";
 import RoomType from "../models/RoomType";
 import { toDateOnlyString } from "./Date";
@@ -8,18 +10,20 @@ import { toDateOnlyString } from "./Date";
 // ToJsonRoomType: converts a room type to a json string
 // ToJsonBookingSource: converts a booking source to a json string
 
-
-export function ToJson(object: any): any{
-    if(object as Reservation) return ToJsonReservation(object);
+// Cant figure out how to typeguard interfaces
+/* export function ToJson(object: any): any{
+    if(object as Reservation) return ToJsonReservation(object as Reservation);
     if(object as RoomType) return ToJsonRoomType(object);
     if(object as BookingSource) return ToJsonBookingSource(object);
+    if(object as Guest[]) return object.map((guest: Guest) => ToJsonGuest(guest));
+    if(object as Guest) return ToJsonGuest(object);
     throw new Error("Object is not implemented");
-}
+} */
 
-function ToJsonReservation(reservation: Reservation): any{
+export function ToJsonReservation(reservation: Reservation): any{
     return {
         id: reservation.id,
-        guests: reservation.guests,
+        guests: undefined,
         checkIn: !reservation.checkIn ? undefined : toDateOnlyString(reservation.checkIn), 
         checkOut: !reservation.checkOut ? undefined : toDateOnlyString(reservation.checkOut),
         room: reservation.room,
@@ -36,7 +40,7 @@ function ToJsonReservation(reservation: Reservation): any{
     };
 }
 
-function ToJsonRoomType(roomType: RoomType): number{
+export function ToJsonRoomType(roomType: RoomType): number{
     switch(roomType){
         case RoomType.None:
             return 0;
@@ -45,11 +49,12 @@ function ToJsonRoomType(roomType: RoomType): number{
         case RoomType.Room:
             return 2;
         default:
+            console.log(roomType);
             throw new Error("RoomType is not implemented");
     }
 }
 
-function ToJsonBookingSource(bookingSource: BookingSource): number{
+export function ToJsonBookingSource(bookingSource: BookingSource): number{
     switch(bookingSource){
         case BookingSource.None:
             return 0;
@@ -67,5 +72,36 @@ function ToJsonBookingSource(bookingSource: BookingSource): number{
             return 6;
         default:
             throw new Error("BookingSource is not implemented");
+    }
+}
+
+export function ToJsonGuest(guest: Guest): any {
+    return{
+        id: guest.id,
+        prefix: ToJsonPrefix(guest.prefix ?? PersonPrefix.Unknown),
+        firstName: guest.firstName,
+        lastName: guest.lastName,
+        age: guest.age,
+        note: guest.note,
+
+        reservationId: guest.reservationId,
+        reservation: undefined,
+    }
+}
+
+export function ToJsonPrefix(prefix: PersonPrefix): number{
+    switch(prefix){
+        case PersonPrefix.Unknown:
+            return 0;
+        case PersonPrefix.Mr:
+            return 1;
+        case PersonPrefix.Mrs:
+            return 2;
+        case PersonPrefix.Ms:
+            return 3;
+        case PersonPrefix.Other:
+            return 4;
+        default:
+            throw new Error("Prefix is not implemented");
     }
 }

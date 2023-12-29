@@ -4,7 +4,7 @@ import { MdBedroomParent } from "react-icons/md";
 import PageLink from "../../types/PageLink";
 import Room from "../../models/Room";
 import RoomType from "../../models/RoomType";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { FaLongArrowAltLeft, FaLongArrowAltRight } from "react-icons/fa";
 import axios from "axios";
 import {default as Rooms} from "./table";
@@ -19,13 +19,12 @@ function RoomIndexBody(): ReactElement {
     const [rooms, setRooms] = useState<Room[]>([]);
     useEffect(() => {
         axios.get(process.env.REACT_APP_API_URL + "/Rooms/Get/" + id)
-            .then(async response => {
-                setRooms(MapRooms(response.data as Room[]));
-            })
-            .catch(error => console.log(error));
+        .then(async response => {
+            setRooms(MapRooms(response.data as Room[]));
+        })
+        .catch(error => console.log(error));
     }, [id]);
 
-    
     const groupedRooms = groupByRoomType(rooms);
     return(<>
         <div style={{borderRadius:"5px"}} className="p-3 m-3 mb-2 bg-primary d-flex flex-fill flex-row">

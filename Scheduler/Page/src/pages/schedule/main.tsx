@@ -21,6 +21,7 @@ function ScheduleMain(): ReactElement {
     }
 
     function getSchedules(): void {
+        console.log(process.env.REACT_APP_API_URL);
         axios.get(process.env.REACT_APP_API_URL + "/Schedules/Get")
         .then(res => res.status === 200 
             ? setSchedules(res.data as Schedule[])

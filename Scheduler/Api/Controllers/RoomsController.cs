@@ -33,7 +33,10 @@ public sealed class RoomsController : Controller
 	/// <returns> Status 200 (OK) with the <see cref="Room"/>s, when the <see cref="Room"/>s have been found. </returns>
 	[HttpGet($"[controller]/[action]/{{{nameof(Reservation.ScheduleId)}}}")]
 	public async Task<ObjectResult> Get([FromRoute] int ScheduleId)	
-		=> Ok(JsonSerializer.Serialize(await _db.Rooms.Include(r => r.Reservations).Where(r => r.ScheduleId == ScheduleId).ToListAsync(), serializerOptions));
+		=> Ok(JsonSerializer.Serialize(await _db.Rooms
+			.Include(r => r.Reservations!)
+			.ThenInclude(r => r.Guests)
+			.Where(r => r.ScheduleId == ScheduleId).ToListAsync(), serializerOptions));
 	
 
 	/// <summary> Gets a specific room from the database. </summary>

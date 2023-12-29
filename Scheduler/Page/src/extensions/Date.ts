@@ -42,7 +42,6 @@ export function toDateTimeString(date: Date): string {
 }
 
 export function DateOnlyToDateTime(date: Date): Date {
-    console.log(new Date(date as unknown as string + 'T00:00:00'));
     return new Date(date as unknown as string + 'T00:00:00');
 }
 
