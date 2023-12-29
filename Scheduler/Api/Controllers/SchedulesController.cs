@@ -45,7 +45,8 @@ public class SchedulesController : Controller
 
 	/// <summary> Api endpoint for deleting schedules in the database. </summary>
 	/// <returns> Status 200 (OK) with the deleted schedule, when the schedule has been deleted.</returns>
+	/// <remarks> CLOSED for safety to open change private to public </remarks>
 	[HttpDelete($"[controller]/[action]/{{{nameof(Schedule.Id)}}}")]
-	public async Task<ObjectResult> Delete([FromRoute] int Id)
+	private async Task<ObjectResult> Delete([FromRoute] int Id)
 		=> Ok(await _crud.Delete(new HashSet<Key>(new Key[] { new(nameof(Schedule.Id), Id) })));
 }

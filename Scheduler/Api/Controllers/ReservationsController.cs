@@ -38,18 +38,20 @@ public class ReservationsController : Controller
 	/// Status 200 (OK) with all reservations from a room in the database.
 	/// </returns>
 	/// <remarks> Returns empty list when room is not found/does not exist. </remarks>
+	/// <remarks> Closed for safetly, to open change private to public. </remarks>
 	[HttpGet($"[controller]/[action]/{{{nameof(Reservation.RoomScheduleId)}}}/{{{nameof(Reservation.RoomNumber)}}}")]
-	public async Task<ObjectResult> Get([FromRoute] int RoomScheduleId, [FromRoute] int RoomNumber)
+	private async Task<ObjectResult> Get([FromRoute] int RoomScheduleId, [FromRoute] int RoomNumber)
 		=> Ok((await _crud.GetAll()).Where(r => r.RoomScheduleId == RoomScheduleId && r.RoomNumber == RoomNumber));
-	
+
 
 	/// <summary> Api endpoint for getting a reservation by id.</summary>
 	/// <returns> 
 	/// Status 200 (OK) with the reservation with the given id.
 	/// Status 400 (Bad request) with error message, when the reservation could not be found.
 	/// </returns>
+	/// <remarks> Closed for safetly, to open change private to public. </remarks>
 	[HttpGet($"[controller]/[action]/{{{nameof(Reservation.Id)}}}")]
-	public async Task<ObjectResult> Get([FromRoute] int Id)
+	private async Task<ObjectResult> Get([FromRoute] int Id)
 	{
 		var reservation = await _crud.Get(new HashSet<Key>(new Key[] { new(nameof(Reservation.Id), Id) }));
 		return reservation is null ? BadRequest(ReservationNotFound) : Ok(reservation);
@@ -102,7 +104,6 @@ public class ReservationsController : Controller
 	[HttpDelete($"[controller]/[action]/{{{nameof(Reservation.Id)}}}")]
 	public async Task<ObjectResult> Delete([FromRoute] int Id)
 		=> Ok(await _crud.Delete(new HashSet<Key>(new Key[] { new(nameof(Reservation.Id), Id) })));
-
 
 	private async Task<bool> CanFit(Reservation reservation)
 		=> !(await _crud.GetAll()).Any(r => 

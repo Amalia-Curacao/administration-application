@@ -22,12 +22,16 @@ public class GuestController : Controller
 
 	/// <summary> Api endpoint for getting all guests from a reservation in the database.</summary>
 	/// <returns> 
-	/// Status 200 (OK) with all guests  from a reservation in the database.
+	/// Status 200 (OK) with all guests from a reservation in the database.
 	/// </returns>
 	[HttpGet($"[controller]/[action]/{{{nameof(Guest.ReservationId)}}}")]
 	public async Task<ObjectResult> GetReservationGuests([FromRoute] int ReservationId)
 		=> Ok(await GetGuestsWithReservationId(ReservationId));
 
+	/// <summary> Api endpoint for getting all guests from a reservation in the database.</summary>
+	/// <returns>
+	/// Status 200 (OK) with all guests from a reservation in the database.
+	/// </returns>
 	private async Task<Guest[]> GetGuestsWithReservationId(int ReservationId)
 		=> (await _crud.GetAll()).Where(g => g.ReservationId == ReservationId).ToArray();
 
@@ -43,6 +47,11 @@ public class GuestController : Controller
 		return guest is null ? BadRequest(PersonNotFound) : Ok(guest);
 	}
 
+	/// <summary> Api endpoint for setting guests in the database. </summary>
+	/// <returns>
+	/// Status 200 (OK) with the new set of guests, when the guests has been set.
+	/// Status 400 (Bad request) with error message, when properties are invalid.
+	/// </returns>
 	[HttpPut($"[controller]/[action]/{{{nameof(Guest.ReservationId)}}}")]
 	public async Task<ObjectResult> Set([FromRoute]int ReservationId, [FromBody]Guest[]? guests)
 	{
